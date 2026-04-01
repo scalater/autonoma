@@ -30,7 +30,7 @@ function WaitingForAgent({ applicationId }: { applicationId: string }) {
 
   return (
     <div className="space-y-10">
-      {/* Step 1: Run the plugin */}
+      {/* Step 1: Reload plugins */}
       <div className="relative pl-10">
         <div className="absolute left-0 top-0 flex size-7 items-center justify-center bg-surface-void">
           <div className="size-3 rounded-full border-2 border-primary-ink shadow-[0_0_10px_var(--accent-glow)]" />
@@ -39,6 +39,25 @@ function WaitingForAgent({ applicationId }: { applicationId: string }) {
         <div className="mb-4">
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-sm font-medium text-primary-ink">Step 1</span>
+            <h3 className="text-xl font-medium text-text-primary">Reload plugins</h3>
+          </div>
+          <p className="mt-1 text-sm text-text-secondary">Reload plugins to make sure the latest version is loaded.</p>
+        </div>
+
+        <div className="max-w-2xl">
+          <CodeBlock>/reload-plugins</CodeBlock>
+        </div>
+      </div>
+
+      {/* Step 2: Run the plugin */}
+      <div className="relative pl-10">
+        <div className="absolute left-0 top-0 flex size-7 items-center justify-center bg-surface-void">
+          <div className="size-3 rounded-full border-2 border-primary-ink shadow-[0_0_10px_var(--accent-glow)]" />
+        </div>
+
+        <div className="mb-4">
+          <div className="flex items-baseline gap-3">
+            <span className="font-mono text-sm font-medium text-primary-ink">Step 2</span>
             <h3 className="text-xl font-medium text-text-primary">Run the plugin</h3>
           </div>
           <p className="mt-1 text-sm text-text-secondary">Run the test planner inside Claude Code.</p>
@@ -60,7 +79,10 @@ function WaitingForAgent({ applicationId }: { applicationId: string }) {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-ink opacity-75" />
             <span className="relative inline-flex size-2.5 rounded-full bg-primary-ink" />
           </span>
-          <span className="font-mono text-sm text-text-secondary">Waiting for events from agent...</span>
+          <span className="font-mono text-sm text-text-secondary">
+            Waiting for events from agent...{" "}
+            <span className="font-bold text-primary-ink">Please don&apos;t close this tab.</span>
+          </span>
         </div>
       </div>
     </div>

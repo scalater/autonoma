@@ -270,7 +270,8 @@ function WorkingPage() {
           Autonoma&apos;s Agent is working on your project
         </h1>
         <p className="mt-3 font-mono text-sm text-text-secondary">
-          The agent is analyzing your codebase and generating test scenarios.
+          The agent is analyzing your codebase and generating test scenarios.{" "}
+          <span className="font-bold text-primary-ink">Please don&apos;t close this tab.</span>
         </p>
       </header>
 
