@@ -14,12 +14,22 @@ const posthogKey = env.VITE_POSTHOG_KEY;
 const isPostHogEnabled = !import.meta.env.DEV && posthogKey != null;
 
 if (isPostHogEnabled) {
+  const params = new URLSearchParams(window.location.search);
+  const crossDomainId = params.get("ph_id");
+
   posthog.init(posthogKey, {
     api_host: env.VITE_POSTHOG_HOST,
     session_recording: {
       recordCrossOriginIframes: true,
     },
+    bootstrap: crossDomainId != null ? { distinctID: crossDomainId } : undefined,
   });
+
+  if (crossDomainId != null) {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("ph_id");
+    window.history.replaceState({}, "", cleanUrl.toString());
+  }
 }
 
 if (env.VITE_SENTRY_DSN != null) {
