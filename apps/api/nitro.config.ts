@@ -2,7 +2,12 @@ import { defineConfig } from "nitro";
 
 export default defineConfig({
     modules: ["workflow/nitro"],
-    plugins: ["plugins/start-pg-world.ts"],
+    hooks: {
+        ready: async () => {
+            const { getWorld } = await import("workflow/runtime");
+            await getWorld().start?.();
+        },
+    },
     routes: {
         "/**": "./src/nitro-entry.ts",
     },

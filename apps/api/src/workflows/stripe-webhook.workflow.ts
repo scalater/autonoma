@@ -14,7 +14,7 @@ export type StripeWebhookWorkflowInput = {
     processUrl: string;
 };
 
-async function processStripeWebhookEventStep(input: StripeWebhookWorkflowInput): Promise<void> {
+export async function processStripeWebhookEventStep(input: StripeWebhookWorkflowInput): Promise<void> {
     "use step";
 
     const processSecret = process.env.STRIPE_INTERNAL_WEBHOOK_SECRET;
