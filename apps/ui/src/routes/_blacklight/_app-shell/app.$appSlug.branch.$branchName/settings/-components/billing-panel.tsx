@@ -10,6 +10,9 @@ import {
   PanelBody,
   PanelHeader,
   PanelTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@autonoma/blacklight";
 import { CreditCardIcon } from "@phosphor-icons/react/CreditCard";
 import { CrownSimpleIcon } from "@phosphor-icons/react/CrownSimple";
@@ -32,6 +35,8 @@ import {
 import { toastManager } from "lib/toast-manager";
 import { useEffect, useState } from "react";
 
+const SUBSCRIBED_STATUSES = new Set(["active", "trialing"]);
+
 export function BillingPanel() {
   const { data } = useBillingStatus();
   const createCheckout = useCreateCheckoutSession();
@@ -47,6 +52,8 @@ export function BillingPanel() {
     setAutoTopUpEnabled(data.autoTopUpEnabled);
     setAutoTopUpThreshold(String(data.autoTopUpThreshold));
   }, [data.autoTopUpEnabled, data.autoTopUpThreshold]);
+
+  const isSubscribed = data.subscriptionStatus != null && SUBSCRIBED_STATUSES.has(data.subscriptionStatus);
 
   const topupBalance = Math.max(0, data.creditBalance - data.subscriptionCreditBalance);
   const thresholdValue = Number.parseInt(autoTopUpThreshold, 10);
@@ -163,14 +170,19 @@ export function BillingPanel() {
             </Alert>
 
             <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={() => handleCreateCheckout(CHECKOUT_TYPE_SUBSCRIPTION)}
-                disabled={createCheckout.isPending}
-                aria-label="billing-start-subscription"
-              >
-                <CrownSimpleIcon size={14} />
-                Upgrade
-              </Button>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <Button
+                    onClick={() => handleCreateCheckout(CHECKOUT_TYPE_SUBSCRIPTION)}
+                    disabled={isSubscribed || createCheckout.isPending}
+                    aria-label="billing-start-subscription"
+                  >
+                    <CrownSimpleIcon size={14} />
+                    Upgrade
+                  </Button>
+                </TooltipTrigger>
+                {isSubscribed && <TooltipContent>You are already on the Pro plan</TooltipContent>}
+              </Tooltip>
               <Button
                 variant="outline"
                 onClick={handleOpenPortal}
