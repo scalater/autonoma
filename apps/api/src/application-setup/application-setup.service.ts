@@ -1,4 +1,5 @@
-import type { PrismaClient } from "@autonoma/db";
+import { randomBytes } from "node:crypto";
+import type { Prisma, PrismaClient } from "@autonoma/db";
 import { logger } from "@autonoma/logger";
 import {
     AddSkill,
@@ -9,6 +10,7 @@ import {
 } from "@autonoma/test-updates";
 import type { SetupEventBody, UpdateSetupBody, UploadArtifactsBody } from "@autonoma/types";
 import { TOTAL_SETUP_STEPS } from "@autonoma/types";
+import { toSlug } from "@autonoma/utils";
 import matter from "gray-matter";
 
 const log = logger.child({ name: "ApplicationSetupService" });
@@ -20,7 +22,7 @@ export class ApplicationSetupService {
     ) {}
 
     async createSetup(userId: string, organizationId: string, applicationId: string, repoName?: string) {
-        return await this.db.$transaction(async (tx) => {
+        return this.db.$transaction(async (tx) => {
             const app = await tx.application.findFirst({
                 where: { id: applicationId, organizationId },
             });
@@ -29,9 +31,10 @@ export class ApplicationSetupService {
             }
 
             if (repoName != null) {
+                const uniqueName = await this.resolveUniqueName(tx, repoName, organizationId);
                 await tx.application.update({
                     where: { id: applicationId },
-                    data: { name: repoName },
+                    data: { name: uniqueName, slug: toSlug(uniqueName) },
                 });
             }
 
@@ -58,6 +61,23 @@ export class ApplicationSetupService {
             log.info("Created application setup", { setupId: setup.id, applicationId });
             return { id: setup.id };
         });
+    }
+
+    private async resolveUniqueName(
+        tx: Prisma.TransactionClient,
+        name: string,
+        organizationId: string,
+    ): Promise<string> {
+        const existing = await tx.application.findUnique({
+            where: { name_organizationId: { name, organizationId } },
+            select: { id: true },
+        });
+        if (existing == null) return name;
+
+        const suffix = randomBytes(6).toString("hex");
+        const uniqueName = `${name}-${suffix}`;
+        log.info("Application name conflict, appending suffix", { originalName: name, uniqueName });
+        return uniqueName;
     }
 
     async addEvent(setupId: string, organizationId: string, event: SetupEventBody) {
