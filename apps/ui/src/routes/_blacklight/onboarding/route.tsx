@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_blacklight/onboarding")({
   component: OnboardingLayout,
   beforeLoad: async ({ context: { queryClient } }) => {
     const session = await ensureSessionData(queryClient);
-    if (session == null) throw Route.redirect({ to: "/login" });
+    if (session == null) throw Route.redirect({ to: "/login", search: { error: undefined } });
 
     if (hasCompletedOnboarding(session.user.id)) throw Route.redirect({ to: "/" });
   },

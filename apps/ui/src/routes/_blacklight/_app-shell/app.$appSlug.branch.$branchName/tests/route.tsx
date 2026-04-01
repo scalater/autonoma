@@ -1,6 +1,7 @@
 import { Button, Skeleton } from "@autonoma/blacklight";
 import { PencilSimpleIcon } from "@phosphor-icons/react/PencilSimple";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { useAuth } from "lib/auth";
 import { Suspense } from "react";
 import { useCurrentBranch } from "../-use-current-branch";
 import { TestsTreeProvider } from "./-tests-tree/tests-tree-context";
@@ -26,6 +27,7 @@ function TestsPage() {
   const { appSlug, branchName } = Route.useParams();
   const testCount = branch.activeSnapshot.testCaseAssignments.length;
   const hasPending = branch.pendingSnapshotId != null;
+  const { isAdmin } = useAuth();
 
   return (
     <TestsTreeProvider>
@@ -37,14 +39,17 @@ function TestsPage() {
               {testCount} {testCount === 1 ? "test" : "tests"} on branch {branch.name}
             </p>
           </div>
-          <Button
-            size="sm"
-            className="gap-1.5 font-mono text-2xs"
-            render={<Link to="/app/$appSlug/branch/$branchName/edit" params={{ appSlug, branchName }} />}
-          >
-            <PencilSimpleIcon size={12} />
-            {hasPending ? "Continue editing" : "Edit test suite"}
-          </Button>
+
+          {isAdmin && (
+            <Button
+              size="sm"
+              className="gap-1.5 font-mono text-2xs"
+              render={<Link to="/app/$appSlug/branch/$branchName/edit" params={{ appSlug, branchName }} />}
+            >
+              <PencilSimpleIcon size={12} />
+              {hasPending ? "Continue editing" : "Edit test suite"}
+            </Button>
+          )}
         </header>
 
         <div className="flex min-h-0 flex-1 gap-4">

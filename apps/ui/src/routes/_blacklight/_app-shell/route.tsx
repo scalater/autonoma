@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_blacklight/_app-shell")({
 
 async function getAppShellContext({ queryClient, trpc }: RouteContext) {
   const session = await ensureSessionData(queryClient);
-  if (session == null) throw redirect({ to: "/login" });
+  if (session == null) throw redirect({ to: "/login", search: { error: undefined } });
 
   const user = session.user;
   const isAdmin = user.role === "admin";

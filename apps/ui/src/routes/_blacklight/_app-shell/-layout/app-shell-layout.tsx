@@ -13,7 +13,8 @@ import { SignOutIcon } from "@phosphor-icons/react/SignOut";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth, useAuthClient } from "lib/auth";
 import { toastManager } from "lib/toast-manager";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
+import { GenerationBanner } from "../app.$appSlug.branch.$branchName/-generation-banner";
 import { openFeedbackSurvey } from "./feedback-survey";
 import { Sidebar, useBranchNav, useSidebarCollapsed } from "./sidebar";
 import { AppBreadcrumb } from "./top-bar";
@@ -132,7 +133,12 @@ export function AppShellLayout({ children }: { children: ReactNode }) {
                 </button>
               </div>
               <div className="flex h-14 items-center justify-between border-b border-border-dim bg-surface-void/80 px-6 backdrop-blur">
-                <AppBreadcrumb />
+                <div className="flex items-center gap-3">
+                  <AppBreadcrumb />
+                </div>
+                <Suspense>
+                  <GenerationBanner />
+                </Suspense>
               </div>
             </div>
 
