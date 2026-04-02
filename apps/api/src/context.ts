@@ -29,8 +29,8 @@ export const storageProvider = S3Storage.createFromEnv();
 export const redisClient = await connectRedis({ url: env.REDIS_URL });
 export const auth = buildAuth({ redisClient, conn: db });
 
-const encryptionHelper = new EncryptionHelper(env.SCENARIO_ENCRYPTION_KEY);
-const scenarioManager = new ScenarioManager(db, encryptionHelper);
+export const encryptionHelper = new EncryptionHelper(env.SCENARIO_ENCRYPTION_KEY);
+export const scenarioManager = new ScenarioManager(db, encryptionHelper);
 
 function createGenerationProvider(): GenerationProvider {
     if (env.LOCAL_GENERATION) {

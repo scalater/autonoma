@@ -42,9 +42,8 @@ import { Route as BlacklightAppShellRouteRouteImport } from "./routes/_blackligh
 import { Route as BlacklightOnboardingCompleteRouteImport } from "./routes/_blacklight/onboarding/complete";
 import { Route as BlacklightOnboardingConfigureRouteImport } from "./routes/_blacklight/onboarding/configure";
 import { Route as BlacklightOnboardingInstallRouteImport } from "./routes/_blacklight/onboarding/install";
-import { Route as BlacklightOnboardingProductionRouteImport } from "./routes/_blacklight/onboarding/production";
 import { Route as BlacklightOnboardingRouteRouteImport } from "./routes/_blacklight/onboarding/route";
-import { Route as BlacklightOnboardingScenariosRouteImport } from "./routes/_blacklight/onboarding/scenarios";
+import { Route as BlacklightOnboardingScenarioDryRunRouteImport } from "./routes/_blacklight/onboarding/scenario-dry-run";
 import { Route as BlacklightOnboardingUrlRouteImport } from "./routes/_blacklight/onboarding/url";
 import { Route as BlacklightOnboardingWorkingRouteImport } from "./routes/_blacklight/onboarding/working";
 
@@ -76,14 +75,9 @@ const BlacklightOnboardingUrlRoute = BlacklightOnboardingUrlRouteImport.update({
     path: "/url",
     getParentRoute: () => BlacklightOnboardingRouteRoute,
 } as any);
-const BlacklightOnboardingScenariosRoute = BlacklightOnboardingScenariosRouteImport.update({
-    id: "/scenarios",
-    path: "/scenarios",
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-} as any);
-const BlacklightOnboardingProductionRoute = BlacklightOnboardingProductionRouteImport.update({
-    id: "/production",
-    path: "/production",
+const BlacklightOnboardingScenarioDryRunRoute = BlacklightOnboardingScenarioDryRunRouteImport.update({
+    id: "/scenario-dry-run",
+    path: "/scenario-dry-run",
     getParentRoute: () => BlacklightOnboardingRouteRoute,
 } as any);
 const BlacklightOnboardingInstallRoute = BlacklightOnboardingInstallRouteImport.update({
@@ -266,8 +260,7 @@ export interface FileRoutesByFullPath {
     "/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
     "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
-    "/onboarding/production": typeof BlacklightOnboardingProductionRoute;
-    "/onboarding/scenarios": typeof BlacklightOnboardingScenariosRoute;
+    "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
     "/app/$appSlug": typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren;
@@ -303,8 +296,7 @@ export interface FileRoutesByTo {
     "/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
     "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
-    "/onboarding/production": typeof BlacklightOnboardingProductionRoute;
-    "/onboarding/scenarios": typeof BlacklightOnboardingScenariosRoute;
+    "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
     "/login": typeof BlacklightauthLoginIndexRoute;
@@ -340,8 +332,7 @@ export interface FileRoutesById {
     "/_blacklight/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
     "/_blacklight/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/_blacklight/onboarding/install": typeof BlacklightOnboardingInstallRoute;
-    "/_blacklight/onboarding/production": typeof BlacklightOnboardingProductionRoute;
-    "/_blacklight/onboarding/scenarios": typeof BlacklightOnboardingScenariosRoute;
+    "/_blacklight/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/_blacklight/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/_blacklight/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
     "/_blacklight/_app-shell/": typeof BlacklightAppShellIndexRoute;
@@ -381,8 +372,7 @@ export interface FileRouteTypes {
         | "/onboarding/complete"
         | "/onboarding/configure"
         | "/onboarding/install"
-        | "/onboarding/production"
-        | "/onboarding/scenarios"
+        | "/onboarding/scenario-dry-run"
         | "/onboarding/url"
         | "/onboarding/working"
         | "/app/$appSlug"
@@ -418,8 +408,7 @@ export interface FileRouteTypes {
         | "/onboarding/complete"
         | "/onboarding/configure"
         | "/onboarding/install"
-        | "/onboarding/production"
-        | "/onboarding/scenarios"
+        | "/onboarding/scenario-dry-run"
         | "/onboarding/url"
         | "/onboarding/working"
         | "/login"
@@ -454,8 +443,7 @@ export interface FileRouteTypes {
         | "/_blacklight/onboarding/complete"
         | "/_blacklight/onboarding/configure"
         | "/_blacklight/onboarding/install"
-        | "/_blacklight/onboarding/production"
-        | "/_blacklight/onboarding/scenarios"
+        | "/_blacklight/onboarding/scenario-dry-run"
         | "/_blacklight/onboarding/url"
         | "/_blacklight/onboarding/working"
         | "/_blacklight/_app-shell/"
@@ -533,18 +521,11 @@ declare module "@tanstack/react-router" {
             preLoaderRoute: typeof BlacklightOnboardingUrlRouteImport;
             parentRoute: typeof BlacklightOnboardingRouteRoute;
         };
-        "/_blacklight/onboarding/scenarios": {
-            id: "/_blacklight/onboarding/scenarios";
-            path: "/scenarios";
-            fullPath: "/onboarding/scenarios";
-            preLoaderRoute: typeof BlacklightOnboardingScenariosRouteImport;
-            parentRoute: typeof BlacklightOnboardingRouteRoute;
-        };
-        "/_blacklight/onboarding/production": {
-            id: "/_blacklight/onboarding/production";
-            path: "/production";
-            fullPath: "/onboarding/production";
-            preLoaderRoute: typeof BlacklightOnboardingProductionRouteImport;
+        "/_blacklight/onboarding/scenario-dry-run": {
+            id: "/_blacklight/onboarding/scenario-dry-run";
+            path: "/scenario-dry-run";
+            fullPath: "/onboarding/scenario-dry-run";
+            preLoaderRoute: typeof BlacklightOnboardingScenarioDryRunRouteImport;
             parentRoute: typeof BlacklightOnboardingRouteRoute;
         };
         "/_blacklight/onboarding/install": {
@@ -875,8 +856,7 @@ interface BlacklightOnboardingRouteRouteChildren {
     BlacklightOnboardingCompleteRoute: typeof BlacklightOnboardingCompleteRoute;
     BlacklightOnboardingConfigureRoute: typeof BlacklightOnboardingConfigureRoute;
     BlacklightOnboardingInstallRoute: typeof BlacklightOnboardingInstallRoute;
-    BlacklightOnboardingProductionRoute: typeof BlacklightOnboardingProductionRoute;
-    BlacklightOnboardingScenariosRoute: typeof BlacklightOnboardingScenariosRoute;
+    BlacklightOnboardingScenarioDryRunRoute: typeof BlacklightOnboardingScenarioDryRunRoute;
     BlacklightOnboardingUrlRoute: typeof BlacklightOnboardingUrlRoute;
     BlacklightOnboardingWorkingRoute: typeof BlacklightOnboardingWorkingRoute;
 }
@@ -885,8 +865,7 @@ const BlacklightOnboardingRouteRouteChildren: BlacklightOnboardingRouteRouteChil
     BlacklightOnboardingCompleteRoute: BlacklightOnboardingCompleteRoute,
     BlacklightOnboardingConfigureRoute: BlacklightOnboardingConfigureRoute,
     BlacklightOnboardingInstallRoute: BlacklightOnboardingInstallRoute,
-    BlacklightOnboardingProductionRoute: BlacklightOnboardingProductionRoute,
-    BlacklightOnboardingScenariosRoute: BlacklightOnboardingScenariosRoute,
+    BlacklightOnboardingScenarioDryRunRoute: BlacklightOnboardingScenarioDryRunRoute,
     BlacklightOnboardingUrlRoute: BlacklightOnboardingUrlRoute,
     BlacklightOnboardingWorkingRoute: BlacklightOnboardingWorkingRoute,
 };

@@ -1,5 +1,5 @@
 import { MODEL_ENTRIES, ModelRegistry } from "@autonoma/ai";
-import { createBillingServices, type BillingService } from "@autonoma/billing";
+import { createBillingService, type BillingService } from "@autonoma/billing";
 import type { PrismaClient } from "@autonoma/db";
 import { BugLinker, BugMatcher } from "@autonoma/review";
 import type { EncryptionHelper, ScenarioManager } from "@autonoma/scenario";
@@ -17,6 +17,7 @@ import { BranchesService } from "./branches/branches.service";
 import { BugsService } from "./bugs/bugs.service";
 import { FoldersService } from "./folders/folders.service";
 import { IssuesService } from "./issues/issues.service";
+import { OnboardingManager } from "./onboarding/onboarding-manager";
 import { OnboardingService } from "./onboarding/onboarding.service";
 import { RunsService } from "./runs/runs.service";
 import { ScenariosService } from "./scenarios/scenarios.service";
@@ -77,7 +78,8 @@ export function buildServices({
     });
     const bugMatcher = new BugMatcher(registry.getModel({ model: "smart-text", tag: "bug-matching" }));
     const bugLinker = new BugLinker(bugMatcher);
-    const { billingService } = createBillingServices(conn);
+    const billingService = createBillingService(conn);
+    const onboardingManager = new OnboardingManager(conn, generationProvider, scenarioManager, encryptionHelper);
 
     return {
         admin: new AdminService(conn, auth),
@@ -94,7 +96,7 @@ export function buildServices({
         skills: new SkillsService(conn),
         github: new GitHubInstallationService(conn),
         issues: new IssuesService(conn, storageProvider, triggerGenerationReview, triggerRunReview),
-        onboarding: new OnboardingService(conn, generationProvider),
+        onboarding: new OnboardingService(onboardingManager),
         snapshotEdit: new SnapshotEditService(conn, generationProvider, billingService),
         billing: billingService,
         applicationSetups: new ApplicationSetupsService(conn),

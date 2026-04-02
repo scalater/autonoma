@@ -138,20 +138,29 @@ model Organization {
   @@map("organization")
 }
 
+enum OnboardingStep {
+  install
+  configure
+  working
+  scenario_dry_run
+  url
+  completed
+
+  @@map("onboarding_step")
+}
+
 model OnboardingState {
-  id                    String    @id @default(cuid())
-  applicationId         String    @unique @map("application_id")
-  currentStep           Int       @default(0) @map("current_step")
-  agentConnectedAt      DateTime? @map("agent_connected_at")
-  /// @prisma-json-types-generator/types AgentLogEntry[]
-  agentLogs             Json      @default("[]") @map("agent_logs")
-  ngrokUrl              String?   @map("ngrok_url")
-  ngrokTestsPassed      Boolean   @default(false) @map("ngrok_tests_passed")
-  productionUrl         String?   @map("production_url")
-  productionTestsPassed Boolean   @default(false) @map("production_tests_passed")
-  completedAt           DateTime? @map("completed_at")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
+  id                    String         @id @default(cuid())
+  applicationId         String         @unique @map("application_id")
+  step                  OnboardingStep @default(install) @map("step")
+  agentConnectedAt      DateTime?      @map("agent_connected_at")
+  /// [AgentLogEntry]
+  agentLogs             Json           @default("[]") @map("agent_logs")
+  productionUrl         String?        @map("production_url")
+  productionTestsPassed Boolean        @default(false) @map("production_tests_passed")
+  completedAt           DateTime?      @map("completed_at")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
