@@ -4,7 +4,6 @@ import { SignOutIcon } from "@phosphor-icons/react/SignOut";
 import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { TalkToSupport } from "components/talk-to-support";
 import { useAuth, useAuthClient } from "lib/auth";
-import { hasCompletedOnboarding } from "lib/onboarding/onboarding";
 import { ensureSessionData } from "lib/query/auth.queries";
 import { useState } from "react";
 import { StepProgress } from "./-components/step-progress";
@@ -14,8 +13,6 @@ export const Route = createFileRoute("/_blacklight/onboarding")({
   beforeLoad: async ({ context: { queryClient } }) => {
     const session = await ensureSessionData(queryClient);
     if (session == null) throw Route.redirect({ to: "/login", search: { error: undefined } });
-
-    if (hasCompletedOnboarding(session.user.id)) throw Route.redirect({ to: "/" });
   },
 });
 
