@@ -34,10 +34,18 @@ async function findAvailablePort(startPort: number, maxAttempts = 10): Promise<n
 
 async function start() {
     const preferredPort = Number.parseInt(env.API_PORT);
-    const port = await findAvailablePort(preferredPort);
+    const port = env.NODE_ENV === "production" ? preferredPort : await findAvailablePort(preferredPort);
 
-    const portFile = resolve(import.meta.dirname, "..", "..", "..", ".api-port");
-    writeFileSync(portFile, String(port));
+    if (env.NODE_ENV !== "production") {
+        try {
+            const portFile = resolve(process.cwd(), ".api-port");
+            writeFileSync(portFile, String(port));
+        } catch (error) {
+            logger.warn("Failed to write local API port file", {
+                error: error instanceof Error ? error.message : String(error),
+            });
+        }
+    }
     logger.info(`Server running on port ${port}`);
 
     const server = serve({ fetch: app.fetch, port });
