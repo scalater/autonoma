@@ -1,68 +1,49 @@
-import { type ChildProcess, spawn } from "node:child_process";
+import { writeFile } from "node:fs/promises";
 import * as os from "node:os";
 import path from "node:path";
 import { VideoRecorder } from "@autonoma/engine";
 import type { Browser } from "webdriverio";
+import { runAppium } from "./drivers/appium-error";
 
 export class IosVideoRecorder extends VideoRecorder {
     private videoPath?: string;
-    private simctlProcess?: ChildProcess;
 
     constructor(private readonly driver: Browser) {
         super();
     }
 
     protected async startRecording(): Promise<void> {
-        const udid = this.getSimulatorUdid();
-        const tmpDir = os.tmpdir();
-        const videoPath = path.join(tmpDir, `video-${Date.now()}.mp4`);
+        this.logger.info("Starting iOS simulator recording via Appium");
 
-        this.logger.info("Starting iOS simulator recording via simctl", { udid, videoPath });
-
-        this.simctlProcess = spawn("xcrun", ["simctl", "io", udid, "recordVideo", "--codec=h264", videoPath], {
-            stdio: "ignore",
-        });
-
-        this.videoPath = videoPath;
-
-        await new Promise<void>((resolve, reject) => {
-            this.simctlProcess?.on("error", (error) => {
-                reject(new Error(`Failed to start simctl recordVideo: ${error.message}`));
-            });
-
-            // Give simctl a moment to start up and fail if it's going to
-            setTimeout(() => resolve(), 500);
-        });
+        await runAppium(() =>
+            this.driver.startRecordingScreen({
+                timeLimit: 1800,
+                videoType: "h264",
+                videoQuality: "medium",
+            }),
+        );
     }
 
     protected async stopRecording(): Promise<void> {
-        if (this.simctlProcess == null) {
-            this.logger.warn("No simctl recording process to stop");
-            return;
-        }
+        this.logger.info("Stopping iOS simulator recording via Appium");
 
-        this.logger.info("Sending SIGINT to simctl recordVideo process");
+        const recordingBase64 = await runAppium(() => this.driver.stopRecordingScreen());
 
-        await new Promise<void>((resolve) => {
-            this.simctlProcess?.on("close", () => resolve());
-            this.simctlProcess?.kill("SIGINT");
-        });
+        this.logger.info("Recording stopped, converting to buffer", { length: recordingBase64.length });
+        const buff = Buffer.from(recordingBase64, "base64");
 
-        this.logger.info("iOS simulator recording stopped", { videoPath: this.videoPath });
+        const tmpDir = os.tmpdir();
+        const videoPath = path.join(tmpDir, `video-${Date.now()}.mp4`);
+
+        await writeFile(videoPath, buff);
+
+        this.videoPath = videoPath;
+        this.logger.info("Video file written successfully", { videoPath });
     }
 
     protected async computeVideoPath(): Promise<string> {
         if (this.videoPath == null) throw new NoVideoPathError();
         return this.videoPath;
-    }
-
-    private getSimulatorUdid(): string {
-        const caps = this.driver.capabilities as Record<string, unknown>;
-        const udid = caps["appium:udid"] ?? caps.udid;
-        if (typeof udid !== "string" || udid.length === 0) {
-            throw new Error("Cannot record iOS simulator: could not determine simulator UDID");
-        }
-        return udid;
     }
 }
 
