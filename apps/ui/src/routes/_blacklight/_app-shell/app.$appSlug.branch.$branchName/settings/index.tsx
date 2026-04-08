@@ -18,6 +18,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useUpdateApplicationSettings } from "lib/query/applications.queries";
 import { useEffect, useState } from "react";
 import { useCurrentApplication } from "../../-use-current-application";
+import { DeleteApplicationDialog } from "./-delete-application-dialog";
 import { SettingsTabNav } from "./-settings-tab-nav";
 
 export const Route = createFileRoute("/_blacklight/_app-shell/app/$appSlug/branch/$branchName/settings/")({
@@ -184,7 +185,43 @@ function SettingsPage() {
         </Alert>
 
         <ThemePanel />
+
+        <DangerZonePanel />
       </div>
     </div>
+  );
+}
+
+function DangerZonePanel() {
+  const currentApp = useCurrentApplication();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  return (
+    <>
+      <Panel>
+        <PanelHeader>
+          <PanelTitle>Danger zone</PanelTitle>
+        </PanelHeader>
+        <PanelBody>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium text-text-primary">Delete application</p>
+              <p className="text-xs text-text-secondary">
+                Permanently remove this application and all its data. This action cannot be undone.
+              </p>
+            </div>
+            <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+              Delete
+            </Button>
+          </div>
+        </PanelBody>
+      </Panel>
+      <DeleteApplicationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        applicationId={currentApp.id}
+        applicationName={currentApp.name}
+      />
+    </>
   );
 }

@@ -67,7 +67,7 @@ export class ApplicationsService extends Service {
         this.logger.info("Listing applications", { organizationId });
 
         const apps = await this.db.application.findMany({
-            where: { organizationId },
+            where: { organizationId, disabled: false },
             include: deploymentInclude,
         });
 
@@ -285,36 +285,20 @@ export class ApplicationsService extends Service {
     }
 
     async deleteApplication(id: string, organizationId: string) {
-        this.logger.info("Deleting application", { applicationId: id, organizationId });
+        this.logger.info("Disabling application", { applicationId: id, organizationId });
 
         const app = await this.db.application.findFirst({
-            where: { id, organizationId },
+            where: { id, organizationId, disabled: false },
             select: { id: true },
         });
         if (app == null) throw new NotFoundError();
 
-        await this.db.$transaction(async (tx) => {
-            // Null out self-referencing FK on application so branches can be deleted
-            await tx.application.update({
-                where: { id },
-                data: { mainBranchId: null },
-            });
-
-            // Delete test generations first (they reference snapshots with Restrict)
-            await tx.$executeRaw`
-                DELETE FROM test_generation
-                WHERE snapshot_id IN (
-                    SELECT bs.id FROM branch_snapshot bs
-                    JOIN branch b ON b.id = bs.branch_id
-                    WHERE b.application_id = ${id}
-                )
-            `;
-
-            // Now Prisma cascade can handle the rest
-            await tx.application.delete({ where: { id } });
+        await this.db.application.update({
+            where: { id },
+            data: { disabled: true },
         });
 
-        this.logger.info("Application deleted", { applicationId: id });
+        this.logger.info("Application disabled", { applicationId: id });
     }
 
     async updateData(id: string, organizationId: string, data: UpdateDataInput) {

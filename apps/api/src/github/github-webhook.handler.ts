@@ -2,7 +2,6 @@ import type { PrismaClient } from "@autonoma/db";
 import { logger } from "@autonoma/logger";
 import type { CommitDiffHandler } from "@autonoma/test-updates";
 import * as Sentry from "@sentry/node";
-
 import type { GitHubInstallationService } from "./github-installation.service";
 
 export class GitHubWebhookHandler {
@@ -60,6 +59,7 @@ export class GitHubWebhookHandler {
                 fullName: repoFullName,
                 applicationId: { not: null },
                 watchBranch: branchName,
+                application: { disabled: false },
             },
             select: { applicationId: true },
         });

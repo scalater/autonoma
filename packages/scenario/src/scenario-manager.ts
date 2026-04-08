@@ -178,11 +178,14 @@ export class ScenarioManager {
     private async getApplicationData(applicationId: string): Promise<ScenarioApplicationData> {
         const application = await this.db.application.findUnique({
             where: { id: applicationId },
-            select: { id: true, webhookUrl: true, signingSecretEnc: true, organizationId: true },
+            select: { id: true, webhookUrl: true, signingSecretEnc: true, organizationId: true, disabled: true },
         });
 
         if (application == null) {
             throw new Error(`Application ${applicationId} not found`);
+        }
+        if (application.disabled) {
+            throw new Error(`Application ${applicationId} is disabled`);
         }
         if (application.webhookUrl == null || application.signingSecretEnc == null) {
             throw new Error(`Application ${applicationId} does not have a webhook configured`);

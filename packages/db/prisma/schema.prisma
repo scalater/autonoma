@@ -281,6 +281,7 @@ model Application {
   architecture       ApplicationArchitecture
   mode               ApplicationMode         @default(MAIN_ONLY)
   customInstructions String?                 @map("custom_instructions")
+  disabled           Boolean                 @default(false)
 
   mainBranchId String? @unique @map("main_branch_id")
   mainBranch   Branch? @relation("MainBranch", fields: [mainBranchId], references: [id])

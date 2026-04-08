@@ -65,8 +65,8 @@ export function useDeleteApplication() {
                 await router.invalidate();
             },
         }),
-        successToast: { title: "Application discarded" },
-        errorToast: { title: "Failed to discard application" },
+        successToast: { title: "Application deleted" },
+        errorToast: { title: "Failed to delete application" },
     });
 }
 
