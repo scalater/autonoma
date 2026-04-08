@@ -26,7 +26,8 @@ type ExecutionAgentOptionalParams =
  * {@link ExecutionAgentConfig}, but with some optional parameters.
  */
 export interface ExecutionAgentFactoryConfig<TSpec extends CommandSpec, TContext extends BaseCommandContext>
-    extends Omit<ExecutionAgentConfig<TSpec, TContext>, ExecutionAgentOptionalParams>,
+    extends
+        Omit<ExecutionAgentConfig<TSpec, TContext>, ExecutionAgentOptionalParams>,
         Partial<Pick<ExecutionAgentConfig<TSpec, TContext>, ExecutionAgentOptionalParams>> {
     /** The platform architecture, used for screenshot configuration. */
     architecture: "web" | "mobile";
@@ -43,7 +44,8 @@ type ExecutionAgentOptionalRunParams =
     | "afterMetadata";
 
 export interface BuildAgentRunParams<TSpec extends CommandSpec, TContext extends BaseCommandContext>
-    extends Omit<ExecutionAgentRunParams<TSpec, TContext>, ExecutionAgentOptionalRunParams>,
+    extends
+        Omit<ExecutionAgentRunParams<TSpec, TContext>, ExecutionAgentOptionalRunParams>,
         Partial<Pick<ExecutionAgentRunParams<TSpec, TContext>, ExecutionAgentOptionalRunParams>> {
     /** Optional handler for asking the user questions (only in frontend-connected sessions) */
     askUserHandler?: AskUserHandler;
@@ -78,7 +80,7 @@ export class ExecutionAgentFactory<TSpec extends CommandSpec, TContext extends B
 
         setScreenshotConfig({ screenResolution, architecture: this.params.architecture });
 
-        const { architecture, platformMetadata, ...agentParams } = this.params;
+        const { architecture: _architecture, platformMetadata, ...agentParams } = this.params;
 
         const composedBeforeMetadata = this.composeBeforeMetadata(runParams.beforeMetadata, platformMetadata);
 

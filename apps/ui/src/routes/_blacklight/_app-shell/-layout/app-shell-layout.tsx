@@ -15,7 +15,7 @@ import { useAuth, useAuthClient } from "lib/auth";
 import { toastManager } from "lib/toast-manager";
 import type { ReactNode } from "react";
 import { openFeedbackSurvey } from "./feedback-survey";
-import { Sidebar, useBranchNav, useSidebarCollapsed } from "./sidebar";
+import { Sidebar, useAppNav, useSidebarCollapsed } from "./sidebar";
 import { AppBreadcrumb, PendingOnboardingBanner } from "./top-bar";
 
 function GridBackground() {
@@ -88,12 +88,12 @@ function AppShellToasts() {
 export function AppShellLayout({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
   const { pathname } = useLocation();
-  const { items: branchNavItems } = useBranchNav();
+  const { items: appNavItems } = useAppNav();
   const isAdminPage = pathname === "/admin" || pathname.startsWith("/admin/");
   const [collapsed, setCollapsed] = useSidebarCollapsed();
 
-  const hasBranchNav = branchNavItems.length > 0;
-  const hasNav = hasBranchNav || (isAdminPage && isAdmin);
+  const hasAppNav = appNavItems.length > 0;
+  const hasNav = hasAppNav || (isAdminPage && isAdmin);
 
   if (!hasNav) {
     return (

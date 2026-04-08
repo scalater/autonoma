@@ -1,14 +1,22 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { Outlet, createFileRoute, notFound } from "@tanstack/react-router";
+import { ensureBranchData } from "lib/query/branches.queries";
 import { setLastApp } from "../-last-app";
 
 export const Route = createFileRoute("/_blacklight/_app-shell/app/$appSlug")({
-  loader: ({ context, params }) => {
-    const app = context.applications.find((a) => a.slug === params.appSlug);
+  loader: ({ context, params: { appSlug } }) => {
+    const app = context.applications.find((a) => a.slug === appSlug);
     if (app == null) throw notFound();
     setLastApp(app.slug);
+    if (app.mainBranch == null) return;
+    return ensureBranchData(context.queryClient, app.id, app.mainBranch.name);
   },
   notFoundComponent: AppNotFound,
+  component: AppLayout,
 });
+
+function AppLayout() {
+  return <Outlet />;
+}
 
 function AppNotFound() {
   return (

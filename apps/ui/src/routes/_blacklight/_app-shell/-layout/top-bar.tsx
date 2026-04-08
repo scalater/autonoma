@@ -18,63 +18,12 @@ import {
 } from "@autonoma/blacklight";
 import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
-import { GitBranchIcon } from "@phosphor-icons/react/GitBranch";
 import { PlusIcon } from "@phosphor-icons/react/Plus";
 import { TrashIcon } from "@phosphor-icons/react/Trash";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouteContext } from "@tanstack/react-router";
 import { navigateToOnboarding } from "lib/onboarding/navigate-to-onboarding";
 import { useDeleteApplication } from "lib/query/applications.queries";
-import { trpc } from "lib/trpc";
-import { Suspense, useState } from "react";
-
-// ─── BranchSelector ──────────────────────────────────────────────────────────
-
-function BranchSelector({
-  appSlug,
-  applicationId,
-  currentBranch,
-}: {
-  appSlug: string;
-  applicationId: string;
-  currentBranch: string;
-}) {
-  const { data: branches } = useSuspenseQuery(trpc.branches.list.queryOptions({ applicationId }));
-  const navigate = useNavigate();
-
-  if (branches.length <= 1) {
-    return (
-      <span className="flex items-center gap-1.5 font-mono text-2xs text-text-secondary">
-        <GitBranchIcon size={12} />
-        {currentBranch}
-      </span>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-2xs text-text-secondary transition-colors hover:bg-surface-base hover:text-text-primary">
-        <GitBranchIcon size={12} />
-        {currentBranch}
-        <CaretDownIcon size={10} className="text-text-tertiary" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {branches.map((branch) => (
-          <DropdownMenuItem
-            key={branch.id}
-            className={branch.name === currentBranch ? "text-primary-ink" : ""}
-            onClick={() => {
-              void navigate({ to: "/app/$appSlug/branch/$branchName", params: { appSlug, branchName: branch.name } });
-            }}
-          >
-            <GitBranchIcon size={12} />
-            {branch.name}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+import { useState } from "react";
 
 // ─── DiscardConfirmDialog ────────────────────────────────────────────────────
 
@@ -339,29 +288,14 @@ function PendingOnboardingBanner() {
 
 function AppBreadcrumb() {
   const applications = useRouteContext({ from: "/_blacklight/_app-shell", select: (ctx) => ctx.applications });
-  const params = useParams({ strict: false }) as { appSlug?: string; branchName?: string };
+  const params = useParams({ strict: false }) as { appSlug?: string };
 
-  if (params.appSlug == null || params.branchName == null) return null;
+  if (params.appSlug == null) return null;
 
   const app = applications.find((a) => a.slug === params.appSlug);
   if (app == null) return null;
 
-  return (
-    <div className="flex items-center gap-2">
-      <AppSelector currentApp={app} />
-      <span className="text-text-tertiary">/</span>
-      <Suspense
-        fallback={
-          <span className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary">
-            <GitBranchIcon size={12} />
-            {params.branchName}
-          </span>
-        }
-      >
-        <BranchSelector appSlug={params.appSlug} applicationId={app.id} currentBranch={params.branchName} />
-      </Suspense>
-    </div>
-  );
+  return <AppSelector currentApp={app} />;
 }
 
 export { AppBreadcrumb, PendingOnboardingBanner };

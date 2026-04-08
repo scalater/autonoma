@@ -6,7 +6,7 @@
     "scripts": {
         "build": "tsup",
         "typecheck": "tsc --noEmit",
-        "lint": "biome check src/ --fix",
+        "lint": "oxlint --fix src/",
         "test": "vitest run --passWithNoTests"
     },
     "dependencies": {

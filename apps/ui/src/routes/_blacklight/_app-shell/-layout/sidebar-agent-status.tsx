@@ -6,7 +6,6 @@ import {
   TooltipTrigger,
 } from "@autonoma/blacklight";
 import { CircleIcon } from "@phosphor-icons/react/Circle";
-import { GitBranchIcon } from "@phosphor-icons/react/GitBranch";
 import { Link } from "@tanstack/react-router";
 import { type ActivityLine, useBranchActivity } from "./use-branch-activity";
 
@@ -32,7 +31,7 @@ function ActivityLineItem({ activity }: { activity: ActivityLine }) {
 }
 
 export function SidebarAgentStatus({ collapsed }: { collapsed: boolean }) {
-  const { state, activities, branchName } = useBranchActivity();
+  const { state, activities } = useBranchActivity();
 
   const inner = (
     <div
@@ -40,18 +39,6 @@ export function SidebarAgentStatus({ collapsed }: { collapsed: boolean }) {
         collapsed ? "flex-col items-center px-2 py-3" : "flex-col gap-2 px-4 py-3"
       }`}
     >
-      {!collapsed && branchName != null && (
-        <Tooltip>
-          <TooltipTrigger render={<div />}>
-            <div className="flex items-center gap-1.5 text-text-tertiary">
-              <GitBranchIcon size={12} className="shrink-0" />
-              <span className="truncate font-mono text-3xs">{branchName}</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="right">Agent activity is scoped to this branch</TooltipContent>
-        </Tooltip>
-      )}
-
       <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3.5"}`}>
         <AgentIndicator state={state} size={18} />
         {!collapsed && (
@@ -78,12 +65,6 @@ export function SidebarAgentStatus({ collapsed }: { collapsed: boolean }) {
         <TooltipTrigger render={<div />}>{inner}</TooltipTrigger>
         <TooltipContent side="right">
           <div className="flex flex-col gap-1">
-            {branchName != null && (
-              <div className="flex items-center gap-1 text-text-tertiary">
-                <GitBranchIcon size={10} />
-                <span className="font-mono text-3xs">{branchName}</span>
-              </div>
-            )}
             <div>
               <span className="font-medium">Autonoma Agent</span>
               <span className="ml-1.5 text-text-tertiary">{AGENT_INDICATOR_STATE_LABEL[state]}</span>

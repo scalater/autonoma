@@ -1,26 +1,50 @@
-import { WarningCircleIcon } from "@phosphor-icons/react/WarningCircle";
-import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { ensureAPIQueryData } from "lib/query/api-queries";
+import { trpc } from "lib/trpc";
+import { Suspense } from "react";
+import { BugsChart, BugsChartSkeleton } from "./-home/bugs-chart";
+import { LastGenerationsTable, LastGenerationsTableSkeleton } from "./-home/last-generations-table";
+import { RecentRunsTable, RecentRunsTableSkeleton } from "./-home/recent-runs-table";
+import { TopSection, TopSectionSkeleton } from "./-home/top-section";
 
 export const Route = createFileRoute("/_blacklight/_app-shell/app/$appSlug/")({
-  loader: ({ context, params }) => {
-    const app = context.applications.find((a) => a.slug === params.appSlug);
-    if (app?.mainBranch == null) throw notFound();
-
-    throw redirect({
-      to: "/app/$appSlug/branch/$branchName",
-      params: { appSlug: params.appSlug, branchName: app.mainBranch.name },
-      replace: true,
-    });
+  loader: async ({ context, params: { appSlug } }) => {
+    const app = context.applications.find((a) => a.slug === appSlug);
+    if (app == null) return;
+    await Promise.all([
+      ensureAPIQueryData(context.queryClient, trpc.tests.list.queryOptions({ applicationId: app.id })),
+      ensureAPIQueryData(context.queryClient, trpc.generations.list.queryOptions({ applicationId: app.id })),
+      ensureAPIQueryData(context.queryClient, trpc.runs.list.queryOptions({ applicationId: app.id })),
+      ensureAPIQueryData(context.queryClient, trpc.bugs.list.queryOptions({ applicationId: app.id })),
+    ]);
   },
-  notFoundComponent: MainBranchNotFound,
+  component: OverviewPage,
 });
 
-function MainBranchNotFound() {
+function OverviewPage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center">
-      <WarningCircleIcon size={48} className="mb-4 text-text-tertiary" />
-      <h1 className="text-xl font-medium text-text-primary">Main branch not found</h1>
-      <p className="mt-2 font-mono text-sm text-text-secondary">The application does not have a main branch set up.</p>
+    <div className="flex flex-col gap-6">
+      <header>
+        <h1 className="text-2xl font-medium tracking-tight text-text-primary">Overview</h1>
+        <p className="mt-1 font-mono text-xs text-text-secondary">Real-time health across your test suite</p>
+      </header>
+
+      <Suspense fallback={<TopSectionSkeleton />}>
+        <TopSection />
+      </Suspense>
+
+      <Suspense fallback={<BugsChartSkeleton />}>
+        <BugsChart />
+      </Suspense>
+
+      <div className="grid min-h-75 grid-cols-1 gap-6 lg:grid-cols-2">
+        <Suspense fallback={<RecentRunsTableSkeleton />}>
+          <RecentRunsTable />
+        </Suspense>
+        <Suspense fallback={<LastGenerationsTableSkeleton />}>
+          <LastGenerationsTable />
+        </Suspense>
+      </div>
     </div>
   );
 }

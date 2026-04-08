@@ -16,23 +16,22 @@ export interface ActivityLine {
 export interface BranchActivity {
     state: AgentIndicatorState;
     activities: ActivityLine[];
-    branchName?: string;
 }
 
 const IDLE_ACTIVITY: BranchActivity = { state: "idle", activities: [] };
 
 const SUCCESS_DECAY_MS = 10_000;
 
-function useBranchContext() {
-    const params = useParams({ strict: false }) as { appSlug?: string; branchName?: string };
+function useAppContext() {
+    const params = useParams({ strict: false }) as { appSlug?: string };
     const applications = useRouteContext({ from: "/_blacklight/_app-shell", select: (ctx) => ctx.applications });
 
-    if (params.appSlug == null || params.branchName == null) return undefined;
+    if (params.appSlug == null) return undefined;
 
     const app = applications.find((a) => a.slug === params.appSlug);
-    if (app == null) return undefined;
+    if (app?.mainBranch == null) return undefined;
 
-    return { appSlug: params.appSlug, branchName: params.branchName, applicationId: app.id };
+    return { appSlug: params.appSlug, branchName: app.mainBranch.name, applicationId: app.id };
 }
 
 function hasIncompleteGenerations(generationSummary: Array<{ status: string }>): boolean {
@@ -40,7 +39,7 @@ function hasIncompleteGenerations(generationSummary: Array<{ status: string }>):
 }
 
 export function useBranchActivity(): BranchActivity {
-    const ctx = useBranchContext();
+    const ctx = useAppContext();
 
     const { data: branch } = useQuery({
         ...trpc.branches.detailByName.queryOptions({
@@ -73,7 +72,7 @@ export function useBranchActivity(): BranchActivity {
         if (ctx == null) return IDLE_ACTIVITY;
 
         const activities: ActivityLine[] = [];
-        const base = `/app/${ctx.appSlug}/branch/${ctx.branchName}`;
+        const base = `/app/${ctx.appSlug}`;
 
         // Generations
         if (editSession != null) {
@@ -118,7 +117,7 @@ export function useBranchActivity(): BranchActivity {
             state = "processing";
         }
 
-        return { state, activities, branchName: ctx.branchName };
+        return { state, activities };
     }, [ctx, editSession, runs]);
 
     const activity = computeActivity();
@@ -139,7 +138,7 @@ export function useBranchActivity(): BranchActivity {
     }, [activity.state]);
 
     if (showSuccess && activity.state === "idle") {
-        return { state: "success", activities: [], branchName: activity.branchName };
+        return { state: "success", activities: [] };
     }
 
     return activity;

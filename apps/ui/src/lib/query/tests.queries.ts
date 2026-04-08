@@ -2,7 +2,7 @@ import { type QueryClient, useQueryClient, useSuspenseQuery } from "@tanstack/re
 import { ensureAPIQueryData, useAPIMutation } from "lib/query/api-queries";
 import { trpc } from "lib/trpc";
 import { useCurrentApplication } from "routes/_blacklight/_app-shell/-use-current-application";
-import { useCurrentSnapshot } from "routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/-use-current-branch";
+import { useCurrentSnapshot } from "routes/_blacklight/_app-shell/app.$appSlug/-use-main-branch";
 
 export function useTests() {
     const { id: applicationId } = useCurrentApplication();

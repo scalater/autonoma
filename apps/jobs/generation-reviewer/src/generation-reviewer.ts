@@ -4,7 +4,6 @@ import type { LanguageModel, UploadedVideo, VideoProcessor } from "@autonoma/ai"
 import { logger } from "@autonoma/logger";
 import { buildReviewTools, runReviewAgent, tryUploadVideo } from "@autonoma/review";
 import type { ReviewVerdict } from "@autonoma/types";
-
 import type { FilePart, ModelMessage, TextPart } from "ai";
 import type { GenerationData, GenerationDataLoader } from "./data-loader";
 
@@ -128,7 +127,7 @@ export class GenerationReviewer {
                     return partType !== "image";
                 })
                 .map((part) => {
-                    const { providerOptions, ...rest } = part as Record<string, unknown>;
+                    const { providerOptions: _providerOptions, ...rest } = part as Record<string, unknown>;
                     return rest;
                 });
 

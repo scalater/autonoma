@@ -8,955 +8,835 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as BlacklightRouteImport } from './routes/_blacklight'
-import { Route as BlacklightOnboardingRouteRouteImport } from './routes/_blacklight/onboarding/route'
-import { Route as BlacklightAppShellRouteRouteImport } from './routes/_blacklight/_app-shell/route'
-import { Route as BlacklightAppShellIndexRouteImport } from './routes/_blacklight/_app-shell/index'
-import { Route as BlacklightOnboardingWorkingRouteImport } from './routes/_blacklight/onboarding/working'
-import { Route as BlacklightOnboardingUrlRouteImport } from './routes/_blacklight/onboarding/url'
-import { Route as BlacklightOnboardingScenarioDryRunRouteImport } from './routes/_blacklight/onboarding/scenario-dry-run'
-import { Route as BlacklightOnboardingInstallRouteImport } from './routes/_blacklight/onboarding/install'
-import { Route as BlacklightOnboardingConfigureRouteImport } from './routes/_blacklight/onboarding/configure'
-import { Route as BlacklightOnboardingCompleteRouteImport } from './routes/_blacklight/onboarding/complete'
-import { Route as BlacklightauthRejectedRouteImport } from './routes/_blacklight/(auth)/rejected'
-import { Route as BlacklightauthPendingRouteImport } from './routes/_blacklight/(auth)/pending'
-import { Route as BlacklightauthLoginRouteRouteImport } from './routes/_blacklight/(auth)/login/route'
-import { Route as BlacklightAppShellAdminIndexRouteImport } from './routes/_blacklight/_app-shell/admin/index'
-import { Route as BlacklightauthLoginIndexRouteImport } from './routes/_blacklight/(auth)/login/index'
-import { Route as BlacklightAppShellAppAppSlugRouteRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug/route'
-import { Route as BlacklightAppShellAppAppSlugIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/route'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/tests/route'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/tests/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/skills/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/settings/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/scenarios/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/runs/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/issues/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/history/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/generations/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/generation-progress/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/edit/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/bugs/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/billing/index'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/tests/$testSlug'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/runs/$runId'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/issues/$issueId'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/bugs/$bugId'
-import { Route as BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRouteImport } from './routes/_blacklight/_app-shell/app.$appSlug.branch.$branchName/generations/$generationId/index'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as BlacklightRouteImport } from "./routes/_blacklight";
+import { Route as BlacklightauthLoginIndexRouteImport } from "./routes/_blacklight/(auth)/login/index";
+import { Route as BlacklightauthLoginRouteRouteImport } from "./routes/_blacklight/(auth)/login/route";
+import { Route as BlacklightauthPendingRouteImport } from "./routes/_blacklight/(auth)/pending";
+import { Route as BlacklightauthRejectedRouteImport } from "./routes/_blacklight/(auth)/rejected";
+import { Route as BlacklightAppShellAdminIndexRouteImport } from "./routes/_blacklight/_app-shell/admin/index";
+import { Route as BlacklightAppShellAppAppSlugBillingIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/billing/index";
+import { Route as BlacklightAppShellAppAppSlugBugsBugIdRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/bugs/$bugId";
+import { Route as BlacklightAppShellAppAppSlugBugsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/bugs/index";
+import { Route as BlacklightAppShellAppAppSlugEditIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/edit/index";
+import { Route as BlacklightAppShellAppAppSlugGenerationProgressIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/generation-progress/index";
+import { Route as BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/generations/$generationId/index";
+import { Route as BlacklightAppShellAppAppSlugGenerationsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/generations/index";
+import { Route as BlacklightAppShellAppAppSlugHistoryIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/history/index";
+import { Route as BlacklightAppShellAppAppSlugIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/index";
+import { Route as BlacklightAppShellAppAppSlugIssuesIssueIdRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/issues/$issueId";
+import { Route as BlacklightAppShellAppAppSlugIssuesIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/issues/index";
+import { Route as BlacklightAppShellAppAppSlugPullRequestsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/pull-requests/index";
+import { Route as BlacklightAppShellAppAppSlugRouteRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/route";
+import { Route as BlacklightAppShellAppAppSlugRunsRunIdRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/runs/$runId";
+import { Route as BlacklightAppShellAppAppSlugRunsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/runs/index";
+import { Route as BlacklightAppShellAppAppSlugScenariosIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/scenarios/index";
+import { Route as BlacklightAppShellAppAppSlugSettingsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/settings/index";
+import { Route as BlacklightAppShellAppAppSlugSkillsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/skills/index";
+import { Route as BlacklightAppShellAppAppSlugTestsTestSlugRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/tests/$testSlug";
+import { Route as BlacklightAppShellAppAppSlugTestsIndexRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/tests/index";
+import { Route as BlacklightAppShellAppAppSlugTestsRouteRouteImport } from "./routes/_blacklight/_app-shell/app.$appSlug/tests/route";
+import { Route as BlacklightAppShellIndexRouteImport } from "./routes/_blacklight/_app-shell/index";
+import { Route as BlacklightAppShellRouteRouteImport } from "./routes/_blacklight/_app-shell/route";
+import { Route as BlacklightOnboardingCompleteRouteImport } from "./routes/_blacklight/onboarding/complete";
+import { Route as BlacklightOnboardingConfigureRouteImport } from "./routes/_blacklight/onboarding/configure";
+import { Route as BlacklightOnboardingInstallRouteImport } from "./routes/_blacklight/onboarding/install";
+import { Route as BlacklightOnboardingRouteRouteImport } from "./routes/_blacklight/onboarding/route";
+import { Route as BlacklightOnboardingScenarioDryRunRouteImport } from "./routes/_blacklight/onboarding/scenario-dry-run";
+import { Route as BlacklightOnboardingUrlRouteImport } from "./routes/_blacklight/onboarding/url";
+import { Route as BlacklightOnboardingWorkingRouteImport } from "./routes/_blacklight/onboarding/working";
 
 const BlacklightRoute = BlacklightRouteImport.update({
-  id: '/_blacklight',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlacklightOnboardingRouteRoute =
-  BlacklightOnboardingRouteRouteImport.update({
-    id: '/onboarding',
-    path: '/onboarding',
+    id: "/_blacklight",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const BlacklightOnboardingRouteRoute = BlacklightOnboardingRouteRouteImport.update({
+    id: "/onboarding",
+    path: "/onboarding",
     getParentRoute: () => BlacklightRoute,
-  } as any)
+} as any);
 const BlacklightAppShellRouteRoute = BlacklightAppShellRouteRouteImport.update({
-  id: '/_app-shell',
-  getParentRoute: () => BlacklightRoute,
-} as any)
-const BlacklightAppShellIndexRoute = BlacklightAppShellIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => BlacklightAppShellRouteRoute,
-} as any)
-const BlacklightOnboardingWorkingRoute =
-  BlacklightOnboardingWorkingRouteImport.update({
-    id: '/working',
-    path: '/working',
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-  } as any)
-const BlacklightOnboardingUrlRoute = BlacklightOnboardingUrlRouteImport.update({
-  id: '/url',
-  path: '/url',
-  getParentRoute: () => BlacklightOnboardingRouteRoute,
-} as any)
-const BlacklightOnboardingScenarioDryRunRoute =
-  BlacklightOnboardingScenarioDryRunRouteImport.update({
-    id: '/scenario-dry-run',
-    path: '/scenario-dry-run',
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-  } as any)
-const BlacklightOnboardingInstallRoute =
-  BlacklightOnboardingInstallRouteImport.update({
-    id: '/install',
-    path: '/install',
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-  } as any)
-const BlacklightOnboardingConfigureRoute =
-  BlacklightOnboardingConfigureRouteImport.update({
-    id: '/configure',
-    path: '/configure',
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-  } as any)
-const BlacklightOnboardingCompleteRoute =
-  BlacklightOnboardingCompleteRouteImport.update({
-    id: '/complete',
-    path: '/complete',
-    getParentRoute: () => BlacklightOnboardingRouteRoute,
-  } as any)
-const BlacklightauthRejectedRoute = BlacklightauthRejectedRouteImport.update({
-  id: '/(auth)/rejected',
-  path: '/rejected',
-  getParentRoute: () => BlacklightRoute,
-} as any)
-const BlacklightauthPendingRoute = BlacklightauthPendingRouteImport.update({
-  id: '/(auth)/pending',
-  path: '/pending',
-  getParentRoute: () => BlacklightRoute,
-} as any)
-const BlacklightauthLoginRouteRoute =
-  BlacklightauthLoginRouteRouteImport.update({
-    id: '/(auth)/login',
-    path: '/login',
+    id: "/_app-shell",
     getParentRoute: () => BlacklightRoute,
-  } as any)
-const BlacklightAppShellAdminIndexRoute =
-  BlacklightAppShellAdminIndexRouteImport.update({
-    id: '/admin/',
-    path: '/admin/',
+} as any);
+const BlacklightAppShellIndexRoute = BlacklightAppShellIndexRouteImport.update({
+    id: "/",
+    path: "/",
     getParentRoute: () => BlacklightAppShellRouteRoute,
-  } as any)
-const BlacklightauthLoginIndexRoute =
-  BlacklightauthLoginIndexRouteImport.update({
-    id: '/',
-    path: '/',
+} as any);
+const BlacklightOnboardingWorkingRoute = BlacklightOnboardingWorkingRouteImport.update({
+    id: "/working",
+    path: "/working",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingUrlRoute = BlacklightOnboardingUrlRouteImport.update({
+    id: "/url",
+    path: "/url",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingScenarioDryRunRoute = BlacklightOnboardingScenarioDryRunRouteImport.update({
+    id: "/scenario-dry-run",
+    path: "/scenario-dry-run",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingInstallRoute = BlacklightOnboardingInstallRouteImport.update({
+    id: "/install",
+    path: "/install",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingConfigureRoute = BlacklightOnboardingConfigureRouteImport.update({
+    id: "/configure",
+    path: "/configure",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingCompleteRoute = BlacklightOnboardingCompleteRouteImport.update({
+    id: "/complete",
+    path: "/complete",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightauthRejectedRoute = BlacklightauthRejectedRouteImport.update({
+    id: "/(auth)/rejected",
+    path: "/rejected",
+    getParentRoute: () => BlacklightRoute,
+} as any);
+const BlacklightauthPendingRoute = BlacklightauthPendingRouteImport.update({
+    id: "/(auth)/pending",
+    path: "/pending",
+    getParentRoute: () => BlacklightRoute,
+} as any);
+const BlacklightauthLoginRouteRoute = BlacklightauthLoginRouteRouteImport.update({
+    id: "/(auth)/login",
+    path: "/login",
+    getParentRoute: () => BlacklightRoute,
+} as any);
+const BlacklightAppShellAdminIndexRoute = BlacklightAppShellAdminIndexRouteImport.update({
+    id: "/admin/",
+    path: "/admin/",
+    getParentRoute: () => BlacklightAppShellRouteRoute,
+} as any);
+const BlacklightauthLoginIndexRoute = BlacklightauthLoginIndexRouteImport.update({
+    id: "/",
+    path: "/",
     getParentRoute: () => BlacklightauthLoginRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugRouteRoute =
-  BlacklightAppShellAppAppSlugRouteRouteImport.update({
-    id: '/app/$appSlug',
-    path: '/app/$appSlug',
+} as any);
+const BlacklightAppShellAppAppSlugRouteRoute = BlacklightAppShellAppAppSlugRouteRouteImport.update({
+    id: "/app/$appSlug",
+    path: "/app/$appSlug",
     getParentRoute: () => BlacklightAppShellRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugIndexRoute =
-  BlacklightAppShellAppAppSlugIndexRouteImport.update({
-    id: '/',
-    path: '/',
+} as any);
+const BlacklightAppShellAppAppSlugIndexRoute = BlacklightAppShellAppAppSlugIndexRouteImport.update({
+    id: "/",
+    path: "/",
     getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteImport.update({
-    id: '/branch/$branchName',
-    path: '/branch/$branchName',
+} as any);
+const BlacklightAppShellAppAppSlugTestsRouteRoute = BlacklightAppShellAppAppSlugTestsRouteRouteImport.update({
+    id: "/tests",
+    path: "/tests",
     getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteImport.update({
-    id: '/tests',
-    path: '/tests',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRouteImport.update({
-    id: '/skills/',
-    path: '/skills/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRouteImport.update({
-    id: '/scenarios/',
-    path: '/scenarios/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRouteImport.update({
-    id: '/runs/',
-    path: '/runs/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRouteImport.update({
-    id: '/issues/',
-    path: '/issues/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRouteImport.update({
-    id: '/history/',
-    path: '/history/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRouteImport.update(
-    {
-      id: '/generations/',
-      path: '/generations/',
-      getParentRoute: () =>
-        BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-    } as any,
-  )
-const BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRouteImport.update(
-    {
-      id: '/generation-progress/',
-      path: '/generation-progress/',
-      getParentRoute: () =>
-        BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-    } as any,
-  )
-const BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRouteImport.update({
-    id: '/edit/',
-    path: '/edit/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRouteImport.update({
-    id: '/bugs/',
-    path: '/bugs/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRouteImport.update({
-    id: '/billing/',
-    path: '/billing/',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRouteImport.update({
-    id: '/$testSlug',
-    path: '/$testSlug',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRouteImport.update({
-    id: '/runs/$runId',
-    path: '/runs/$runId',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRouteImport.update({
-    id: '/issues/$issueId',
-    path: '/issues/$issueId',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRouteImport.update({
-    id: '/bugs/$bugId',
-    path: '/bugs/$bugId',
-    getParentRoute: () =>
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-  } as any)
-const BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute =
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRouteImport.update(
-    {
-      id: '/generations/$generationId/',
-      path: '/generations/$generationId/',
-      getParentRoute: () =>
-        BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute,
-    } as any,
-  )
+} as any);
+const BlacklightAppShellAppAppSlugTestsIndexRoute = BlacklightAppShellAppAppSlugTestsIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugTestsRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugSkillsIndexRoute = BlacklightAppShellAppAppSlugSkillsIndexRouteImport.update({
+    id: "/skills/",
+    path: "/skills/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugSettingsIndexRoute = BlacklightAppShellAppAppSlugSettingsIndexRouteImport.update({
+    id: "/settings/",
+    path: "/settings/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugScenariosIndexRoute = BlacklightAppShellAppAppSlugScenariosIndexRouteImport.update({
+    id: "/scenarios/",
+    path: "/scenarios/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugRunsIndexRoute = BlacklightAppShellAppAppSlugRunsIndexRouteImport.update({
+    id: "/runs/",
+    path: "/runs/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugPullRequestsIndexRoute =
+    BlacklightAppShellAppAppSlugPullRequestsIndexRouteImport.update({
+        id: "/pull-requests/",
+        path: "/pull-requests/",
+        getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+    } as any);
+const BlacklightAppShellAppAppSlugIssuesIndexRoute = BlacklightAppShellAppAppSlugIssuesIndexRouteImport.update({
+    id: "/issues/",
+    path: "/issues/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugHistoryIndexRoute = BlacklightAppShellAppAppSlugHistoryIndexRouteImport.update({
+    id: "/history/",
+    path: "/history/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugGenerationsIndexRoute =
+    BlacklightAppShellAppAppSlugGenerationsIndexRouteImport.update({
+        id: "/generations/",
+        path: "/generations/",
+        getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+    } as any);
+const BlacklightAppShellAppAppSlugGenerationProgressIndexRoute =
+    BlacklightAppShellAppAppSlugGenerationProgressIndexRouteImport.update({
+        id: "/generation-progress/",
+        path: "/generation-progress/",
+        getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+    } as any);
+const BlacklightAppShellAppAppSlugEditIndexRoute = BlacklightAppShellAppAppSlugEditIndexRouteImport.update({
+    id: "/edit/",
+    path: "/edit/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugBugsIndexRoute = BlacklightAppShellAppAppSlugBugsIndexRouteImport.update({
+    id: "/bugs/",
+    path: "/bugs/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugBillingIndexRoute = BlacklightAppShellAppAppSlugBillingIndexRouteImport.update({
+    id: "/billing/",
+    path: "/billing/",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugTestsTestSlugRoute = BlacklightAppShellAppAppSlugTestsTestSlugRouteImport.update({
+    id: "/$testSlug",
+    path: "/$testSlug",
+    getParentRoute: () => BlacklightAppShellAppAppSlugTestsRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugRunsRunIdRoute = BlacklightAppShellAppAppSlugRunsRunIdRouteImport.update({
+    id: "/runs/$runId",
+    path: "/runs/$runId",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugIssuesIssueIdRoute = BlacklightAppShellAppAppSlugIssuesIssueIdRouteImport.update({
+    id: "/issues/$issueId",
+    path: "/issues/$issueId",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugBugsBugIdRoute = BlacklightAppShellAppAppSlugBugsBugIdRouteImport.update({
+    id: "/bugs/$bugId",
+    path: "/bugs/$bugId",
+    getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+} as any);
+const BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute =
+    BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRouteImport.update({
+        id: "/generations/$generationId/",
+        path: "/generations/$generationId/",
+        getParentRoute: () => BlacklightAppShellAppAppSlugRouteRoute,
+    } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof BlacklightAppShellIndexRoute
-  '/onboarding': typeof BlacklightOnboardingRouteRouteWithChildren
-  '/login': typeof BlacklightauthLoginRouteRouteWithChildren
-  '/pending': typeof BlacklightauthPendingRoute
-  '/rejected': typeof BlacklightauthRejectedRoute
-  '/onboarding/complete': typeof BlacklightOnboardingCompleteRoute
-  '/onboarding/configure': typeof BlacklightOnboardingConfigureRoute
-  '/onboarding/install': typeof BlacklightOnboardingInstallRoute
-  '/onboarding/scenario-dry-run': typeof BlacklightOnboardingScenarioDryRunRoute
-  '/onboarding/url': typeof BlacklightOnboardingUrlRoute
-  '/onboarding/working': typeof BlacklightOnboardingWorkingRoute
-  '/app/$appSlug': typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren
-  '/login/': typeof BlacklightauthLoginIndexRoute
-  '/admin/': typeof BlacklightAppShellAdminIndexRoute
-  '/app/$appSlug/': typeof BlacklightAppShellAppAppSlugIndexRoute
-  '/app/$appSlug/branch/$branchName': typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteWithChildren
-  '/app/$appSlug/branch/$branchName/tests': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteWithChildren
-  '/app/$appSlug/branch/$branchName/': typeof BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute
-  '/app/$appSlug/branch/$branchName/bugs/$bugId': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute
-  '/app/$appSlug/branch/$branchName/issues/$issueId': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute
-  '/app/$appSlug/branch/$branchName/runs/$runId': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute
-  '/app/$appSlug/branch/$branchName/tests/$testSlug': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute
-  '/app/$appSlug/branch/$branchName/billing/': typeof BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute
-  '/app/$appSlug/branch/$branchName/bugs/': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute
-  '/app/$appSlug/branch/$branchName/edit/': typeof BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute
-  '/app/$appSlug/branch/$branchName/generation-progress/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute
-  '/app/$appSlug/branch/$branchName/generations/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute
-  '/app/$appSlug/branch/$branchName/history/': typeof BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute
-  '/app/$appSlug/branch/$branchName/issues/': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute
-  '/app/$appSlug/branch/$branchName/runs/': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute
-  '/app/$appSlug/branch/$branchName/scenarios/': typeof BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute
-  '/app/$appSlug/branch/$branchName/settings/': typeof BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute
-  '/app/$appSlug/branch/$branchName/skills/': typeof BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute
-  '/app/$appSlug/branch/$branchName/tests/': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute
-  '/app/$appSlug/branch/$branchName/generations/$generationId/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute
+    "/": typeof BlacklightAppShellIndexRoute;
+    "/onboarding": typeof BlacklightOnboardingRouteRouteWithChildren;
+    "/login": typeof BlacklightauthLoginRouteRouteWithChildren;
+    "/pending": typeof BlacklightauthPendingRoute;
+    "/rejected": typeof BlacklightauthRejectedRoute;
+    "/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
+    "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
+    "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
+    "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
+    "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
+    "/app/$appSlug": typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren;
+    "/login/": typeof BlacklightauthLoginIndexRoute;
+    "/admin/": typeof BlacklightAppShellAdminIndexRoute;
+    "/app/$appSlug/tests": typeof BlacklightAppShellAppAppSlugTestsRouteRouteWithChildren;
+    "/app/$appSlug/": typeof BlacklightAppShellAppAppSlugIndexRoute;
+    "/app/$appSlug/bugs/$bugId": typeof BlacklightAppShellAppAppSlugBugsBugIdRoute;
+    "/app/$appSlug/issues/$issueId": typeof BlacklightAppShellAppAppSlugIssuesIssueIdRoute;
+    "/app/$appSlug/runs/$runId": typeof BlacklightAppShellAppAppSlugRunsRunIdRoute;
+    "/app/$appSlug/tests/$testSlug": typeof BlacklightAppShellAppAppSlugTestsTestSlugRoute;
+    "/app/$appSlug/billing/": typeof BlacklightAppShellAppAppSlugBillingIndexRoute;
+    "/app/$appSlug/bugs/": typeof BlacklightAppShellAppAppSlugBugsIndexRoute;
+    "/app/$appSlug/edit/": typeof BlacklightAppShellAppAppSlugEditIndexRoute;
+    "/app/$appSlug/generation-progress/": typeof BlacklightAppShellAppAppSlugGenerationProgressIndexRoute;
+    "/app/$appSlug/generations/": typeof BlacklightAppShellAppAppSlugGenerationsIndexRoute;
+    "/app/$appSlug/history/": typeof BlacklightAppShellAppAppSlugHistoryIndexRoute;
+    "/app/$appSlug/issues/": typeof BlacklightAppShellAppAppSlugIssuesIndexRoute;
+    "/app/$appSlug/pull-requests/": typeof BlacklightAppShellAppAppSlugPullRequestsIndexRoute;
+    "/app/$appSlug/runs/": typeof BlacklightAppShellAppAppSlugRunsIndexRoute;
+    "/app/$appSlug/scenarios/": typeof BlacklightAppShellAppAppSlugScenariosIndexRoute;
+    "/app/$appSlug/settings/": typeof BlacklightAppShellAppAppSlugSettingsIndexRoute;
+    "/app/$appSlug/skills/": typeof BlacklightAppShellAppAppSlugSkillsIndexRoute;
+    "/app/$appSlug/tests/": typeof BlacklightAppShellAppAppSlugTestsIndexRoute;
+    "/app/$appSlug/generations/$generationId/": typeof BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof BlacklightAppShellIndexRoute
-  '/onboarding': typeof BlacklightOnboardingRouteRouteWithChildren
-  '/pending': typeof BlacklightauthPendingRoute
-  '/rejected': typeof BlacklightauthRejectedRoute
-  '/onboarding/complete': typeof BlacklightOnboardingCompleteRoute
-  '/onboarding/configure': typeof BlacklightOnboardingConfigureRoute
-  '/onboarding/install': typeof BlacklightOnboardingInstallRoute
-  '/onboarding/scenario-dry-run': typeof BlacklightOnboardingScenarioDryRunRoute
-  '/onboarding/url': typeof BlacklightOnboardingUrlRoute
-  '/onboarding/working': typeof BlacklightOnboardingWorkingRoute
-  '/login': typeof BlacklightauthLoginIndexRoute
-  '/admin': typeof BlacklightAppShellAdminIndexRoute
-  '/app/$appSlug': typeof BlacklightAppShellAppAppSlugIndexRoute
-  '/app/$appSlug/branch/$branchName': typeof BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute
-  '/app/$appSlug/branch/$branchName/bugs/$bugId': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute
-  '/app/$appSlug/branch/$branchName/issues/$issueId': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute
-  '/app/$appSlug/branch/$branchName/runs/$runId': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute
-  '/app/$appSlug/branch/$branchName/tests/$testSlug': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute
-  '/app/$appSlug/branch/$branchName/billing': typeof BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute
-  '/app/$appSlug/branch/$branchName/bugs': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute
-  '/app/$appSlug/branch/$branchName/edit': typeof BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute
-  '/app/$appSlug/branch/$branchName/generation-progress': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute
-  '/app/$appSlug/branch/$branchName/generations': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute
-  '/app/$appSlug/branch/$branchName/history': typeof BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute
-  '/app/$appSlug/branch/$branchName/issues': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute
-  '/app/$appSlug/branch/$branchName/runs': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute
-  '/app/$appSlug/branch/$branchName/scenarios': typeof BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute
-  '/app/$appSlug/branch/$branchName/settings': typeof BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute
-  '/app/$appSlug/branch/$branchName/skills': typeof BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute
-  '/app/$appSlug/branch/$branchName/tests': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute
-  '/app/$appSlug/branch/$branchName/generations/$generationId': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute
+    "/": typeof BlacklightAppShellIndexRoute;
+    "/onboarding": typeof BlacklightOnboardingRouteRouteWithChildren;
+    "/pending": typeof BlacklightauthPendingRoute;
+    "/rejected": typeof BlacklightauthRejectedRoute;
+    "/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
+    "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
+    "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
+    "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
+    "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
+    "/login": typeof BlacklightauthLoginIndexRoute;
+    "/admin": typeof BlacklightAppShellAdminIndexRoute;
+    "/app/$appSlug": typeof BlacklightAppShellAppAppSlugIndexRoute;
+    "/app/$appSlug/bugs/$bugId": typeof BlacklightAppShellAppAppSlugBugsBugIdRoute;
+    "/app/$appSlug/issues/$issueId": typeof BlacklightAppShellAppAppSlugIssuesIssueIdRoute;
+    "/app/$appSlug/runs/$runId": typeof BlacklightAppShellAppAppSlugRunsRunIdRoute;
+    "/app/$appSlug/tests/$testSlug": typeof BlacklightAppShellAppAppSlugTestsTestSlugRoute;
+    "/app/$appSlug/billing": typeof BlacklightAppShellAppAppSlugBillingIndexRoute;
+    "/app/$appSlug/bugs": typeof BlacklightAppShellAppAppSlugBugsIndexRoute;
+    "/app/$appSlug/edit": typeof BlacklightAppShellAppAppSlugEditIndexRoute;
+    "/app/$appSlug/generation-progress": typeof BlacklightAppShellAppAppSlugGenerationProgressIndexRoute;
+    "/app/$appSlug/generations": typeof BlacklightAppShellAppAppSlugGenerationsIndexRoute;
+    "/app/$appSlug/history": typeof BlacklightAppShellAppAppSlugHistoryIndexRoute;
+    "/app/$appSlug/issues": typeof BlacklightAppShellAppAppSlugIssuesIndexRoute;
+    "/app/$appSlug/pull-requests": typeof BlacklightAppShellAppAppSlugPullRequestsIndexRoute;
+    "/app/$appSlug/runs": typeof BlacklightAppShellAppAppSlugRunsIndexRoute;
+    "/app/$appSlug/scenarios": typeof BlacklightAppShellAppAppSlugScenariosIndexRoute;
+    "/app/$appSlug/settings": typeof BlacklightAppShellAppAppSlugSettingsIndexRoute;
+    "/app/$appSlug/skills": typeof BlacklightAppShellAppAppSlugSkillsIndexRoute;
+    "/app/$appSlug/tests": typeof BlacklightAppShellAppAppSlugTestsIndexRoute;
+    "/app/$appSlug/generations/$generationId": typeof BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/_blacklight': typeof BlacklightRouteWithChildren
-  '/_blacklight/_app-shell': typeof BlacklightAppShellRouteRouteWithChildren
-  '/_blacklight/onboarding': typeof BlacklightOnboardingRouteRouteWithChildren
-  '/_blacklight/(auth)/login': typeof BlacklightauthLoginRouteRouteWithChildren
-  '/_blacklight/(auth)/pending': typeof BlacklightauthPendingRoute
-  '/_blacklight/(auth)/rejected': typeof BlacklightauthRejectedRoute
-  '/_blacklight/onboarding/complete': typeof BlacklightOnboardingCompleteRoute
-  '/_blacklight/onboarding/configure': typeof BlacklightOnboardingConfigureRoute
-  '/_blacklight/onboarding/install': typeof BlacklightOnboardingInstallRoute
-  '/_blacklight/onboarding/scenario-dry-run': typeof BlacklightOnboardingScenarioDryRunRoute
-  '/_blacklight/onboarding/url': typeof BlacklightOnboardingUrlRoute
-  '/_blacklight/onboarding/working': typeof BlacklightOnboardingWorkingRoute
-  '/_blacklight/_app-shell/': typeof BlacklightAppShellIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug': typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren
-  '/_blacklight/(auth)/login/': typeof BlacklightauthLoginIndexRoute
-  '/_blacklight/_app-shell/admin/': typeof BlacklightAppShellAdminIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/': typeof BlacklightAppShellAppAppSlugIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName': typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteWithChildren
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteWithChildren
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/': typeof BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/$bugId': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/$issueId': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/$runId': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/$testSlug': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/billing/': typeof BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/': typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/edit/': typeof BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generation-progress/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/history/': typeof BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/': typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/': typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/scenarios/': typeof BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/settings/': typeof BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/skills/': typeof BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/': typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute
-  '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/$generationId/': typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute
+    __root__: typeof rootRouteImport;
+    "/_blacklight": typeof BlacklightRouteWithChildren;
+    "/_blacklight/_app-shell": typeof BlacklightAppShellRouteRouteWithChildren;
+    "/_blacklight/onboarding": typeof BlacklightOnboardingRouteRouteWithChildren;
+    "/_blacklight/(auth)/login": typeof BlacklightauthLoginRouteRouteWithChildren;
+    "/_blacklight/(auth)/pending": typeof BlacklightauthPendingRoute;
+    "/_blacklight/(auth)/rejected": typeof BlacklightauthRejectedRoute;
+    "/_blacklight/onboarding/complete": typeof BlacklightOnboardingCompleteRoute;
+    "/_blacklight/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
+    "/_blacklight/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/_blacklight/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
+    "/_blacklight/onboarding/url": typeof BlacklightOnboardingUrlRoute;
+    "/_blacklight/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
+    "/_blacklight/_app-shell/": typeof BlacklightAppShellIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug": typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren;
+    "/_blacklight/(auth)/login/": typeof BlacklightauthLoginIndexRoute;
+    "/_blacklight/_app-shell/admin/": typeof BlacklightAppShellAdminIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/tests": typeof BlacklightAppShellAppAppSlugTestsRouteRouteWithChildren;
+    "/_blacklight/_app-shell/app/$appSlug/": typeof BlacklightAppShellAppAppSlugIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/bugs/$bugId": typeof BlacklightAppShellAppAppSlugBugsBugIdRoute;
+    "/_blacklight/_app-shell/app/$appSlug/issues/$issueId": typeof BlacklightAppShellAppAppSlugIssuesIssueIdRoute;
+    "/_blacklight/_app-shell/app/$appSlug/runs/$runId": typeof BlacklightAppShellAppAppSlugRunsRunIdRoute;
+    "/_blacklight/_app-shell/app/$appSlug/tests/$testSlug": typeof BlacklightAppShellAppAppSlugTestsTestSlugRoute;
+    "/_blacklight/_app-shell/app/$appSlug/billing/": typeof BlacklightAppShellAppAppSlugBillingIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/bugs/": typeof BlacklightAppShellAppAppSlugBugsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/edit/": typeof BlacklightAppShellAppAppSlugEditIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/generation-progress/": typeof BlacklightAppShellAppAppSlugGenerationProgressIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/generations/": typeof BlacklightAppShellAppAppSlugGenerationsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/history/": typeof BlacklightAppShellAppAppSlugHistoryIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/issues/": typeof BlacklightAppShellAppAppSlugIssuesIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/pull-requests/": typeof BlacklightAppShellAppAppSlugPullRequestsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/runs/": typeof BlacklightAppShellAppAppSlugRunsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/scenarios/": typeof BlacklightAppShellAppAppSlugScenariosIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/settings/": typeof BlacklightAppShellAppAppSlugSettingsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/skills/": typeof BlacklightAppShellAppAppSlugSkillsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/tests/": typeof BlacklightAppShellAppAppSlugTestsIndexRoute;
+    "/_blacklight/_app-shell/app/$appSlug/generations/$generationId/": typeof BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/onboarding'
-    | '/login'
-    | '/pending'
-    | '/rejected'
-    | '/onboarding/complete'
-    | '/onboarding/configure'
-    | '/onboarding/install'
-    | '/onboarding/scenario-dry-run'
-    | '/onboarding/url'
-    | '/onboarding/working'
-    | '/app/$appSlug'
-    | '/login/'
-    | '/admin/'
-    | '/app/$appSlug/'
-    | '/app/$appSlug/branch/$branchName'
-    | '/app/$appSlug/branch/$branchName/tests'
-    | '/app/$appSlug/branch/$branchName/'
-    | '/app/$appSlug/branch/$branchName/bugs/$bugId'
-    | '/app/$appSlug/branch/$branchName/issues/$issueId'
-    | '/app/$appSlug/branch/$branchName/runs/$runId'
-    | '/app/$appSlug/branch/$branchName/tests/$testSlug'
-    | '/app/$appSlug/branch/$branchName/billing/'
-    | '/app/$appSlug/branch/$branchName/bugs/'
-    | '/app/$appSlug/branch/$branchName/edit/'
-    | '/app/$appSlug/branch/$branchName/generation-progress/'
-    | '/app/$appSlug/branch/$branchName/generations/'
-    | '/app/$appSlug/branch/$branchName/history/'
-    | '/app/$appSlug/branch/$branchName/issues/'
-    | '/app/$appSlug/branch/$branchName/runs/'
-    | '/app/$appSlug/branch/$branchName/scenarios/'
-    | '/app/$appSlug/branch/$branchName/settings/'
-    | '/app/$appSlug/branch/$branchName/skills/'
-    | '/app/$appSlug/branch/$branchName/tests/'
-    | '/app/$appSlug/branch/$branchName/generations/$generationId/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/onboarding'
-    | '/pending'
-    | '/rejected'
-    | '/onboarding/complete'
-    | '/onboarding/configure'
-    | '/onboarding/install'
-    | '/onboarding/scenario-dry-run'
-    | '/onboarding/url'
-    | '/onboarding/working'
-    | '/login'
-    | '/admin'
-    | '/app/$appSlug'
-    | '/app/$appSlug/branch/$branchName'
-    | '/app/$appSlug/branch/$branchName/bugs/$bugId'
-    | '/app/$appSlug/branch/$branchName/issues/$issueId'
-    | '/app/$appSlug/branch/$branchName/runs/$runId'
-    | '/app/$appSlug/branch/$branchName/tests/$testSlug'
-    | '/app/$appSlug/branch/$branchName/billing'
-    | '/app/$appSlug/branch/$branchName/bugs'
-    | '/app/$appSlug/branch/$branchName/edit'
-    | '/app/$appSlug/branch/$branchName/generation-progress'
-    | '/app/$appSlug/branch/$branchName/generations'
-    | '/app/$appSlug/branch/$branchName/history'
-    | '/app/$appSlug/branch/$branchName/issues'
-    | '/app/$appSlug/branch/$branchName/runs'
-    | '/app/$appSlug/branch/$branchName/scenarios'
-    | '/app/$appSlug/branch/$branchName/settings'
-    | '/app/$appSlug/branch/$branchName/skills'
-    | '/app/$appSlug/branch/$branchName/tests'
-    | '/app/$appSlug/branch/$branchName/generations/$generationId'
-  id:
-    | '__root__'
-    | '/_blacklight'
-    | '/_blacklight/_app-shell'
-    | '/_blacklight/onboarding'
-    | '/_blacklight/(auth)/login'
-    | '/_blacklight/(auth)/pending'
-    | '/_blacklight/(auth)/rejected'
-    | '/_blacklight/onboarding/complete'
-    | '/_blacklight/onboarding/configure'
-    | '/_blacklight/onboarding/install'
-    | '/_blacklight/onboarding/scenario-dry-run'
-    | '/_blacklight/onboarding/url'
-    | '/_blacklight/onboarding/working'
-    | '/_blacklight/_app-shell/'
-    | '/_blacklight/_app-shell/app/$appSlug'
-    | '/_blacklight/(auth)/login/'
-    | '/_blacklight/_app-shell/admin/'
-    | '/_blacklight/_app-shell/app/$appSlug/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/$bugId'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/$issueId'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/$runId'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/$testSlug'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/billing/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/edit/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generation-progress/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/history/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/scenarios/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/settings/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/skills/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/'
-    | '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/$generationId/'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath;
+    fullPaths:
+        | "/"
+        | "/onboarding"
+        | "/login"
+        | "/pending"
+        | "/rejected"
+        | "/onboarding/complete"
+        | "/onboarding/configure"
+        | "/onboarding/install"
+        | "/onboarding/scenario-dry-run"
+        | "/onboarding/url"
+        | "/onboarding/working"
+        | "/app/$appSlug"
+        | "/login/"
+        | "/admin/"
+        | "/app/$appSlug/tests"
+        | "/app/$appSlug/"
+        | "/app/$appSlug/bugs/$bugId"
+        | "/app/$appSlug/issues/$issueId"
+        | "/app/$appSlug/runs/$runId"
+        | "/app/$appSlug/tests/$testSlug"
+        | "/app/$appSlug/billing/"
+        | "/app/$appSlug/bugs/"
+        | "/app/$appSlug/edit/"
+        | "/app/$appSlug/generation-progress/"
+        | "/app/$appSlug/generations/"
+        | "/app/$appSlug/history/"
+        | "/app/$appSlug/issues/"
+        | "/app/$appSlug/pull-requests/"
+        | "/app/$appSlug/runs/"
+        | "/app/$appSlug/scenarios/"
+        | "/app/$appSlug/settings/"
+        | "/app/$appSlug/skills/"
+        | "/app/$appSlug/tests/"
+        | "/app/$appSlug/generations/$generationId/";
+    fileRoutesByTo: FileRoutesByTo;
+    to:
+        | "/"
+        | "/onboarding"
+        | "/pending"
+        | "/rejected"
+        | "/onboarding/complete"
+        | "/onboarding/configure"
+        | "/onboarding/install"
+        | "/onboarding/scenario-dry-run"
+        | "/onboarding/url"
+        | "/onboarding/working"
+        | "/login"
+        | "/admin"
+        | "/app/$appSlug"
+        | "/app/$appSlug/bugs/$bugId"
+        | "/app/$appSlug/issues/$issueId"
+        | "/app/$appSlug/runs/$runId"
+        | "/app/$appSlug/tests/$testSlug"
+        | "/app/$appSlug/billing"
+        | "/app/$appSlug/bugs"
+        | "/app/$appSlug/edit"
+        | "/app/$appSlug/generation-progress"
+        | "/app/$appSlug/generations"
+        | "/app/$appSlug/history"
+        | "/app/$appSlug/issues"
+        | "/app/$appSlug/pull-requests"
+        | "/app/$appSlug/runs"
+        | "/app/$appSlug/scenarios"
+        | "/app/$appSlug/settings"
+        | "/app/$appSlug/skills"
+        | "/app/$appSlug/tests"
+        | "/app/$appSlug/generations/$generationId";
+    id:
+        | "__root__"
+        | "/_blacklight"
+        | "/_blacklight/_app-shell"
+        | "/_blacklight/onboarding"
+        | "/_blacklight/(auth)/login"
+        | "/_blacklight/(auth)/pending"
+        | "/_blacklight/(auth)/rejected"
+        | "/_blacklight/onboarding/complete"
+        | "/_blacklight/onboarding/configure"
+        | "/_blacklight/onboarding/install"
+        | "/_blacklight/onboarding/scenario-dry-run"
+        | "/_blacklight/onboarding/url"
+        | "/_blacklight/onboarding/working"
+        | "/_blacklight/_app-shell/"
+        | "/_blacklight/_app-shell/app/$appSlug"
+        | "/_blacklight/(auth)/login/"
+        | "/_blacklight/_app-shell/admin/"
+        | "/_blacklight/_app-shell/app/$appSlug/tests"
+        | "/_blacklight/_app-shell/app/$appSlug/"
+        | "/_blacklight/_app-shell/app/$appSlug/bugs/$bugId"
+        | "/_blacklight/_app-shell/app/$appSlug/issues/$issueId"
+        | "/_blacklight/_app-shell/app/$appSlug/runs/$runId"
+        | "/_blacklight/_app-shell/app/$appSlug/tests/$testSlug"
+        | "/_blacklight/_app-shell/app/$appSlug/billing/"
+        | "/_blacklight/_app-shell/app/$appSlug/bugs/"
+        | "/_blacklight/_app-shell/app/$appSlug/edit/"
+        | "/_blacklight/_app-shell/app/$appSlug/generation-progress/"
+        | "/_blacklight/_app-shell/app/$appSlug/generations/"
+        | "/_blacklight/_app-shell/app/$appSlug/history/"
+        | "/_blacklight/_app-shell/app/$appSlug/issues/"
+        | "/_blacklight/_app-shell/app/$appSlug/pull-requests/"
+        | "/_blacklight/_app-shell/app/$appSlug/runs/"
+        | "/_blacklight/_app-shell/app/$appSlug/scenarios/"
+        | "/_blacklight/_app-shell/app/$appSlug/settings/"
+        | "/_blacklight/_app-shell/app/$appSlug/skills/"
+        | "/_blacklight/_app-shell/app/$appSlug/tests/"
+        | "/_blacklight/_app-shell/app/$appSlug/generations/$generationId/";
+    fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  BlacklightRoute: typeof BlacklightRouteWithChildren
+    BlacklightRoute: typeof BlacklightRouteWithChildren;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/_blacklight': {
-      id: '/_blacklight'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof BlacklightRouteImport
-      parentRoute: typeof rootRouteImport
+declare module "@tanstack/react-router" {
+    interface FileRoutesByPath {
+        "/_blacklight": {
+            id: "/_blacklight";
+            path: "";
+            fullPath: "/";
+            preLoaderRoute: typeof BlacklightRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/_blacklight/onboarding": {
+            id: "/_blacklight/onboarding";
+            path: "/onboarding";
+            fullPath: "/onboarding";
+            preLoaderRoute: typeof BlacklightOnboardingRouteRouteImport;
+            parentRoute: typeof BlacklightRoute;
+        };
+        "/_blacklight/_app-shell": {
+            id: "/_blacklight/_app-shell";
+            path: "";
+            fullPath: "/";
+            preLoaderRoute: typeof BlacklightAppShellRouteRouteImport;
+            parentRoute: typeof BlacklightRoute;
+        };
+        "/_blacklight/_app-shell/": {
+            id: "/_blacklight/_app-shell/";
+            path: "/";
+            fullPath: "/";
+            preLoaderRoute: typeof BlacklightAppShellIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellRouteRoute;
+        };
+        "/_blacklight/onboarding/working": {
+            id: "/_blacklight/onboarding/working";
+            path: "/working";
+            fullPath: "/onboarding/working";
+            preLoaderRoute: typeof BlacklightOnboardingWorkingRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/url": {
+            id: "/_blacklight/onboarding/url";
+            path: "/url";
+            fullPath: "/onboarding/url";
+            preLoaderRoute: typeof BlacklightOnboardingUrlRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/scenario-dry-run": {
+            id: "/_blacklight/onboarding/scenario-dry-run";
+            path: "/scenario-dry-run";
+            fullPath: "/onboarding/scenario-dry-run";
+            preLoaderRoute: typeof BlacklightOnboardingScenarioDryRunRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/install": {
+            id: "/_blacklight/onboarding/install";
+            path: "/install";
+            fullPath: "/onboarding/install";
+            preLoaderRoute: typeof BlacklightOnboardingInstallRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/configure": {
+            id: "/_blacklight/onboarding/configure";
+            path: "/configure";
+            fullPath: "/onboarding/configure";
+            preLoaderRoute: typeof BlacklightOnboardingConfigureRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/complete": {
+            id: "/_blacklight/onboarding/complete";
+            path: "/complete";
+            fullPath: "/onboarding/complete";
+            preLoaderRoute: typeof BlacklightOnboardingCompleteRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/(auth)/rejected": {
+            id: "/_blacklight/(auth)/rejected";
+            path: "/rejected";
+            fullPath: "/rejected";
+            preLoaderRoute: typeof BlacklightauthRejectedRouteImport;
+            parentRoute: typeof BlacklightRoute;
+        };
+        "/_blacklight/(auth)/pending": {
+            id: "/_blacklight/(auth)/pending";
+            path: "/pending";
+            fullPath: "/pending";
+            preLoaderRoute: typeof BlacklightauthPendingRouteImport;
+            parentRoute: typeof BlacklightRoute;
+        };
+        "/_blacklight/(auth)/login": {
+            id: "/_blacklight/(auth)/login";
+            path: "/login";
+            fullPath: "/login";
+            preLoaderRoute: typeof BlacklightauthLoginRouteRouteImport;
+            parentRoute: typeof BlacklightRoute;
+        };
+        "/_blacklight/_app-shell/admin/": {
+            id: "/_blacklight/_app-shell/admin/";
+            path: "/admin";
+            fullPath: "/admin/";
+            preLoaderRoute: typeof BlacklightAppShellAdminIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellRouteRoute;
+        };
+        "/_blacklight/(auth)/login/": {
+            id: "/_blacklight/(auth)/login/";
+            path: "/";
+            fullPath: "/login/";
+            preLoaderRoute: typeof BlacklightauthLoginIndexRouteImport;
+            parentRoute: typeof BlacklightauthLoginRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug": {
+            id: "/_blacklight/_app-shell/app/$appSlug";
+            path: "/app/$appSlug";
+            fullPath: "/app/$appSlug";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugRouteRouteImport;
+            parentRoute: typeof BlacklightAppShellRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/";
+            path: "/";
+            fullPath: "/app/$appSlug/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/tests": {
+            id: "/_blacklight/_app-shell/app/$appSlug/tests";
+            path: "/tests";
+            fullPath: "/app/$appSlug/tests";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugTestsRouteRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/tests/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/tests/";
+            path: "/";
+            fullPath: "/app/$appSlug/tests/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugTestsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugTestsRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/skills/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/skills/";
+            path: "/skills";
+            fullPath: "/app/$appSlug/skills/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugSkillsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/settings/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/settings/";
+            path: "/settings";
+            fullPath: "/app/$appSlug/settings/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugSettingsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/scenarios/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/scenarios/";
+            path: "/scenarios";
+            fullPath: "/app/$appSlug/scenarios/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugScenariosIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/runs/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/runs/";
+            path: "/runs";
+            fullPath: "/app/$appSlug/runs/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugRunsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/pull-requests/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/pull-requests/";
+            path: "/pull-requests";
+            fullPath: "/app/$appSlug/pull-requests/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugPullRequestsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/issues/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/issues/";
+            path: "/issues";
+            fullPath: "/app/$appSlug/issues/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugIssuesIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/history/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/history/";
+            path: "/history";
+            fullPath: "/app/$appSlug/history/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugHistoryIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/generations/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/generations/";
+            path: "/generations";
+            fullPath: "/app/$appSlug/generations/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugGenerationsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/generation-progress/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/generation-progress/";
+            path: "/generation-progress";
+            fullPath: "/app/$appSlug/generation-progress/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugGenerationProgressIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/edit/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/edit/";
+            path: "/edit";
+            fullPath: "/app/$appSlug/edit/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugEditIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/bugs/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/bugs/";
+            path: "/bugs";
+            fullPath: "/app/$appSlug/bugs/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugBugsIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/billing/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/billing/";
+            path: "/billing";
+            fullPath: "/app/$appSlug/billing/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugBillingIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/tests/$testSlug": {
+            id: "/_blacklight/_app-shell/app/$appSlug/tests/$testSlug";
+            path: "/$testSlug";
+            fullPath: "/app/$appSlug/tests/$testSlug";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugTestsTestSlugRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugTestsRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/runs/$runId": {
+            id: "/_blacklight/_app-shell/app/$appSlug/runs/$runId";
+            path: "/runs/$runId";
+            fullPath: "/app/$appSlug/runs/$runId";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugRunsRunIdRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/issues/$issueId": {
+            id: "/_blacklight/_app-shell/app/$appSlug/issues/$issueId";
+            path: "/issues/$issueId";
+            fullPath: "/app/$appSlug/issues/$issueId";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugIssuesIssueIdRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/bugs/$bugId": {
+            id: "/_blacklight/_app-shell/app/$appSlug/bugs/$bugId";
+            path: "/bugs/$bugId";
+            fullPath: "/app/$appSlug/bugs/$bugId";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugBugsBugIdRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
+        "/_blacklight/_app-shell/app/$appSlug/generations/$generationId/": {
+            id: "/_blacklight/_app-shell/app/$appSlug/generations/$generationId/";
+            path: "/generations/$generationId";
+            fullPath: "/app/$appSlug/generations/$generationId/";
+            preLoaderRoute: typeof BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRouteImport;
+            parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute;
+        };
     }
-    '/_blacklight/onboarding': {
-      id: '/_blacklight/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof BlacklightOnboardingRouteRouteImport
-      parentRoute: typeof BlacklightRoute
-    }
-    '/_blacklight/_app-shell': {
-      id: '/_blacklight/_app-shell'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof BlacklightAppShellRouteRouteImport
-      parentRoute: typeof BlacklightRoute
-    }
-    '/_blacklight/_app-shell/': {
-      id: '/_blacklight/_app-shell/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof BlacklightAppShellIndexRouteImport
-      parentRoute: typeof BlacklightAppShellRouteRoute
-    }
-    '/_blacklight/onboarding/working': {
-      id: '/_blacklight/onboarding/working'
-      path: '/working'
-      fullPath: '/onboarding/working'
-      preLoaderRoute: typeof BlacklightOnboardingWorkingRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/onboarding/url': {
-      id: '/_blacklight/onboarding/url'
-      path: '/url'
-      fullPath: '/onboarding/url'
-      preLoaderRoute: typeof BlacklightOnboardingUrlRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/onboarding/scenario-dry-run': {
-      id: '/_blacklight/onboarding/scenario-dry-run'
-      path: '/scenario-dry-run'
-      fullPath: '/onboarding/scenario-dry-run'
-      preLoaderRoute: typeof BlacklightOnboardingScenarioDryRunRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/onboarding/install': {
-      id: '/_blacklight/onboarding/install'
-      path: '/install'
-      fullPath: '/onboarding/install'
-      preLoaderRoute: typeof BlacklightOnboardingInstallRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/onboarding/configure': {
-      id: '/_blacklight/onboarding/configure'
-      path: '/configure'
-      fullPath: '/onboarding/configure'
-      preLoaderRoute: typeof BlacklightOnboardingConfigureRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/onboarding/complete': {
-      id: '/_blacklight/onboarding/complete'
-      path: '/complete'
-      fullPath: '/onboarding/complete'
-      preLoaderRoute: typeof BlacklightOnboardingCompleteRouteImport
-      parentRoute: typeof BlacklightOnboardingRouteRoute
-    }
-    '/_blacklight/(auth)/rejected': {
-      id: '/_blacklight/(auth)/rejected'
-      path: '/rejected'
-      fullPath: '/rejected'
-      preLoaderRoute: typeof BlacklightauthRejectedRouteImport
-      parentRoute: typeof BlacklightRoute
-    }
-    '/_blacklight/(auth)/pending': {
-      id: '/_blacklight/(auth)/pending'
-      path: '/pending'
-      fullPath: '/pending'
-      preLoaderRoute: typeof BlacklightauthPendingRouteImport
-      parentRoute: typeof BlacklightRoute
-    }
-    '/_blacklight/(auth)/login': {
-      id: '/_blacklight/(auth)/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof BlacklightauthLoginRouteRouteImport
-      parentRoute: typeof BlacklightRoute
-    }
-    '/_blacklight/_app-shell/admin/': {
-      id: '/_blacklight/_app-shell/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof BlacklightAppShellAdminIndexRouteImport
-      parentRoute: typeof BlacklightAppShellRouteRoute
-    }
-    '/_blacklight/(auth)/login/': {
-      id: '/_blacklight/(auth)/login/'
-      path: '/'
-      fullPath: '/login/'
-      preLoaderRoute: typeof BlacklightauthLoginIndexRouteImport
-      parentRoute: typeof BlacklightauthLoginRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug': {
-      id: '/_blacklight/_app-shell/app/$appSlug'
-      path: '/app/$appSlug'
-      fullPath: '/app/$appSlug'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugRouteRouteImport
-      parentRoute: typeof BlacklightAppShellRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/'
-      path: '/'
-      fullPath: '/app/$appSlug/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName'
-      path: '/branch/$branchName'
-      fullPath: '/app/$appSlug/branch/$branchName'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/'
-      path: '/'
-      fullPath: '/app/$appSlug/branch/$branchName/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests'
-      path: '/tests'
-      fullPath: '/app/$appSlug/branch/$branchName/tests'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/'
-      path: '/'
-      fullPath: '/app/$appSlug/branch/$branchName/tests/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/skills/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/skills/'
-      path: '/skills'
-      fullPath: '/app/$appSlug/branch/$branchName/skills/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/settings/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/settings/'
-      path: '/settings'
-      fullPath: '/app/$appSlug/branch/$branchName/settings/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/scenarios/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/scenarios/'
-      path: '/scenarios'
-      fullPath: '/app/$appSlug/branch/$branchName/scenarios/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/'
-      path: '/runs'
-      fullPath: '/app/$appSlug/branch/$branchName/runs/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/'
-      path: '/issues'
-      fullPath: '/app/$appSlug/branch/$branchName/issues/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/history/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/history/'
-      path: '/history'
-      fullPath: '/app/$appSlug/branch/$branchName/history/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/'
-      path: '/generations'
-      fullPath: '/app/$appSlug/branch/$branchName/generations/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generation-progress/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generation-progress/'
-      path: '/generation-progress'
-      fullPath: '/app/$appSlug/branch/$branchName/generation-progress/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/edit/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/edit/'
-      path: '/edit'
-      fullPath: '/app/$appSlug/branch/$branchName/edit/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/'
-      path: '/bugs'
-      fullPath: '/app/$appSlug/branch/$branchName/bugs/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/billing/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/billing/'
-      path: '/billing'
-      fullPath: '/app/$appSlug/branch/$branchName/billing/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/$testSlug': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/tests/$testSlug'
-      path: '/$testSlug'
-      fullPath: '/app/$appSlug/branch/$branchName/tests/$testSlug'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/$runId': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/runs/$runId'
-      path: '/runs/$runId'
-      fullPath: '/app/$appSlug/branch/$branchName/runs/$runId'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/$issueId': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/issues/$issueId'
-      path: '/issues/$issueId'
-      fullPath: '/app/$appSlug/branch/$branchName/issues/$issueId'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/$bugId': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/bugs/$bugId'
-      path: '/bugs/$bugId'
-      fullPath: '/app/$appSlug/branch/$branchName/bugs/$bugId'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-    '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/$generationId/': {
-      id: '/_blacklight/_app-shell/app/$appSlug/branch/$branchName/generations/$generationId/'
-      path: '/generations/$generationId'
-      fullPath: '/app/$appSlug/branch/$branchName/generations/$generationId/'
-      preLoaderRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRouteImport
-      parentRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute
-    }
-  }
 }
 
-interface BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteChildren {
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute
+interface BlacklightAppShellAppAppSlugTestsRouteRouteChildren {
+    BlacklightAppShellAppAppSlugTestsTestSlugRoute: typeof BlacklightAppShellAppAppSlugTestsTestSlugRoute;
+    BlacklightAppShellAppAppSlugTestsIndexRoute: typeof BlacklightAppShellAppAppSlugTestsIndexRoute;
 }
 
-const BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteChildren: BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteChildren =
-  {
-    BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameTestsTestSlugRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameTestsIndexRoute,
-  }
+const BlacklightAppShellAppAppSlugTestsRouteRouteChildren: BlacklightAppShellAppAppSlugTestsRouteRouteChildren = {
+    BlacklightAppShellAppAppSlugTestsTestSlugRoute: BlacklightAppShellAppAppSlugTestsTestSlugRoute,
+    BlacklightAppShellAppAppSlugTestsIndexRoute: BlacklightAppShellAppAppSlugTestsIndexRoute,
+};
 
-const BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteWithChildren =
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute._addFileChildren(
-    BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteChildren,
-  )
-
-interface BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteChildren {
-  BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteWithChildren
-  BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute
-}
-
-const BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteChildren: BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteChildren =
-  {
-    BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameTestsRouteRouteWithChildren,
-    BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameBugsBugIdRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameIssuesIssueIdRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameRunsRunIdRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameBillingIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameBugsIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameEditIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameGenerationProgressIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameGenerationsIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameHistoryIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameIssuesIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameRunsIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameScenariosIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameSettingsIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameSkillsIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameGenerationsGenerationIdIndexRoute,
-  }
-
-const BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteWithChildren =
-  BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute._addFileChildren(
-    BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteChildren,
-  )
+const BlacklightAppShellAppAppSlugTestsRouteRouteWithChildren =
+    BlacklightAppShellAppAppSlugTestsRouteRoute._addFileChildren(BlacklightAppShellAppAppSlugTestsRouteRouteChildren);
 
 interface BlacklightAppShellAppAppSlugRouteRouteChildren {
-  BlacklightAppShellAppAppSlugIndexRoute: typeof BlacklightAppShellAppAppSlugIndexRoute
-  BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute: typeof BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteWithChildren
+    BlacklightAppShellAppAppSlugTestsRouteRoute: typeof BlacklightAppShellAppAppSlugTestsRouteRouteWithChildren;
+    BlacklightAppShellAppAppSlugIndexRoute: typeof BlacklightAppShellAppAppSlugIndexRoute;
+    BlacklightAppShellAppAppSlugBugsBugIdRoute: typeof BlacklightAppShellAppAppSlugBugsBugIdRoute;
+    BlacklightAppShellAppAppSlugIssuesIssueIdRoute: typeof BlacklightAppShellAppAppSlugIssuesIssueIdRoute;
+    BlacklightAppShellAppAppSlugRunsRunIdRoute: typeof BlacklightAppShellAppAppSlugRunsRunIdRoute;
+    BlacklightAppShellAppAppSlugBillingIndexRoute: typeof BlacklightAppShellAppAppSlugBillingIndexRoute;
+    BlacklightAppShellAppAppSlugBugsIndexRoute: typeof BlacklightAppShellAppAppSlugBugsIndexRoute;
+    BlacklightAppShellAppAppSlugEditIndexRoute: typeof BlacklightAppShellAppAppSlugEditIndexRoute;
+    BlacklightAppShellAppAppSlugGenerationProgressIndexRoute: typeof BlacklightAppShellAppAppSlugGenerationProgressIndexRoute;
+    BlacklightAppShellAppAppSlugGenerationsIndexRoute: typeof BlacklightAppShellAppAppSlugGenerationsIndexRoute;
+    BlacklightAppShellAppAppSlugHistoryIndexRoute: typeof BlacklightAppShellAppAppSlugHistoryIndexRoute;
+    BlacklightAppShellAppAppSlugIssuesIndexRoute: typeof BlacklightAppShellAppAppSlugIssuesIndexRoute;
+    BlacklightAppShellAppAppSlugPullRequestsIndexRoute: typeof BlacklightAppShellAppAppSlugPullRequestsIndexRoute;
+    BlacklightAppShellAppAppSlugRunsIndexRoute: typeof BlacklightAppShellAppAppSlugRunsIndexRoute;
+    BlacklightAppShellAppAppSlugScenariosIndexRoute: typeof BlacklightAppShellAppAppSlugScenariosIndexRoute;
+    BlacklightAppShellAppAppSlugSettingsIndexRoute: typeof BlacklightAppShellAppAppSlugSettingsIndexRoute;
+    BlacklightAppShellAppAppSlugSkillsIndexRoute: typeof BlacklightAppShellAppAppSlugSkillsIndexRoute;
+    BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute: typeof BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute;
 }
 
-const BlacklightAppShellAppAppSlugRouteRouteChildren: BlacklightAppShellAppAppSlugRouteRouteChildren =
-  {
-    BlacklightAppShellAppAppSlugIndexRoute:
-      BlacklightAppShellAppAppSlugIndexRoute,
-    BlacklightAppShellAppAppSlugBranchBranchNameRouteRoute:
-      BlacklightAppShellAppAppSlugBranchBranchNameRouteRouteWithChildren,
-  }
+const BlacklightAppShellAppAppSlugRouteRouteChildren: BlacklightAppShellAppAppSlugRouteRouteChildren = {
+    BlacklightAppShellAppAppSlugTestsRouteRoute: BlacklightAppShellAppAppSlugTestsRouteRouteWithChildren,
+    BlacklightAppShellAppAppSlugIndexRoute: BlacklightAppShellAppAppSlugIndexRoute,
+    BlacklightAppShellAppAppSlugBugsBugIdRoute: BlacklightAppShellAppAppSlugBugsBugIdRoute,
+    BlacklightAppShellAppAppSlugIssuesIssueIdRoute: BlacklightAppShellAppAppSlugIssuesIssueIdRoute,
+    BlacklightAppShellAppAppSlugRunsRunIdRoute: BlacklightAppShellAppAppSlugRunsRunIdRoute,
+    BlacklightAppShellAppAppSlugBillingIndexRoute: BlacklightAppShellAppAppSlugBillingIndexRoute,
+    BlacklightAppShellAppAppSlugBugsIndexRoute: BlacklightAppShellAppAppSlugBugsIndexRoute,
+    BlacklightAppShellAppAppSlugEditIndexRoute: BlacklightAppShellAppAppSlugEditIndexRoute,
+    BlacklightAppShellAppAppSlugGenerationProgressIndexRoute: BlacklightAppShellAppAppSlugGenerationProgressIndexRoute,
+    BlacklightAppShellAppAppSlugGenerationsIndexRoute: BlacklightAppShellAppAppSlugGenerationsIndexRoute,
+    BlacklightAppShellAppAppSlugHistoryIndexRoute: BlacklightAppShellAppAppSlugHistoryIndexRoute,
+    BlacklightAppShellAppAppSlugIssuesIndexRoute: BlacklightAppShellAppAppSlugIssuesIndexRoute,
+    BlacklightAppShellAppAppSlugPullRequestsIndexRoute: BlacklightAppShellAppAppSlugPullRequestsIndexRoute,
+    BlacklightAppShellAppAppSlugRunsIndexRoute: BlacklightAppShellAppAppSlugRunsIndexRoute,
+    BlacklightAppShellAppAppSlugScenariosIndexRoute: BlacklightAppShellAppAppSlugScenariosIndexRoute,
+    BlacklightAppShellAppAppSlugSettingsIndexRoute: BlacklightAppShellAppAppSlugSettingsIndexRoute,
+    BlacklightAppShellAppAppSlugSkillsIndexRoute: BlacklightAppShellAppAppSlugSkillsIndexRoute,
+    BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute:
+        BlacklightAppShellAppAppSlugGenerationsGenerationIdIndexRoute,
+};
 
-const BlacklightAppShellAppAppSlugRouteRouteWithChildren =
-  BlacklightAppShellAppAppSlugRouteRoute._addFileChildren(
+const BlacklightAppShellAppAppSlugRouteRouteWithChildren = BlacklightAppShellAppAppSlugRouteRoute._addFileChildren(
     BlacklightAppShellAppAppSlugRouteRouteChildren,
-  )
+);
 
 interface BlacklightAppShellRouteRouteChildren {
-  BlacklightAppShellIndexRoute: typeof BlacklightAppShellIndexRoute
-  BlacklightAppShellAppAppSlugRouteRoute: typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren
-  BlacklightAppShellAdminIndexRoute: typeof BlacklightAppShellAdminIndexRoute
+    BlacklightAppShellIndexRoute: typeof BlacklightAppShellIndexRoute;
+    BlacklightAppShellAppAppSlugRouteRoute: typeof BlacklightAppShellAppAppSlugRouteRouteWithChildren;
+    BlacklightAppShellAdminIndexRoute: typeof BlacklightAppShellAdminIndexRoute;
 }
 
-const BlacklightAppShellRouteRouteChildren: BlacklightAppShellRouteRouteChildren =
-  {
+const BlacklightAppShellRouteRouteChildren: BlacklightAppShellRouteRouteChildren = {
     BlacklightAppShellIndexRoute: BlacklightAppShellIndexRoute,
-    BlacklightAppShellAppAppSlugRouteRoute:
-      BlacklightAppShellAppAppSlugRouteRouteWithChildren,
+    BlacklightAppShellAppAppSlugRouteRoute: BlacklightAppShellAppAppSlugRouteRouteWithChildren,
     BlacklightAppShellAdminIndexRoute: BlacklightAppShellAdminIndexRoute,
-  }
+};
 
-const BlacklightAppShellRouteRouteWithChildren =
-  BlacklightAppShellRouteRoute._addFileChildren(
+const BlacklightAppShellRouteRouteWithChildren = BlacklightAppShellRouteRoute._addFileChildren(
     BlacklightAppShellRouteRouteChildren,
-  )
+);
 
 interface BlacklightOnboardingRouteRouteChildren {
-  BlacklightOnboardingCompleteRoute: typeof BlacklightOnboardingCompleteRoute
-  BlacklightOnboardingConfigureRoute: typeof BlacklightOnboardingConfigureRoute
-  BlacklightOnboardingInstallRoute: typeof BlacklightOnboardingInstallRoute
-  BlacklightOnboardingScenarioDryRunRoute: typeof BlacklightOnboardingScenarioDryRunRoute
-  BlacklightOnboardingUrlRoute: typeof BlacklightOnboardingUrlRoute
-  BlacklightOnboardingWorkingRoute: typeof BlacklightOnboardingWorkingRoute
+    BlacklightOnboardingCompleteRoute: typeof BlacklightOnboardingCompleteRoute;
+    BlacklightOnboardingConfigureRoute: typeof BlacklightOnboardingConfigureRoute;
+    BlacklightOnboardingInstallRoute: typeof BlacklightOnboardingInstallRoute;
+    BlacklightOnboardingScenarioDryRunRoute: typeof BlacklightOnboardingScenarioDryRunRoute;
+    BlacklightOnboardingUrlRoute: typeof BlacklightOnboardingUrlRoute;
+    BlacklightOnboardingWorkingRoute: typeof BlacklightOnboardingWorkingRoute;
 }
 
-const BlacklightOnboardingRouteRouteChildren: BlacklightOnboardingRouteRouteChildren =
-  {
+const BlacklightOnboardingRouteRouteChildren: BlacklightOnboardingRouteRouteChildren = {
     BlacklightOnboardingCompleteRoute: BlacklightOnboardingCompleteRoute,
     BlacklightOnboardingConfigureRoute: BlacklightOnboardingConfigureRoute,
     BlacklightOnboardingInstallRoute: BlacklightOnboardingInstallRoute,
-    BlacklightOnboardingScenarioDryRunRoute:
-      BlacklightOnboardingScenarioDryRunRoute,
+    BlacklightOnboardingScenarioDryRunRoute: BlacklightOnboardingScenarioDryRunRoute,
     BlacklightOnboardingUrlRoute: BlacklightOnboardingUrlRoute,
     BlacklightOnboardingWorkingRoute: BlacklightOnboardingWorkingRoute,
-  }
+};
 
-const BlacklightOnboardingRouteRouteWithChildren =
-  BlacklightOnboardingRouteRoute._addFileChildren(
+const BlacklightOnboardingRouteRouteWithChildren = BlacklightOnboardingRouteRoute._addFileChildren(
     BlacklightOnboardingRouteRouteChildren,
-  )
+);
 
 interface BlacklightauthLoginRouteRouteChildren {
-  BlacklightauthLoginIndexRoute: typeof BlacklightauthLoginIndexRoute
+    BlacklightauthLoginIndexRoute: typeof BlacklightauthLoginIndexRoute;
 }
 
-const BlacklightauthLoginRouteRouteChildren: BlacklightauthLoginRouteRouteChildren =
-  {
+const BlacklightauthLoginRouteRouteChildren: BlacklightauthLoginRouteRouteChildren = {
     BlacklightauthLoginIndexRoute: BlacklightauthLoginIndexRoute,
-  }
+};
 
-const BlacklightauthLoginRouteRouteWithChildren =
-  BlacklightauthLoginRouteRoute._addFileChildren(
+const BlacklightauthLoginRouteRouteWithChildren = BlacklightauthLoginRouteRoute._addFileChildren(
     BlacklightauthLoginRouteRouteChildren,
-  )
+);
 
 interface BlacklightRouteChildren {
-  BlacklightAppShellRouteRoute: typeof BlacklightAppShellRouteRouteWithChildren
-  BlacklightOnboardingRouteRoute: typeof BlacklightOnboardingRouteRouteWithChildren
-  BlacklightauthLoginRouteRoute: typeof BlacklightauthLoginRouteRouteWithChildren
-  BlacklightauthPendingRoute: typeof BlacklightauthPendingRoute
-  BlacklightauthRejectedRoute: typeof BlacklightauthRejectedRoute
+    BlacklightAppShellRouteRoute: typeof BlacklightAppShellRouteRouteWithChildren;
+    BlacklightOnboardingRouteRoute: typeof BlacklightOnboardingRouteRouteWithChildren;
+    BlacklightauthLoginRouteRoute: typeof BlacklightauthLoginRouteRouteWithChildren;
+    BlacklightauthPendingRoute: typeof BlacklightauthPendingRoute;
+    BlacklightauthRejectedRoute: typeof BlacklightauthRejectedRoute;
 }
 
 const BlacklightRouteChildren: BlacklightRouteChildren = {
-  BlacklightAppShellRouteRoute: BlacklightAppShellRouteRouteWithChildren,
-  BlacklightOnboardingRouteRoute: BlacklightOnboardingRouteRouteWithChildren,
-  BlacklightauthLoginRouteRoute: BlacklightauthLoginRouteRouteWithChildren,
-  BlacklightauthPendingRoute: BlacklightauthPendingRoute,
-  BlacklightauthRejectedRoute: BlacklightauthRejectedRoute,
-}
+    BlacklightAppShellRouteRoute: BlacklightAppShellRouteRouteWithChildren,
+    BlacklightOnboardingRouteRoute: BlacklightOnboardingRouteRouteWithChildren,
+    BlacklightauthLoginRouteRoute: BlacklightauthLoginRouteRouteWithChildren,
+    BlacklightauthPendingRoute: BlacklightauthPendingRoute,
+    BlacklightauthRejectedRoute: BlacklightauthRejectedRoute,
+};
 
-const BlacklightRouteWithChildren = BlacklightRoute._addFileChildren(
-  BlacklightRouteChildren,
-)
+const BlacklightRouteWithChildren = BlacklightRoute._addFileChildren(BlacklightRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
-  BlacklightRoute: BlacklightRouteWithChildren,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+    BlacklightRoute: BlacklightRouteWithChildren,
+};
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();

@@ -6,6 +6,7 @@ import { CaretLineRightIcon } from "@phosphor-icons/react/CaretLineRight";
 import { ChatCircleDotsIcon } from "@phosphor-icons/react/ChatCircleDots";
 import { CrownSimpleIcon } from "@phosphor-icons/react/CrownSimple";
 import { GearSixIcon } from "@phosphor-icons/react/GearSix";
+import { GitPullRequestIcon } from "@phosphor-icons/react/GitPullRequest";
 import { GridFourIcon } from "@phosphor-icons/react/GridFour";
 import type { Icon } from "@phosphor-icons/react/lib";
 import { LightningIcon } from "@phosphor-icons/react/Lightning";
@@ -51,16 +52,16 @@ function useSidebarCollapsed() {
   return [collapsed, setCollapsed] as const;
 }
 
-function useBranchNav() {
+function useAppNav() {
   const applications = useRouteContext({ from: "/_blacklight/_app-shell", select: (ctx) => ctx.applications });
-  const params = useParams({ strict: false }) as { appSlug?: string; branchName?: string };
+  const params = useParams({ strict: false }) as { appSlug?: string };
 
-  if (params.appSlug == null || params.branchName == null) return { items: [] as NavItem[], tools: [] as NavItem[] };
+  if (params.appSlug == null) return { items: [] as NavItem[], tools: [] as NavItem[] };
 
   const app = applications.find((a) => a.slug === params.appSlug);
   if (app == null) return { items: [] as NavItem[], tools: [] as NavItem[] };
 
-  const base = `/app/${params.appSlug}/branch/${params.branchName}`;
+  const base = `/app/${params.appSlug}`;
 
   const items: NavItem[] = [
     { icon: GridFourIcon, label: "Home", href: base, exact: true },
@@ -69,6 +70,7 @@ function useBranchNav() {
     { icon: BugBeetleIcon, label: "Bugs", href: `${base}/bugs` },
     { icon: PlayIcon, label: "Runs", href: `${base}/runs` },
     { icon: BugIcon, label: "Tests", href: `${base}/tests` },
+    { icon: GitPullRequestIcon, label: "Pull Requests", href: `${base}/pull-requests` },
   ];
 
   const tools: NavItem[] = [{ icon: GearSixIcon, label: "Settings", href: `${base}/settings` }];
@@ -201,17 +203,17 @@ function Sidebar({ collapsed, onToggleCollapsed, onFeedback }: SidebarProps) {
     from: "/_blacklight/_app-shell",
     select: (ctx) => ctx.activeOrganization,
   });
-  const { items: branchNavItems, tools: toolItems } = useBranchNav();
+  const { items: appNavItems, tools: toolItems } = useAppNav();
   const { pathname } = useLocation();
   const isAdminPage = pathname === "/admin" || pathname.startsWith("/admin/");
 
-  const hasBranchNav = branchNavItems.length > 0;
+  const hasAppNav = appNavItems.length > 0;
 
   let navItems: NavItem[];
   let navToolItems: NavItem[];
 
-  if (hasBranchNav) {
-    navItems = branchNavItems;
+  if (hasAppNav) {
+    navItems = appNavItems;
     navToolItems = toolItems;
   } else if (isAdminPage && isAdmin) {
     navItems = ADMIN_NAV_ITEMS;
@@ -363,4 +365,4 @@ function Sidebar({ collapsed, onToggleCollapsed, onFeedback }: SidebarProps) {
   );
 }
 
-export { Sidebar, useSidebarCollapsed, useBranchNav };
+export { Sidebar, useSidebarCollapsed, useAppNav };

@@ -84,7 +84,7 @@ export class Emulator {
                         `Locked emulator from daemon ${client.getHostname()} with device ${client.getDeviceID()}`,
                     );
                     return emulator;
-                } catch (_error: unknown) {
+                } catch {
                     // pass
                 }
             }
