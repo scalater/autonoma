@@ -1,6 +1,7 @@
-import { Button, Panel, PanelBody } from "@autonoma/blacklight";
+import { Button, Panel, PanelBody, Tooltip, TooltipContent, TooltipTrigger } from "@autonoma/blacklight";
 import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { PlusIcon } from "@phosphor-icons/react/Plus";
+import { WarningCircleIcon } from "@phosphor-icons/react/WarningCircle";
 import { Link, createFileRoute, redirect, useNavigate, useRouteContext } from "@tanstack/react-router";
 import { TalkToSupport } from "components/talk-to-support";
 import { navigateToOnboarding } from "lib/onboarding/navigate-to-onboarding";
@@ -69,23 +70,36 @@ function AppSelector() {
                 </>
               )}
 
-              {completedApps.map((app) => (
-                <Link
-                  key={app.id}
-                  to="/app/$appSlug"
-                  params={{ appSlug: app.slug }}
-                  className="group flex items-center justify-between gap-3 px-5 py-3.5 text-sm text-text-primary transition-colors hover:bg-surface-raised"
-                >
-                  <span className="font-medium">{app.name}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-2xs uppercase text-text-tertiary">{app.architecture}</span>
-                    <ArrowRightIcon
-                      size={14}
-                      className="text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100"
-                    />
-                  </div>
-                </Link>
-              ))}
+              {completedApps.map((app) => {
+                const hasNoRepo = app.githubRepositories.length === 0;
+                return (
+                  <Link
+                    key={app.id}
+                    to={hasNoRepo ? "/app/$appSlug/github" : "/app/$appSlug"}
+                    params={{ appSlug: app.slug }}
+                    className="group flex items-center justify-between gap-3 px-5 py-3.5 text-sm text-text-primary transition-colors hover:bg-surface-raised"
+                  >
+                    <span className="flex items-center gap-2 font-medium">
+                      {app.name}
+                      {hasNoRepo && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <WarningCircleIcon size={14} weight="fill" className="text-status-critical" />
+                          </TooltipTrigger>
+                          <TooltipContent>No repository linked</TooltipContent>
+                        </Tooltip>
+                      )}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-2xs uppercase text-text-tertiary">{app.architecture}</span>
+                      <ArrowRightIcon
+                        size={14}
+                        className="text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100"
+                      />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="px-5 py-12 text-center text-sm text-text-tertiary">No applications yet.</div>

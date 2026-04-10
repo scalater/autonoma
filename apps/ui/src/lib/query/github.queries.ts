@@ -19,8 +19,15 @@ export function useGithubRepositories() {
 }
 
 export function useUpdateRepoConfig() {
+    const queryClient = useQueryClient();
     return useAPIMutation({
-        ...trpc.github.updateRepoConfig.mutationOptions(),
+        ...trpc.github.updateRepoConfig.mutationOptions({
+            onSettled: () => {
+                void queryClient.invalidateQueries({ queryKey: trpc.github.listRepositories.queryKey() });
+                void queryClient.invalidateQueries({ queryKey: trpc.github.getInstallation.queryKey() });
+                void queryClient.invalidateQueries({ queryKey: trpc.applications.list.queryKey() });
+            },
+        }),
         errorToast: { title: "Failed to update repository config" },
     });
 }
@@ -32,6 +39,7 @@ export function useDisconnectGithub() {
             onSettled: () => {
                 void queryClient.invalidateQueries({ queryKey: trpc.github.getInstallation.queryKey() });
                 void queryClient.invalidateQueries({ queryKey: trpc.github.listRepositories.queryKey() });
+                void queryClient.invalidateQueries({ queryKey: trpc.applications.list.queryKey() });
             },
         }),
         successToast: { title: "GitHub disconnected" },

@@ -160,7 +160,15 @@ export class GitHubInstallationService extends Service {
     async listRepositories(orgId: string) {
         const installation = await this.db.gitHubInstallation.findUnique({
             where: { organizationId: orgId },
-            include: { repositories: true },
+            include: {
+                repositories: {
+                    include: {
+                        application: {
+                            select: { id: true, name: true, slug: true },
+                        },
+                    },
+                },
+            },
         });
 
         if (installation == null) throw new NotFoundError();

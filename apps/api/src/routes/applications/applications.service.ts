@@ -74,7 +74,22 @@ export class ApplicationsService extends Service {
 
         const apps = await this.db.application.findMany({
             where: { organizationId, disabled: false },
-            include: deploymentInclude,
+            include: {
+                mainBranch: {
+                    select: {
+                        name: true,
+                        deployment: {
+                            include: {
+                                webDeployment: true,
+                                mobileDeployment: true,
+                            },
+                        },
+                    },
+                },
+                githubRepositories: {
+                    select: { id: true, fullName: true, watchBranch: true },
+                },
+            },
         });
 
         type OnboardingRow = { application_id: string; step: string };

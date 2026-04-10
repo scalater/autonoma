@@ -20,6 +20,7 @@ import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
 import { PlusIcon } from "@phosphor-icons/react/Plus";
 import { TrashIcon } from "@phosphor-icons/react/Trash";
+import { WarningCircleIcon } from "@phosphor-icons/react/WarningCircle";
 import { useNavigate, useParams, useRouteContext } from "@tanstack/react-router";
 import { navigateToOnboarding } from "lib/onboarding/navigate-to-onboarding";
 import { useDeleteApplication } from "lib/query/applications.queries";
@@ -138,17 +139,29 @@ function AppSelector({ currentApp }: { currentApp: { slug: string; name: string 
           {completedApps.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              {completedApps.map((app) => (
-                <DropdownMenuItem
-                  key={app.id}
-                  className={app.slug === currentApp.slug ? "text-primary-ink" : ""}
-                  onClick={() => {
-                    void navigate({ to: "/app/$appSlug", params: { appSlug: app.slug } });
-                  }}
-                >
-                  {app.name}
-                </DropdownMenuItem>
-              ))}
+              {completedApps.map((app) => {
+                const hasNoRepo = app.githubRepositories.length === 0;
+                return (
+                  <DropdownMenuItem
+                    key={app.id}
+                    className={app.slug === currentApp.slug ? "text-primary-ink" : ""}
+                    onClick={() => {
+                      if (hasNoRepo) {
+                        void navigate({ to: "/app/$appSlug/github", params: { appSlug: app.slug } });
+                      } else {
+                        void navigate({ to: "/app/$appSlug", params: { appSlug: app.slug } });
+                      }
+                    }}
+                  >
+                    <span className="flex items-center gap-2">
+                      {app.name}
+                      {hasNoRepo && (
+                        <WarningCircleIcon size={14} weight="fill" className="shrink-0 text-status-critical" />
+                      )}
+                    </span>
+                  </DropdownMenuItem>
+                );
+              })}
             </>
           )}
         </DropdownMenuContent>
