@@ -128,7 +128,7 @@ function ScenarioDryRunPage() {
 
   const navigate = useNavigate();
   const discoverScenarios = useConfigureAndDiscoverScenarios();
-  const scenariosQuery = useOnboardingScenarios(applicationId ?? "");
+  const scenariosQuery = useOnboardingScenarios(applicationId);
   const runDryRun = useRunScenarioDryRun();
   const completeOnboarding = useCompleteOnboarding();
   const log = useLogEntries();

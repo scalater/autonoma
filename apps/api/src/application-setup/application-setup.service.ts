@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import type { Prisma, PrismaClient } from "@autonoma/db";
-import { NotFoundError } from "@autonoma/errors";
+import { BadRequestError, NotFoundError } from "@autonoma/errors";
 import { logger } from "@autonoma/logger";
+import type { ScenarioManager } from "@autonoma/scenario";
 import {
     AddSkill,
     AddTest,
@@ -9,8 +10,13 @@ import {
     type GenerationProvider,
     TestSuiteUpdater,
 } from "@autonoma/test-updates";
-import type { SetupEventBody, UpdateSetupBody, UploadArtifactsBody } from "@autonoma/types";
-import { TOTAL_SETUP_STEPS } from "@autonoma/types";
+import {
+    type SetupEventBody,
+    type UpdateSetupBody,
+    type UploadArtifactsBody,
+    type UploadScenarioRecipeVersionsBody,
+    TOTAL_SETUP_STEPS,
+} from "@autonoma/types";
 import { toSlug } from "@autonoma/utils";
 import matter from "gray-matter";
 import type { OnboardingManager } from "../routes/onboarding/onboarding-manager";
@@ -18,11 +24,31 @@ import { InvalidOnboardingStepError } from "../routes/onboarding/states/onboardi
 
 const log = logger.child({ name: "ApplicationSetupService" });
 
+function buildArtifactPath(file: { name: string; folder?: string }) {
+    return file.folder != null ? `${file.folder}/${file.name}` : file.name;
+}
+
+const SCENARIO_RECIPES_ARTIFACT_PATH = "autonoma/scenario-recipes.json";
+
+type SetupWithBranch = {
+    id: string;
+    applicationId: string;
+    application: {
+        mainBranch: {
+            id: string;
+            activeSnapshot: {
+                id: string;
+            } | null;
+        } | null;
+    };
+};
+
 export class ApplicationSetupService {
     constructor(
         private readonly db: PrismaClient,
         private readonly generationProvider: GenerationProvider,
         private readonly onboardingManager: OnboardingManager,
+        private readonly scenarioManager: ScenarioManager,
     ) {}
 
     async createSetup(userId: string, organizationId: string, applicationId: string, repoName?: string) {
@@ -48,18 +74,39 @@ export class ApplicationSetupService {
             });
         });
 
+        await this.advanceOnboardingForAgentConnection(applicationId);
+
+        log.info("Created application setup", { setupId: setup.id, applicationId });
+        return { id: setup.id };
+    }
+
+    private async advanceOnboardingForAgentConnection(applicationId: string) {
+        const onboarding = await this.onboardingManager.getState(applicationId);
+
+        if (onboarding.step === "install") {
+            await this.onboardingManager.startConfigure(applicationId);
+        }
+
         try {
             await this.onboardingManager.markAgentConnected(applicationId);
         } catch (err) {
             if (err instanceof InvalidOnboardingStepError) {
-                log.info("Agent reconnected - onboarding already past configure step", { applicationId });
-            } else {
-                throw err;
+                const latest = await this.onboardingManager.getState(applicationId);
+                if (
+                    latest.step === "working" ||
+                    latest.step === "scenario_dry_run" ||
+                    latest.step === "url" ||
+                    latest.step === "completed"
+                ) {
+                    log.info("Agent connected - onboarding already at or past working step", {
+                        applicationId,
+                        step: latest.step,
+                    });
+                    return;
+                }
             }
+            throw err;
         }
-
-        log.info("Created application setup", { setupId: setup.id, applicationId });
-        return { id: setup.id };
     }
 
     private async resolveUniqueName(
@@ -80,9 +127,12 @@ export class ApplicationSetupService {
     }
 
     async addEvent(setupId: string, organizationId: string, event: SetupEventBody) {
-        await this.db.$transaction(async (tx) => {
-            const setup = await tx.applicationSetup.findUnique({ where: { id: setupId, organizationId } });
-            if (setup == null) throw new NotFoundError("Application setup not found");
+        const setup = await this.db.$transaction(async (tx) => {
+            const found = await tx.applicationSetup.findUnique({
+                where: { id: setupId, organizationId },
+                select: { id: true, applicationId: true },
+            });
+            if (found == null) throw new NotFoundError("Application setup not found");
 
             await tx.applicationSetupEvent.create({
                 data: {
@@ -112,9 +162,27 @@ export class ApplicationSetupService {
                     data: { status: "failed", errorMessage: event.data.message },
                 });
             }
+
+            return found;
         });
 
         log.info("Added setup event", { setupId, type: event.type });
+
+        if (event.type === "step.completed" && event.data.step === TOTAL_SETUP_STEPS - 1) {
+            try {
+                await this.onboardingManager.startScenarioDryRun(setup.applicationId);
+                log.info("Advanced onboarding to scenario_dry_run after final step completed", {
+                    setupId,
+                    applicationId: setup.applicationId,
+                });
+            } catch (err) {
+                log.warn("Could not advance onboarding to scenario_dry_run - recipes may be missing", {
+                    setupId,
+                    applicationId: setup.applicationId,
+                    error: err instanceof Error ? err.message : String(err),
+                });
+            }
+        }
     }
 
     async updateSetup(setupId: string, organizationId: string, body: UpdateSetupBody) {
@@ -143,83 +211,248 @@ export class ApplicationSetupService {
     }
 
     async uploadArtifacts(setupId: string, organizationId: string, body: UploadArtifactsBody) {
+        const setup = await this.getSetupWithBranch(setupId, organizationId);
+        const branchId = setup.application.mainBranch?.id;
+        if (branchId == null) throw new Error("Application has no main branch");
+        this.assertNoScenarioRecipesInArtifacts(body.artifacts ?? []);
+
+        const updater = await this.getUpdater(branchId, organizationId);
+        await this.applySkills(updater, body.skills ?? []);
+        await this.applyTests(updater, body.testCases ?? [], setup.applicationId);
+        await this.persistArtifacts(setup, organizationId, body.artifacts ?? []);
+        await this.createFileEvents(setupId, body);
+
+        log.info("Uploaded artifacts", {
+            setupId,
+            skills: body.skills?.length ?? 0,
+            testCases: body.testCases?.length ?? 0,
+            artifacts: body.artifacts?.length ?? 0,
+        });
+    }
+
+    async listScenariosForSetup(setupId: string, organizationId: string) {
+        const setup = await this.getSetupWithBranch(setupId, organizationId);
+        const scenarios = await this.db.scenario.findMany({
+            where: { applicationId: setup.applicationId },
+            orderBy: { name: "asc" },
+            select: {
+                id: true,
+                name: true,
+                isDisabled: true,
+                activeRecipeVersionId: true,
+            },
+        });
+        return {
+            scenarios: scenarios.map((s) => ({
+                id: s.id,
+                name: s.name,
+                isDisabled: s.isDisabled,
+                hasActiveRecipe: s.activeRecipeVersionId != null,
+            })),
+        };
+    }
+
+    async uploadScenarioRecipeVersions(
+        setupId: string,
+        organizationId: string,
+        body: UploadScenarioRecipeVersionsBody,
+    ) {
+        const result = await this.ingestScenarioRecipesForSetup(setupId, organizationId, body, "setup API");
+        return {
+            ok: true as const,
+            scenarioCount: result.scenarioCount,
+            scenarios: result.scenarios,
+        };
+    }
+
+    private async getSetupWithBranch(setupId: string, organizationId: string): Promise<SetupWithBranch> {
         const setup = await this.db.applicationSetup.findFirst({
             where: { id: setupId, organizationId },
             select: {
+                id: true,
+                applicationId: true,
                 application: {
-                    select: { mainBranch: { select: { id: true } } },
+                    select: { mainBranch: { select: { id: true, activeSnapshot: { select: { id: true } } } } },
                 },
             },
         });
         if (setup == null) throw new NotFoundError("Application setup not found");
+        return setup;
+    }
 
-        const branchId = setup.application.mainBranch?.id;
-        if (branchId == null) throw new Error("Application has no main branch");
-
-        let updater: TestSuiteUpdater;
+    private async getUpdater(branchId: string, organizationId: string) {
         try {
-            updater = await TestSuiteUpdater.startUpdate({
+            return await TestSuiteUpdater.startUpdate({
                 db: this.db,
                 branchId,
                 organizationId,
                 jobProvider: this.generationProvider,
             });
         } catch (err) {
-            if (err instanceof BranchAlreadyHasPendingSnapshotError) {
-                log.info("Pending snapshot exists, continuing update", { branchId });
-                updater = await TestSuiteUpdater.continueUpdate({
-                    db: this.db,
-                    branchId,
-                    organizationId,
-                    jobProvider: this.generationProvider,
-                });
-            } else {
+            if (!(err instanceof BranchAlreadyHasPendingSnapshotError)) {
                 throw err;
             }
-        }
 
-        for (const skill of body.skills ?? []) {
+            log.info("Pending snapshot exists, continuing update", { branchId });
+            return TestSuiteUpdater.continueUpdate({
+                db: this.db,
+                branchId,
+                organizationId,
+                jobProvider: this.generationProvider,
+            });
+        }
+    }
+
+    private async applySkills(
+        updater: TestSuiteUpdater,
+        skills: NonNullable<UploadArtifactsBody["skills"]>,
+    ): Promise<void> {
+        for (const skill of skills) {
             const { data: frontmatter, content } = matter(skill.content);
             const name = (frontmatter.name as string | undefined) ?? skill.name.replace(/\.(md|markdown)$/i, "");
             const description = (frontmatter.description as string | undefined) ?? name;
             await updater.apply(new AddSkill({ name, description, plan: content.trim() }));
         }
+    }
 
-        for (const tc of body.testCases ?? []) {
-            const { content: plan } = matter(tc.content);
-            await updater.apply(new AddTest({ name: tc.name, plan: plan.trim() }));
+    private async applyTests(
+        updater: TestSuiteUpdater,
+        testCases: NonNullable<UploadArtifactsBody["testCases"]>,
+        applicationId: string,
+    ): Promise<void> {
+        const scenarios = await this.db.scenario.findMany({
+            where: { applicationId },
+            select: { id: true, name: true, activeRecipeVersionId: true },
+        });
+        const scenarioByName = new Map(scenarios.map((s) => [s.name, s]));
+
+        for (const testCase of testCases) {
+            const { data: frontmatter, content: plan } = matter(testCase.content);
+            const scenarioName = frontmatter.scenario as string | undefined;
+
+            let scenarioId: string | undefined;
+            if (scenarioName != null) {
+                const scenario = scenarioByName.get(scenarioName);
+                if (scenario == null) {
+                    log.warn("Test references unknown scenario - scenario recipes must be uploaded before tests", {
+                        testCase: testCase.name,
+                        scenarioName,
+                        applicationId,
+                    });
+                } else {
+                    scenarioId = scenario.id;
+                    if (scenario.activeRecipeVersionId == null) {
+                        log.warn("Scenario has no active recipe version", {
+                            testCase: testCase.name,
+                            scenarioName,
+                            scenarioId,
+                        });
+                    }
+                }
+            }
+
+            await updater.apply(new AddTest({ name: testCase.name, plan: plan.trim(), scenarioId }));
         }
+    }
 
+    private async persistArtifacts(
+        setup: SetupWithBranch,
+        organizationId: string,
+        artifacts: NonNullable<UploadArtifactsBody["artifacts"]>,
+    ): Promise<void> {
+        for (const artifact of artifacts) {
+            const path = buildArtifactPath(artifact);
+            if (path === SCENARIO_RECIPES_ARTIFACT_PATH) {
+                throw new BadRequestError(
+                    "SCENARIO_RECIPES_MUST_USE_VERSIONED_ENDPOINT: upload scenario recipes through /scenario-recipe-versions instead of /artifacts",
+                );
+            }
+            await this.db.applicationSetupArtifact.upsert({
+                where: {
+                    setupId_path: {
+                        setupId: setup.id,
+                        path,
+                    },
+                },
+                create: {
+                    setupId: setup.id,
+                    applicationId: setup.applicationId,
+                    organizationId,
+                    path,
+                    content: artifact.content,
+                },
+                update: {
+                    content: artifact.content,
+                },
+            });
+        }
+    }
+
+    private async createFileEvents(setupId: string, body: UploadArtifactsBody): Promise<void> {
         const fileEvents: Array<{ type: "file.created"; data: { filePath: string } }> = [
-            ...(body.skills ?? []).map((s) => ({
+            ...(body.skills ?? []).map((skill) => ({
                 type: "file.created" as const,
-                data: { filePath: `autonoma/skills/${s.name}` },
+                data: { filePath: `autonoma/skills/${skill.name}` },
             })),
-            ...(body.testCases ?? []).map((tc) => ({
+            ...(body.testCases ?? []).map((testCase) => ({
                 type: "file.created" as const,
                 data: {
                     filePath:
-                        tc.folder != null
-                            ? `autonoma/qa-tests/${tc.folder}/${tc.name}`
-                            : `autonoma/qa-tests/${tc.name}`,
+                        testCase.folder != null
+                            ? `autonoma/qa-tests/${testCase.folder}/${testCase.name}`
+                            : `autonoma/qa-tests/${testCase.name}`,
                 },
+            })),
+            ...(body.artifacts ?? []).map((artifact) => ({
+                type: "file.created" as const,
+                data: { filePath: buildArtifactPath(artifact) },
             })),
         ];
 
-        if (fileEvents.length > 0) {
-            await this.db.applicationSetupEvent.createMany({
-                data: fileEvents.map((e) => ({
-                    setupId,
-                    type: e.type,
-                    data: e.data as Record<string, unknown>,
-                })),
-            });
+        if (fileEvents.length === 0) {
+            return;
         }
 
-        log.info("Uploaded artifacts", {
-            setupId,
-            skills: body.skills?.length ?? 0,
-            testCases: body.testCases?.length ?? 0,
+        await this.db.applicationSetupEvent.createMany({
+            data: fileEvents.map((event) => ({
+                setupId,
+                type: event.type,
+                data: event.data as Record<string, unknown>,
+            })),
         });
+    }
+
+    private async ingestScenarioRecipesForSetup(
+        setupId: string,
+        organizationId: string,
+        body: UploadScenarioRecipeVersionsBody,
+        source: "setup API",
+    ): Promise<{ scenarioCount: number; scenarios: Array<{ id: string; name: string; recipeVersionId: string }> }> {
+        const setup = await this.getSetupWithBranch(setupId, organizationId);
+        const snapshotId = setup.application.mainBranch?.activeSnapshot?.id;
+        if (snapshotId == null) {
+            throw new BadRequestError("Application main branch has no active snapshot");
+        }
+
+        const result = await this.scenarioManager.ingestScenarioRecipes(snapshotId, setup.applicationId, body);
+        log.info(`Ingested scenario recipes via ${source}`, {
+            setupId,
+            snapshotId,
+            applicationId: setup.applicationId,
+            scenarioCount: result.scenarioCount,
+        });
+        return result;
+    }
+
+    private assertNoScenarioRecipesInArtifacts(artifacts: NonNullable<UploadArtifactsBody["artifacts"]>) {
+        const scenarioRecipeArtifact = artifacts.find(
+            (artifact) => buildArtifactPath(artifact) === SCENARIO_RECIPES_ARTIFACT_PATH,
+        );
+        if (scenarioRecipeArtifact == null) {
+            return;
+        }
+        throw new BadRequestError(
+            "SCENARIO_RECIPES_MUST_USE_VERSIONED_ENDPOINT: upload scenario recipes through /scenario-recipe-versions instead of /artifacts",
+        );
     }
 }

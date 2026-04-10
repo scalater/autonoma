@@ -20,6 +20,7 @@
         "db:seed": "dotenv -e ../../.env -- tsx src/seed.ts"
     },
     "dependencies": {
+        "@autonoma/types": "workspace:*",
         "@autonoma/utils": "workspace:*",
         "@prisma/adapter-pg": "^7.5.0",
         "@prisma/client": "^7.5.0",

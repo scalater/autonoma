@@ -1,5 +1,4 @@
 import "dotenv/config";
-
 import { writeFileSync } from "node:fs";
 import { unlink } from "node:fs/promises";
 import os from "node:os";
@@ -60,6 +59,9 @@ class MobileGenerationAPIRunner extends GenerationAPIRunner<MobileCommandSpec, M
         const authParsed = AuthPayloadSchema.safeParse(planData.scenarioInstance?.auth);
         const auth = authParsed.success ? authParsed.data : undefined;
         const credentials = auth?.credentials;
+        const recipeVariables = MobileGenerationAPIRunner.parseResolvedVariables(
+            planData.scenarioInstance?.resolvedVariables,
+        );
 
         if (application.architecture === "WEB") {
             this.logger.fatal("Web architecture is not supported for mobile generation", { testPlanId: testPlan.id });
@@ -68,13 +70,14 @@ class MobileGenerationAPIRunner extends GenerationAPIRunner<MobileCommandSpec, M
 
         return {
             name: testPlan.testCase.name,
-            prompt: buildExecutionPrompt(testPlan.prompt, application.customInstructions, credentials),
+            prompt: buildExecutionPrompt(testPlan.prompt, application.customInstructions, credentials, recipeVariables),
             platform: application.architecture,
             packageUrl: mobileDeployment.packageUrl,
             packageName: mobileDeployment.packageName,
             photo,
             skillsConfig,
             credentials,
+            recipeVariables,
         };
     }
 

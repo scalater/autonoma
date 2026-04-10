@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ScenarioRecipesFileSchema } from "./scenarios";
 
 export const SetupEventTypeSchema = z.enum([
     "step.started",
@@ -66,5 +67,10 @@ const UploadFileSchema = z.object({
 export const UploadArtifactsBodySchema = z.object({
     skills: z.array(UploadFileSchema).optional(),
     testCases: z.array(UploadFileSchema).optional(),
+    artifacts: z.array(UploadFileSchema).optional(),
 });
 export type UploadArtifactsBody = z.infer<typeof UploadArtifactsBodySchema>;
+
+/** Canonical body for `POST /v1/setup/setups/:id/scenario-recipe-versions`. */
+export const UploadScenarioRecipeVersionsBodySchema = ScenarioRecipesFileSchema;
+export type UploadScenarioRecipeVersionsBody = z.infer<typeof UploadScenarioRecipeVersionsBodySchema>;

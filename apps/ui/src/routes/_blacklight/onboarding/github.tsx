@@ -115,7 +115,7 @@ function RepoSelectionStep({ appId }: { appId: string }) {
   const { data: repos } = useGithubRepositories();
   const { data: installation } = useGithubInstallation();
   const updateRepoConfig = useUpdateRepoConfig();
-  const completeGithub = useCompleteGithub(appId);
+  const completeGithub = useCompleteGithub();
 
   const navigate = useNavigate();
   const [selectedRepoId, setSelectedRepoId] = useState<string | undefined>();
@@ -141,11 +141,14 @@ function RepoSelectionStep({ appId }: { appId: string }) {
   }
 
   function handleComplete() {
-    completeGithub.mutate(undefined, {
-      onSuccess: () => {
-        void navigate({ to: "/onboarding/complete", search: { appId } });
+    completeGithub.mutate(
+      { applicationId: appId },
+      {
+        onSuccess: () => {
+          void navigate({ to: "/onboarding/complete", search: { appId } });
+        },
       },
-    });
+    );
   }
 
   if (configured) {

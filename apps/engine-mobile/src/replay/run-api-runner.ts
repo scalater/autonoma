@@ -48,6 +48,15 @@ export class MobileRunAPIRunner extends RunAPIRunner<ReplayMobileCommandSpec, Mo
             }
         }
 
+        const resolvedVars = data.scenarioInstance?.resolvedVariables as Record<string, unknown> | undefined;
+        if (resolvedVars != null) {
+            for (const [key, value] of Object.entries(resolvedVars)) {
+                if (value != null && !this.memory.has(key)) {
+                    this.memory.set(key, String(value));
+                }
+            }
+        }
+
         const photo = await this.resolvePhotoFilePath(mobileDeployment.photo);
 
         this.mobileLogger.info("Parsed run application data", {

@@ -71,13 +71,22 @@ function CommandStep({ label, command }: { label: string; command: string }) {
 
 function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicationId: string }) {
   const apiUrl = window.location.origin;
-  const displayCommand = `export AUTONOMA_API_KEY=${obfuscateKey(apiKey)}\nexport AUTONOMA_PROJECT_ID=${applicationId}\nexport AUTONOMA_API_URL=${apiUrl}\nclaude --dangerously-skip-permissions`;
-  const rawCommand = `export AUTONOMA_API_KEY=${apiKey} && export AUTONOMA_PROJECT_ID=${applicationId} && export AUTONOMA_API_URL=${apiUrl} && claude --dangerously-skip-permissions`;
+  const displayCommand = `export AUTONOMA_API_KEY=${obfuscateKey(apiKey)}\nexport AUTONOMA_PROJECT_ID=${applicationId}\nexport AUTONOMA_API_URL=${apiUrl}\nexport AUTONOMA_SDK_ENDPOINT=https://your-app.com/api/autonoma\nexport AUTONOMA_SHARED_SECRET=your-shared-secret\nclaude --dangerously-skip-permissions`;
+  const rawCommand = `export AUTONOMA_API_KEY=${apiKey} && export AUTONOMA_PROJECT_ID=${applicationId} && export AUTONOMA_API_URL=${apiUrl} && export AUTONOMA_SDK_ENDPOINT=https://your-app.com/api/autonoma && export AUTONOMA_SHARED_SECRET=your-shared-secret && claude --dangerously-skip-permissions`;
 
   return (
     <div className="space-y-2">
       <p className="text-sm text-text-secondary">Set your environment variables and start Claude Code:</p>
+
+      <p className="pt-2 text-sm text-text-secondary">
+        If your project does not already have the Autonoma SDK integrated, integrate the Autonoma SDK in your project
+        first. The plugin needs that SDK endpoint.
+      </p>
       <CodeBlock copyValue={rawCommand}>{displayCommand}</CodeBlock>
+      <p className="font-mono text-2xs text-text-tertiary">
+        Use the endpoint URL and shared secret from your project&apos;s SDK integration, not from the Autonoma
+        dashboard.
+      </p>
     </div>
   );
 }
@@ -231,10 +240,10 @@ function InstallPage() {
           variant="accent"
           className="w-full gap-2 font-mono text-sm font-bold uppercase"
           onClick={handleContinue}
-          disabled={result == null}
+          disabled={result == null || startConfigure.isPending}
           aria-label="onboarding-install-continue"
         >
-          Continue
+          {startConfigure.isPending ? "Starting..." : "Continue"}
           <ArrowRightIcon size={16} weight="bold" />
         </Button>
       </div>

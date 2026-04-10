@@ -247,10 +247,14 @@ export class TestGenerationsService extends Service {
         if (architecture === "WEB") {
             const webUrl = deployment.webDeployment?.url;
             if (webUrl == null || webUrl === "") {
-                throw new BadRequestError("Cannot rerun generation: no deployment URL is configured for this application");
+                throw new BadRequestError(
+                    "Cannot rerun generation: no deployment URL is configured for this application",
+                );
             }
         } else if (deployment.mobileDeployment == null) {
-            throw new BadRequestError("Cannot rerun generation: no mobile deployment is configured for this application");
+            throw new BadRequestError(
+                "Cannot rerun generation: no mobile deployment is configured for this application",
+            );
         }
 
         await this.generationProvider.fireJobs([

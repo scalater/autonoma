@@ -1,12 +1,10 @@
-import { fork } from "node:child_process";
+import { type ChildProcess, fork } from "node:child_process";
 import path from "node:path";
-
 import type { PrismaClient } from "@autonoma/db";
 import { type Logger, logger } from "@autonoma/logger";
 import { GenerationSubject, type ScenarioManager } from "@autonoma/scenario";
 import { fx } from "@autonoma/try";
 import type { WorkflowArchitecture } from "@autonoma/workflow";
-
 import { TestSuiteUpdater } from "../test-update-manager";
 import type { GenerationJobOptions, GenerationProvider, PendingGeneration } from "./generation-job-provider";
 
@@ -147,9 +145,9 @@ export class LocalGenerationProvider implements GenerationProvider {
             const child = fork(entryPoint, [testGenerationId], {
                 execArgv: ["--import", "tsx"],
                 stdio: "inherit",
-            });
+            }) as ChildProcess & NodeJS.EventEmitter;
 
-            child.on("exit", (code) => {
+            child.on("exit", (code: number | null) => {
                 if (code === 0) {
                     this.logger.info("Generation process completed", { testGenerationId });
                     resolve();
@@ -160,7 +158,7 @@ export class LocalGenerationProvider implements GenerationProvider {
                 }
             });
 
-            child.on("error", (error) => {
+            child.on("error", (error: Error) => {
                 this.logger.error("Generation process error", { testGenerationId, error });
                 reject(error);
             });

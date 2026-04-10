@@ -10,6 +10,7 @@ import {
 import type { IntegrationHarness } from "@autonoma/integration-test";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { EncryptionHelper } from "../src/encryption";
+import { ScenarioRecipeStore } from "../src/scenario-recipe-store";
 
 export class WebhookServer {
     private readonly server: Server;
@@ -172,9 +173,18 @@ export class ScenarioTestHarness implements IntegrationHarness {
             },
         });
 
+        const snapshot = await this.db.branchSnapshot.create({
+            data: {
+                branchId: branch.id,
+                source: "MANUAL",
+                status: SnapshotStatus.active,
+                deploymentId: deployment.id,
+            },
+        });
+
         await this.db.branch.update({
             where: { id: branch.id },
-            data: { deploymentId: deployment.id },
+            data: { deploymentId: deployment.id, activeSnapshotId: snapshot.id },
         });
 
         await this.db.application.update({
@@ -185,11 +195,105 @@ export class ScenarioTestHarness implements IntegrationHarness {
         return { appId: app.id, deploymentId: deployment.id };
     }
 
-    async createScenario(organizationId: string, applicationId: string, name: string): Promise<string> {
+    async createScenario(
+        organizationId: string,
+        applicationId: string,
+        name: string,
+        recipe?: Record<string, unknown>,
+    ): Promise<string> {
+        if (recipe != null) {
+            const snapshotId = await this.getMainBranchSnapshotId(applicationId);
+            const store = new ScenarioRecipeStore(this.db);
+            await store.replaceScenarioRecipes({
+                snapshotId,
+                applicationId,
+                organizationId,
+                recipesFile: {
+                    version: 1,
+                    source: {
+                        discoverPath: "autonoma/discover.json",
+                        scenariosPath: "autonoma/scenarios.md",
+                    },
+                    validationMode: "sdk-check",
+                    recipes: [
+                        {
+                            name,
+                            description: name,
+                            create: recipe,
+                            validation: { status: "validated", method: "checkScenario", phase: "ok" },
+                        },
+                    ],
+                },
+            });
+            const scenario = await this.db.scenario.findUniqueOrThrow({
+                where: { applicationId_name: { applicationId, name } },
+                select: { id: true },
+            });
+            return scenario.id;
+        }
+
         const scenario = await this.db.scenario.create({
             data: { organizationId, applicationId, name },
         });
         return scenario.id;
+    }
+
+    async getMainBranchSnapshotId(applicationId: string): Promise<string> {
+        const application = await this.db.application.findUniqueOrThrow({
+            where: { id: applicationId },
+            select: {
+                mainBranch: {
+                    select: {
+                        activeSnapshotId: true,
+                    },
+                },
+            },
+        });
+
+        const snapshotId = application.mainBranch?.activeSnapshotId;
+        if (snapshotId == null) {
+            throw new Error(`Application ${applicationId} has no active main-branch snapshot`);
+        }
+
+        return snapshotId;
+    }
+
+    async createSetupWithArtifacts(
+        organizationId: string,
+        applicationId: string,
+        artifacts: Array<{ path: string; content: string }>,
+    ): Promise<string> {
+        const date = Date.now();
+        const user = await this.db.user.create({
+            data: {
+                name: `Scenario Harness User ${date}`,
+                email: `scenario-harness-${date}-${randomBytes(4).toString("hex")}@example.com`,
+                emailVerified: true,
+            },
+        });
+
+        const setup = await this.db.applicationSetup.create({
+            data: {
+                applicationId,
+                organizationId,
+                userId: user.id,
+                totalSteps: 4,
+            },
+        });
+
+        if (artifacts.length > 0) {
+            await this.db.applicationSetupArtifact.createMany({
+                data: artifacts.map((artifact) => ({
+                    setupId: setup.id,
+                    applicationId,
+                    organizationId,
+                    path: artifact.path,
+                    content: artifact.content,
+                })),
+            });
+        }
+
+        return setup.id;
     }
 
     async createGeneration(

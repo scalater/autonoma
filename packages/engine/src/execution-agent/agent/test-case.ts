@@ -14,4 +14,6 @@ export interface TestCase {
     skillsConfig?: SkillsConfig;
     /** Credentials from the scenario up call, pre-seeded into the agent's memory as {{key}} variables */
     credentials?: Record<string, string>;
+    /** Recipe variables resolved during scenario up, pre-seeded into the agent's memory as {{key}} variables */
+    recipeVariables?: Record<string, string>;
 }

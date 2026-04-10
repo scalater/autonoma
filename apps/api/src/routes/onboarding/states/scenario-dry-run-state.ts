@@ -57,7 +57,9 @@ export class ScenarioDryRunState extends OnboardingState {
         this.logger.info("Running scenario dry run", { scenarioId });
 
         const subject = new DryRunSubject(this.db, this.applicationId);
-        const instance = await this.deps.scenarioManager.up(subject, scenarioId, DRY_RUN_WEBHOOK_OPTIONS);
+        const instance = await this.deps.scenarioManager.up(subject, scenarioId, {
+            webhookOptions: DRY_RUN_WEBHOOK_OPTIONS,
+        });
 
         if (instance.status === "UP_FAILED") {
             return { success: false as const, phase: "up" as const, error: instance.lastError };

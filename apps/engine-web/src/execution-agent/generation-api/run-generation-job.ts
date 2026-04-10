@@ -90,16 +90,18 @@ class WebGenerationAPIRunner extends GenerationAPIRunner<WebCommandSpec, WebCont
         const cookies = auth?.cookies != null ? toPlaywrightCookies(auth.cookies, webDeployment.url) : undefined;
         const headers = auth?.headers;
         const credentials = auth?.credentials;
+        const recipeVariables = WebGenerationAPIRunner.parseResolvedVariables(scenarioInstance?.resolvedVariables);
 
         return {
             name: testPlan.testCase.name,
-            prompt: buildExecutionPrompt(testPlan.prompt, application.customInstructions, credentials),
+            prompt: buildExecutionPrompt(testPlan.prompt, application.customInstructions, credentials, recipeVariables),
             file,
             url: webDeployment.url,
             skillsConfig,
             cookies,
             headers,
             credentials,
+            recipeVariables,
         };
     }
 

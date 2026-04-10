@@ -1111,6 +1111,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@autonoma/types':
+        specifier: workspace:*
+        version: link:../types
       '@autonoma/utils':
         specifier: workspace:*
         version: link:../utils
@@ -11224,6 +11227,7 @@ snapshots:
 
   '@autonoma/db@file:packages/db(prisma@7.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)(valibot@1.2.0(typescript@5.9.3))':
     dependencies:
+      '@autonoma/types': file:packages/types
       '@autonoma/utils': file:packages/utils
       '@prisma/adapter-pg': 7.5.0
       '@prisma/client': 7.5.0(prisma@7.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)

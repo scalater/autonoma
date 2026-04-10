@@ -1,10 +1,12 @@
 import { db } from "@autonoma/db";
+import { BadRequestError, NotFoundError } from "@autonoma/errors";
 import { logger } from "@autonoma/logger";
 import {
     CreateSetupBodySchema,
     SetupEventBodySchema,
     UpdateSetupBodySchema,
     UploadArtifactsBodySchema,
+    UploadScenarioRecipeVersionsBodySchema,
 } from "@autonoma/types";
 import * as Sentry from "@sentry/node";
 import { Hono } from "hono";
@@ -19,7 +21,7 @@ export const applicationSetupHttpRouter = new Hono();
 applicationSetupHttpRouter.use("*", cors({ origin: "*" }));
 
 const onboardingManager = new OnboardingManager(db, generationProvider, scenarioManager, encryptionHelper);
-const service = new ApplicationSetupService(db, generationProvider, onboardingManager);
+const service = new ApplicationSetupService(db, generationProvider, onboardingManager, scenarioManager);
 
 applicationSetupHttpRouter.post("/setups", async (c) => {
     const apiKeyCtx = await verifyApiKeyAndGetContext(db, c.req.header("authorization"));
@@ -64,6 +66,52 @@ applicationSetupHttpRouter.post("/setups/:id/events", async (c) => {
     }
 });
 
+applicationSetupHttpRouter.post("/setups/:id/scenario-recipe-versions", async (c) => {
+    const apiKeyCtx = await verifyApiKeyAndGetContext(db, c.req.header("authorization"));
+    if (apiKeyCtx == null) return c.json({ error: "Unauthorized" }, 401);
+
+    const parsed = UploadScenarioRecipeVersionsBodySchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+        return c.json({ error: "Invalid request body", details: parsed.error.flatten() }, 400);
+    }
+
+    try {
+        const result = await service.uploadScenarioRecipeVersions(
+            c.req.param("id"),
+            apiKeyCtx.organizationId,
+            parsed.data,
+        );
+        return c.json(result);
+    } catch (err) {
+        if (err instanceof NotFoundError) {
+            return c.json({ error: err.message }, 404);
+        }
+        if (err instanceof BadRequestError) {
+            return c.json({ error: err.message }, 400);
+        }
+        Sentry.captureException(err);
+        logger.error("Failed to upload scenario recipe versions", { err });
+        return c.json({ error: "Failed to upload scenario recipe versions" }, 500);
+    }
+});
+
+applicationSetupHttpRouter.get("/setups/:id/scenarios", async (c) => {
+    const apiKeyCtx = await verifyApiKeyAndGetContext(db, c.req.header("authorization"));
+    if (apiKeyCtx == null) return c.json({ error: "Unauthorized" }, 401);
+
+    try {
+        const result = await service.listScenariosForSetup(c.req.param("id"), apiKeyCtx.organizationId);
+        return c.json(result);
+    } catch (err) {
+        if (err instanceof NotFoundError) {
+            return c.json({ error: err.message }, 404);
+        }
+        Sentry.captureException(err);
+        logger.error("Failed to list scenarios for setup", { err });
+        return c.json({ error: "Failed to list scenarios" }, 500);
+    }
+});
+
 applicationSetupHttpRouter.post("/setups/:id/artifacts", async (c) => {
     const apiKeyCtx = await verifyApiKeyAndGetContext(db, c.req.header("authorization"));
     if (apiKeyCtx == null) return c.json({ error: "Unauthorized" }, 401);
@@ -77,6 +125,12 @@ applicationSetupHttpRouter.post("/setups/:id/artifacts", async (c) => {
         await service.uploadArtifacts(c.req.param("id"), apiKeyCtx.organizationId, parsed.data);
         return c.json({ ok: true });
     } catch (err) {
+        if (err instanceof NotFoundError) {
+            return c.json({ error: err.message }, 404);
+        }
+        if (err instanceof BadRequestError) {
+            return c.json({ error: err.message }, 400);
+        }
         Sentry.captureException(err);
         logger.error("Failed to upload artifacts", { err });
         return c.json({ error: "Failed to upload artifacts" }, 500);

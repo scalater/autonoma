@@ -7,6 +7,7 @@ export {
     usePollAgentLogs,
     useResetOnboarding,
     useStartConfigure,
+    useStartScenarioDryRun,
     useSetUrl,
     useConfigureAndDiscoverScenarios,
     useOnboardingScenarios,

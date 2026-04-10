@@ -17,7 +17,15 @@ apiTestSuite({
     seed: async ({ harness }) => {
         // Mock the githubApp on the service to return our mock client
         const service = harness.services.github;
-        const githubApp = (service as unknown as { githubApp: { getInstallationClient: ReturnType<typeof vi.fn>; deleteInstallation: ReturnType<typeof vi.fn>; slug: string } }).githubApp;
+        const githubApp = (
+            service as unknown as {
+                githubApp: {
+                    getInstallationClient: ReturnType<typeof vi.fn>;
+                    deleteInstallation: ReturnType<typeof vi.fn>;
+                    slug: string;
+                };
+            }
+        ).githubApp;
         githubApp.getInstallationClient = vi.fn().mockResolvedValue(mockInstallationClient);
         githubApp.deleteInstallation = vi.fn().mockResolvedValue(undefined);
         githubApp.slug = "test-app";
@@ -78,7 +86,13 @@ apiTestSuite({
 
             // Re-install with updated account login and different repos
             mockInstallationClient.listInstallationRepos.mockResolvedValue([
-                { id: 1001, name: "repo-a-renamed", fullName: "org/repo-a-renamed", defaultBranch: "main", private: false },
+                {
+                    id: 1001,
+                    name: "repo-a-renamed",
+                    fullName: "org/repo-a-renamed",
+                    defaultBranch: "main",
+                    private: false,
+                },
                 { id: 1003, name: "repo-c", fullName: "org/repo-c", defaultBranch: "main", private: false },
             ]);
 
@@ -162,7 +176,10 @@ apiTestSuite({
             await expect(harness.services.github.listRepositories("nonexistent-org-id")).rejects.toThrow(NotFoundError);
         });
 
-        test("updateRepoConfig updates watch branch and deployment trigger", async ({ harness, seedResult: { app } }) => {
+        test("updateRepoConfig updates watch branch and deployment trigger", async ({
+            harness,
+            seedResult: { app },
+        }) => {
             mockInstallationClient.listInstallationRepos.mockResolvedValue([
                 { id: 3001, name: "config-repo", fullName: "org/config-repo", defaultBranch: "main", private: false },
             ]);
@@ -182,13 +199,7 @@ apiTestSuite({
 
             const repo = installation!.repositories[0]!;
 
-            await harness.services.github.updateRepoConfig(
-                harness.organizationId,
-                repo.id,
-                "main",
-                "push",
-                app.id,
-            );
+            await harness.services.github.updateRepoConfig(harness.organizationId, repo.id, "main", "push", app.id);
 
             const updated = await harness.db.gitHubRepository.findUnique({ where: { id: repo.id } });
             expect(updated!.watchBranch).toBe("main");
@@ -398,7 +409,13 @@ apiTestSuite({
 
         test("handleBranchDeployment throws when repo not linked to app", async ({ harness }) => {
             mockInstallationClient.listInstallationRepos.mockResolvedValue([
-                { id: 7001, name: "unlinked-repo", fullName: "org/unlinked-repo", defaultBranch: "main", private: false },
+                {
+                    id: 7001,
+                    name: "unlinked-repo",
+                    fullName: "org/unlinked-repo",
+                    defaultBranch: "main",
+                    private: false,
+                },
             ]);
 
             await harness.services.github.handleInstallation(

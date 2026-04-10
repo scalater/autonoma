@@ -38,7 +38,7 @@ Webhook response schemas for the Environment Factory protocol:
 - `DiscoverResponseSchema` / `UpResponseSchema` / `DownResponseSchema` - Webhook lifecycle responses
 - `AuthPayloadSchema` / `AuthCookieSchema` / `AuthHeadersSchema` - Authentication payloads (cookies, headers, credentials)
 - `ConfigureWebhookInputSchema` / `RemoveWebhookInputSchema` - tRPC input schemas for webhook management
-- `DiscoverInputSchema` / `ListScenariosInputSchema` / `ListInstancesInputSchema` - tRPC input schemas for scenario queries
+- `ListScenariosInputSchema` / `ListInstancesInputSchema` - tRPC input schemas for scenario queries
 
 ### Onboarding
 

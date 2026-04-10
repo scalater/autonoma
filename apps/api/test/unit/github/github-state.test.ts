@@ -60,7 +60,9 @@ describe("github-state", () => {
         it("rejects tampered payload", () => {
             const state = createInstallState("org-123");
             const [, sig] = state.split(".");
-            const tamperedPayload = Buffer.from(JSON.stringify({ organizationId: "hacker", exp: Date.now() + 999999 })).toString("base64url");
+            const tamperedPayload = Buffer.from(
+                JSON.stringify({ organizationId: "hacker", exp: Date.now() + 999999 }),
+            ).toString("base64url");
             const result = verifyInstallState(`${tamperedPayload}.${sig}`);
             expect(result).toBeUndefined();
         });
@@ -68,7 +70,9 @@ describe("github-state", () => {
         it("rejects tampered signature", () => {
             const state = createInstallState("org-123");
             const [payload] = state.split(".");
-            const result = verifyInstallState(`${payload}.deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef`);
+            const result = verifyInstallState(
+                `${payload}.deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef`,
+            );
             expect(result).toBeUndefined();
         });
 

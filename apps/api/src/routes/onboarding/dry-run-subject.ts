@@ -1,16 +1,12 @@
 import type { PrismaClient } from "@autonoma/db";
 import type { ScenarioApplicationData, ScenarioSubject } from "@autonoma/scenario";
-import { DryRunSubjectMisuseError, OnboardingWebhookNotConfiguredError } from "./states/onboarding-state";
+import { OnboardingWebhookNotConfiguredError } from "./states/onboarding-state";
 
 export class DryRunSubject implements ScenarioSubject {
     constructor(
         private readonly db: PrismaClient,
         private readonly applicationId: string,
     ) {}
-
-    async getScenarioId(): Promise<string> {
-        throw new DryRunSubjectMisuseError("getScenarioId");
-    }
 
     async getApplicationData(): Promise<ScenarioApplicationData> {
         const app = await this.db.application.findUniqueOrThrow({

@@ -47,6 +47,15 @@ export class WebRunAPIRunner extends RunAPIRunner<ReplayWebCommandSpec, WebConte
             }
         }
 
+        const resolvedVars = data.scenarioInstance?.resolvedVariables as Record<string, unknown> | undefined;
+        if (resolvedVars != null) {
+            for (const [key, value] of Object.entries(resolvedVars)) {
+                if (value != null && !this.memory.has(key)) {
+                    this.memory.set(key, String(value));
+                }
+            }
+        }
+
         this.runLogger.info("Parsed run application data", {
             url: webDeployment.url,
             hasFile: file != null,

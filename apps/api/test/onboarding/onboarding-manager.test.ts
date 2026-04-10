@@ -5,7 +5,6 @@ import { expect } from "vitest";
 import { DryRunSubject } from "../../src/routes/onboarding/dry-run-subject";
 import { OnboardingManager } from "../../src/routes/onboarding/onboarding-manager";
 import {
-    DryRunSubjectMisuseError,
     InvalidOnboardingStepError,
     OnboardingApplicationNotFoundError,
     OnboardingWebhookNotConfiguredError,
@@ -38,6 +37,7 @@ integrationTestSuite({
         });
 
         test("full onboarding flow: install -> configure -> working -> scenario_dry_run -> url -> github -> completed", async ({
+            harness,
             seedResult: { orgId, manager, createApp },
         }) => {
             const appId = await createApp();
@@ -49,6 +49,7 @@ integrationTestSuite({
             expect(afterConnected.step).toBe("working");
             expect(afterConnected.agentConnectedAt).not.toBeNull();
 
+            await harness.seedScenarioWithRecipe(appId, orgId);
             const afterDryRun = await manager.startScenarioDryRun(appId);
             expect(afterDryRun.step).toBe("scenario_dry_run");
 
@@ -89,19 +90,22 @@ integrationTestSuite({
         });
 
         test("cannot set url from scenario dry run step - must go through complete first", async ({
-            seedResult: { manager, createApp },
+            harness,
+            seedResult: { orgId, manager, createApp },
         }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
             await expect(manager.setUrl(appId, "https://example.com")).rejects.toThrow(InvalidOnboardingStepError);
         });
 
-        test("cannot advance from completed step", async ({ seedResult: { orgId, manager, createApp } }) => {
+        test("cannot advance from completed step", async ({ harness, seedResult: { orgId, manager, createApp } }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
             await manager.complete(appId);
             await manager.setUrl(appId, "https://example.com");
@@ -131,10 +135,14 @@ integrationTestSuite({
             await expect(manager.setUrl(appId, "https://example.com")).rejects.toThrow(InvalidOnboardingStepError);
         });
 
-        test("reset from completed returns to install", async ({ seedResult: { orgId, manager, createApp } }) => {
+        test("reset from completed returns to install", async ({
+            harness,
+            seedResult: { orgId, manager, createApp },
+        }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
             await manager.complete(appId);
             await manager.setUrl(appId, "https://example.com");
@@ -147,10 +155,11 @@ integrationTestSuite({
             expect(afterReset.completedAt).toBeNull();
         });
 
-        test("reset from url returns to install", async ({ seedResult: { manager, createApp } }) => {
+        test("reset from url returns to install", async ({ harness, seedResult: { orgId, manager, createApp } }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
             await manager.complete(appId);
 
@@ -168,7 +177,7 @@ integrationTestSuite({
             expect(afterReset.agentConnectedAt).toBeNull();
         });
 
-        test("can complete full flow after reset", async ({ seedResult: { orgId, manager, createApp } }) => {
+        test("can complete full flow after reset", async ({ harness, seedResult: { orgId, manager, createApp } }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
@@ -176,6 +185,7 @@ integrationTestSuite({
 
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
             await manager.complete(appId);
             await manager.setUrl(appId, "https://example.com");
@@ -184,11 +194,13 @@ integrationTestSuite({
         });
 
         test("configureAndDiscoverScenarios throws OnboardingApplicationNotFoundError for wrong org", async ({
-            seedResult: { manager, createApp },
+            harness,
+            seedResult: { orgId, manager, createApp },
         }) => {
             const appId = await createApp();
             await manager.startConfigure(appId);
             await manager.markAgentConnected(appId);
+            await harness.seedScenarioWithRecipe(appId, orgId);
             await manager.startScenarioDryRun(appId);
 
             await expect(
@@ -215,11 +227,6 @@ integrationTestSuite({
         }) => {
             const appId = await createApp();
             await expect(manager.runScenarioDryRun(appId, "some-scenario")).rejects.toThrow(InvalidOnboardingStepError);
-        });
-
-        test("DryRunSubject.getScenarioId throws DryRunSubjectMisuseError", async ({ harness }) => {
-            const subject = new DryRunSubject(harness.db, "any-app-id");
-            await expect(subject.getScenarioId()).rejects.toThrow(DryRunSubjectMisuseError);
         });
 
         test("DryRunSubject.getApplicationData throws OnboardingWebhookNotConfiguredError when no webhook", async ({

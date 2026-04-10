@@ -1,9 +1,17 @@
 import type { CostCollector } from "@autonoma/ai";
+import { z } from "zod";
 import type { CommandSpec } from "../../commands";
 import type { BaseCommandContext } from "../../platform";
 import type { TestCase } from "../agent";
 import { ExecutionAgentRunner, type ExecutionAgentRunnerConfig } from "../runner";
 import type { GenerationPersister, PlanData } from "./generation-persister";
+
+/**
+ * Schema for the `resolvedVariables` JSON column on `ScenarioInstance`.
+ * Accepts an object with arbitrary string keys and coerces all non-null values to strings.
+ * Returns `undefined` when the input is null, not an object, or has no entries.
+ */
+const ResolvedVariablesSchema = z.record(z.string(), z.coerce.string()).optional().catch(undefined);
 
 export interface GenerationAPIRunnerConfig<
     TSpec extends CommandSpec,
@@ -57,6 +65,17 @@ export abstract class GenerationAPIRunner<
 
     public abstract parsePlanData(planData: PlanData): Promise<TestCase & TApplicationData>;
 
+    /**
+     * Parse the `resolvedVariables` JSON column from a `ScenarioInstance` into a
+     * typed `Record<string, string>`. Returns `undefined` when the input is null,
+     * not an object, or empty.
+     */
+    protected static parseResolvedVariables(raw: unknown): Record<string, string> | undefined {
+        const result = ResolvedVariablesSchema.parse(raw);
+        if (result == null || Object.keys(result).length === 0) return undefined;
+        return result;
+    }
+
     public async runGeneration(): Promise<void> {
         this.logger.info("Marking generation as running");
         const planData = await this.persister.markRunning();
@@ -73,6 +92,13 @@ export abstract class GenerationAPIRunner<
                     keys: Object.keys(testCase.credentials),
                 });
                 this.seedMemory(testCase.credentials);
+            }
+
+            if (testCase.recipeVariables != null && Object.keys(testCase.recipeVariables).length > 0) {
+                this.logger.info("Seeding agent memory with recipe variables", {
+                    keys: Object.keys(testCase.recipeVariables),
+                });
+                this.seedMemory(testCase.recipeVariables);
             }
 
             const runResult = await this.run();

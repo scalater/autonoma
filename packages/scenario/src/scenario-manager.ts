@@ -1,7 +1,10 @@
+import { randomUUID } from "node:crypto";
 import type { PrismaClient, ScenarioInstance } from "@autonoma/db";
 import { type Logger, logger } from "@autonoma/logger";
 import { fx } from "@autonoma/try";
+import type { ScenarioRecipesFile } from "@autonoma/types";
 import type { EncryptionHelper } from "./encryption";
+import { ScenarioRecipeStore } from "./scenario-recipe-store";
 import type { ScenarioApplicationData, ScenarioSubject } from "./scenario-subject";
 import { WebhookClient } from "./webhook-client";
 import type { WebhookCallOptions } from "./webhook-client";
@@ -10,12 +13,14 @@ const DEFAULT_EXPIRES_IN_SECONDS = 2 * 60 * 60; // 2 hours
 
 export class ScenarioManager {
     private readonly logger: Logger;
+    private readonly recipeStore: ScenarioRecipeStore;
 
     constructor(
         private readonly db: PrismaClient,
         private readonly encryption: EncryptionHelper,
     ) {
         this.logger = logger.child({ name: this.constructor.name });
+        this.recipeStore = new ScenarioRecipeStore(db);
     }
 
     async discover(applicationId: string, deploymentId: string, options?: WebhookCallOptions): Promise<void> {
@@ -25,56 +30,93 @@ export class ScenarioManager {
         this.logger.info("Calling discover webhook", { applicationId });
         const response = await webhookClient.discover(options);
 
-        await Promise.all(
-            response.environments.map(async (scenario) => {
-                const existing = await this.db.scenario.findUnique({
-                    where: { applicationId_name: { applicationId, name: scenario.name } },
-                });
-
-                const fingerprintChanged =
-                    scenario.fingerprint != null &&
-                    existing?.lastSeenFingerprint != null &&
-                    scenario.fingerprint !== existing.lastSeenFingerprint;
-
-                await this.db.scenario.upsert({
-                    where: { applicationId_name: { applicationId, name: scenario.name } },
-                    create: {
-                        applicationId,
-                        name: scenario.name,
-                        description: scenario.description,
-                        lastSeenFingerprint: scenario.fingerprint,
-                        lastDiscoveredAt: new Date(),
-                        fingerprintChangedAt: scenario.fingerprint != null ? new Date() : undefined,
-                        organizationId: applicationData.organizationId,
-                    },
-                    update: {
-                        description: scenario.description,
-                        lastSeenFingerprint: scenario.fingerprint,
-                        lastDiscoveredAt: new Date(),
-                        ...(fingerprintChanged ? { fingerprintChangedAt: new Date() } : {}),
-                    },
-                });
-            }),
-        );
-
-        this.logger.info("Discover completed", { applicationId, scenarioCount: response.environments.length });
+        this.logger.info("Discover completed", {
+            applicationId,
+            modelCount: response.schema.models.length,
+        });
     }
 
-    async up(subject: ScenarioSubject, scenarioId: string, options?: WebhookCallOptions): Promise<ScenarioInstance> {
+    /**
+     * Persist scenario rows from a validated recipe file (same shape as `autonoma/scenario-recipes.json`).
+     * Call this only from setup upload paths (`POST .../scenario-recipe-versions`).
+     * Does not call the customer webhook.
+     */
+    async ingestScenarioRecipes(
+        snapshotId: string,
+        applicationId: string,
+        recipesFile: ScenarioRecipesFile,
+    ): Promise<{ scenarioCount: number; scenarios: Array<{ id: string; name: string; recipeVersionId: string }> }> {
+        this.logger.info("Ingesting scenario recipes", { applicationId, scenarioCount: recipesFile.recipes.length });
+
+        const application = await this.db.application.findUnique({
+            where: { id: applicationId },
+            select: { id: true, organizationId: true },
+        });
+        if (application == null) {
+            throw new Error(`Application ${applicationId} not found`);
+        }
+
+        const result = await this.recipeStore.replaceScenarioRecipes({
+            snapshotId,
+            applicationId,
+            organizationId: application.organizationId,
+            recipesFile,
+        });
+
+        this.logger.info("Scenario recipes ingested", {
+            applicationId,
+            scenarioCount: recipesFile.recipes.length,
+        });
+        return result;
+    }
+
+    /**
+     * Set up a scenario environment by calling the customer webhook.
+     *
+     * When `snapshotId` is provided, the recipe version pinned to that snapshot is used.
+     * When `snapshotId` is omitted (dry run), the scenario's active recipe version is used.
+     */
+    async up(
+        subject: ScenarioSubject,
+        scenarioId: string,
+        opts?: { snapshotId?: string; webhookOptions?: WebhookCallOptions },
+    ): Promise<ScenarioInstance> {
+        const { snapshotId, webhookOptions: options } = opts ?? {};
         const applicationData = await subject.getApplicationData();
         const { applicationId, organizationId } = applicationData;
         const webhookClient = this.createWebhookClient(applicationData);
 
         const scenario = await this.db.scenario.findUnique({
             where: { id: scenarioId },
+            select: { id: true, name: true },
         });
         if (scenario == null) {
             throw new Error(`Scenario "${scenarioId}" not found`);
         }
+        const instanceId = randomUUID();
+
+        const recipeResult =
+            snapshotId != null
+                ? await this.recipeStore.loadRecipeCreatePayloadForSnapshot({
+                      scenarioId: scenario.id,
+                      snapshotId,
+                      testRunId: instanceId,
+                  })
+                : await this.recipeStore.loadActiveRecipeCreatePayload({
+                      scenarioId: scenario.id,
+                      testRunId: instanceId,
+                  });
+        if (recipeResult == null) {
+            throw new Error(
+                `Scenario "${scenario.name}" does not have a stored recipe version${snapshotId != null ? ` for snapshot ${snapshotId}` : ""}. Complete the Environment Factory step so the plugin uploads scenario recipes to Autonoma.`,
+            );
+        }
+        const { createPayload, resolvedVariables } = recipeResult;
 
         const expiresAt = new Date(Date.now() + DEFAULT_EXPIRES_IN_SECONDS * 1000);
         const instance = await this.db.scenarioInstance.create({
             data: {
+                id: instanceId,
                 applicationId,
                 organizationId,
                 deploymentId: applicationData.deploymentId,
@@ -89,7 +131,7 @@ export class ScenarioManager {
         this.logger.info("Calling up webhook", { applicationId, scenarioName: scenario.name, instanceId: instance.id });
 
         const [response, error] = await fx.runAsync(() =>
-            webhookClient.up({ instanceId: instance.id, scenarioName: scenario.name }, options),
+            webhookClient.up({ instanceId: instance.id, create: createPayload as Record<string, unknown[]> }, options),
         );
 
         if (error != null) {
@@ -108,6 +150,7 @@ export class ScenarioManager {
         const updatedExpiresAt = new Date(Date.now() + expiresInSeconds * 1000);
 
         this.logger.info("Scenario up succeeded", { instanceId: instance.id });
+        const hasResolvedVariables = Object.keys(resolvedVariables).length > 0;
         return this.db.scenarioInstance.update({
             where: { id: instance.id },
             data: {
@@ -118,6 +161,7 @@ export class ScenarioManager {
                 refs: response.refs,
                 refsToken: response.refsToken,
                 metadata: response.metadata,
+                ...(hasResolvedVariables ? { resolvedVariables } : {}),
             },
         });
     }
@@ -156,7 +200,7 @@ export class ScenarioManager {
             webhookClient.down(
                 {
                     instanceId: instance.id,
-                    refs: instance.refs,
+                    refs: (instance.refs as Record<string, unknown>) ?? null,
                     refsToken: instance.refsToken ?? undefined,
                 },
                 options,

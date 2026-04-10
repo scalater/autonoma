@@ -10,15 +10,14 @@ export function usePollAgentLogs(applicationId: string) {
     return useSuspenseQuery(trpc.onboarding.getLogs.queryOptions({ applicationId }, { refetchInterval: 2000 }));
 }
 
-export function useResetOnboarding() {
+export function useResetOnboarding(applicationId: string) {
     const queryClient = useQueryClient();
     return useAPIMutation({
-        ...trpc.onboarding.reset.mutationOptions({
-            onSettled: () => {
-                void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
-                void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getLogs.queryKey() });
-            },
-        }),
+        mutationFn: () => trpcClient.onboarding.reset.mutate({ applicationId }),
+        onSettled: () => {
+            void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
+            void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getLogs.queryKey() });
+        },
         errorToast: { title: "Failed to reset onboarding" },
     });
 }
@@ -44,16 +43,27 @@ export function useSetUrl(applicationId: string) {
     });
 }
 
+export function useStartScenarioDryRun(applicationId: string) {
+    const queryClient = useQueryClient();
+    return useAPIMutation({
+        mutationFn: () => trpcClient.onboarding.startScenarioDryRun.mutate({ applicationId }),
+        onSettled: () => {
+            void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
+        },
+        errorToast: { title: "Failed to start scenario dry run" },
+    });
+}
+
 export function useConfigureAndDiscoverScenarios() {
     const queryClient = useQueryClient();
     return useAPIMutation({
         ...trpc.onboarding.configureAndDiscoverScenarios.mutationOptions({
             onSettled: () => {
                 void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
-                void queryClient.invalidateQueries({ queryKey: trpc.scenarios.list.queryKey() });
+                void queryClient.invalidateQueries({ queryKey: trpc.applications.list.queryKey() });
             },
         }),
-        errorToast: { title: "Failed to discover scenarios" },
+        errorToast: { title: "Failed to save endpoint configuration" },
     });
 }
 
@@ -72,20 +82,18 @@ export function useCompleteOnboarding() {
     const queryClient = useQueryClient();
     return useAPIMutation({
         ...trpc.onboarding.complete.mutationOptions({
-            onSettled: () => {
-                void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
-            },
+            onSettled: () => void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() }),
         }),
         errorToast: { title: "Failed to complete onboarding" },
     });
 }
 
-export function useCompleteGithub(applicationId: string) {
+export function useCompleteGithub() {
     const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: () => trpcClient.onboarding.completeGithub.mutate({ applicationId }),
-        onSettled: () => {
-            void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
-        },
+    return useAPIMutation({
+        ...trpc.onboarding.completeGithub.mutationOptions({
+            onSettled: () => void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() }),
+        }),
+        errorToast: { title: "Failed to complete Github onboarding" },
     });
 }

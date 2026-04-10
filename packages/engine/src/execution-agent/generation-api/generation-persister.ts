@@ -99,7 +99,7 @@ export class GenerationPersister<TSpec extends CommandSpec> {
                         },
                     },
                 },
-                scenarioInstance: { select: { auth: true } },
+                scenarioInstance: { select: { auth: true, resolvedVariables: true } },
                 snapshotId: true,
                 organizationId: true,
             },

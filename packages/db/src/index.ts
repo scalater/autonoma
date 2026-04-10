@@ -1,7 +1,9 @@
 import { execSync } from "node:child_process";
 import path from "node:path";
+import type { ScenarioRecipeSchema, ScenarioStructureJsonSchema } from "@autonoma/types";
 import { PrismaPg } from "@prisma/adapter-pg";
 import type { ModelMessage as AIModelMessage } from "ai";
+import type { z } from "zod";
 import { env } from "./env";
 import { PrismaClient } from "./generated/prisma/client";
 
@@ -48,6 +50,8 @@ export * from "./generated/prisma/client";
 declare global {
     export namespace PrismaJson {
         export type ModelConversation = AIModelMessage[];
+        export type ScenarioRecipeJson = z.infer<typeof ScenarioRecipeSchema>;
+        export type ScenarioStructureJson = z.infer<typeof ScenarioStructureJsonSchema>;
         export type ScenarioAuth = {
             cookies?: Array<{
                 name: string;

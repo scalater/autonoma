@@ -121,6 +121,7 @@ model Organization {
   tags               Tag[]
   runs               Run[]
   scenarios          Scenario[]
+  scenarioRecipeVersions ScenarioRecipeVersion[]
   scenarioInstances  ScenarioInstance[]
   skills             Skill[]
   skillPlans         SkillPlan[]
@@ -133,6 +134,7 @@ model Organization {
   promoRedemptions   BillingPromoRedemption[]
   billingCustomer    BillingCustomer?
   applicationSetups  ApplicationSetup[]
+  setupArtifacts     ApplicationSetupArtifact[]
   signupHookStates   SignupHookState[]
 
   @@map("organization")
@@ -187,6 +189,7 @@ model ApplicationSetup {
     user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     events ApplicationSetupEvent[]
+    artifacts ApplicationSetupArtifact[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -206,6 +209,25 @@ model ApplicationSetupEvent {
 
     @@index([setupId])
     @@map("application_setup_event")
+}
+
+model ApplicationSetupArtifact {
+    id             String           @id @default(cuid())
+    path           String
+    content        String           @db.Text
+    setupId        String           @map("setup_id")
+    setup          ApplicationSetup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+    applicationId  String           @map("application_id")
+    application    Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+    organizationId String           @map("organization_id")
+    organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime         @default(now()) @map("created_at")
+    updatedAt      DateTime         @updatedAt @map("updated_at")
+
+    @@unique([setupId, path])
+    @@index([setupId])
+    @@index([applicationId])
+    @@map("application_setup_artifact")
 }
 
 model Member {
@@ -295,12 +317,15 @@ model Application {
   skills             Skill[]
   tags               Tag[]
   scenarios          Scenario[]
+  scenarioSchemaSnapshots ScenarioSchemaSnapshot[]
+  scenarioRecipeVersions ScenarioRecipeVersion[]
   scenarioInstances  ScenarioInstance[]
   webhookCalls       WebhookCall[]
+  setupArtifacts     ApplicationSetupArtifact[]
   branches           Branch[]
   githubRepositories GitHubRepository[]
-    onboardingState    OnboardingState?
-    applicationSetups  ApplicationSetup[]
+  onboardingState    OnboardingState?
+  applicationSetups  ApplicationSetup[]
 
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
@@ -517,6 +542,8 @@ model BranchSnapshot {
 
   testCaseAssignments TestCaseAssignment[]
   skillAssignments    SkillAssignment[]
+  scenarioSchemaSnapshots ScenarioSchemaSnapshot[]
+  scenarioRecipeVersions  ScenarioRecipeVersion[]
 
   activeOnBranch  Branch?          @relation("ActiveSnapshot")
   pendingOnBranch Branch?          @relation("PendingSnapshot")
@@ -1058,26 +1085,86 @@ enum WebhookAction {
 }
 
 model Scenario {
-  id                   String    @id @default(cuid())
-  applicationId        String    @map("application_id")
-  name                 String
-  description          String?
+  id                String    @id @default(cuid())
+  applicationId     String    @map("application_id")
+  name              String
+  description       String?
+  activeRecipeVersionId String? @unique @map("active_recipe_version_id")
+
   lastSeenFingerprint  String?   @map("last_seen_fingerprint")
   lastDiscoveredAt     DateTime? @map("last_discovered_at")
   fingerprintChangedAt DateTime? @map("fingerprint_changed_at")
   isDisabled           Boolean   @default(false) @map("is_disabled")
 
-  application Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  activeRecipeVersion ScenarioRecipeVersion? @relation("ActiveScenarioRecipeVersion", fields: [activeRecipeVersionId], references: [id], onDelete: SetNull)
+  recipeVersions ScenarioRecipeVersion[] @relation("ScenarioRecipeVersionHistory")
   instances   ScenarioInstance[]
+  testPlans   TestPlan[]
 
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  testPlans      TestPlan[]
 
   @@unique([applicationId, name])
   @@map("scenario")
+}
+
+model ScenarioSchemaSnapshot {
+  id            String   @id @default(cuid())
+  applicationId String   @map("application_id")
+  snapshotId    String   @map("snapshot_id")
+  /// [ScenarioStructureJson]
+  structureJson Json     @map("structure_json")
+  fingerprint   String
+
+  application    Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  snapshot       BranchSnapshot         @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  recipeVersions ScenarioRecipeVersion[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([applicationId, snapshotId])
+  @@index([applicationId])
+  @@index([snapshotId])
+  @@map("scenario_schema_snapshot")
+}
+
+model ScenarioRecipeVersion {
+  id                   String   @id @default(cuid())
+  scenarioId           String   @map("scenario_id")
+  snapshotId           String   @map("snapshot_id")
+  schemaSnapshotId     String   @map("schema_snapshot_id")
+  applicationId        String   @map("application_id")
+  organizationId       String   @map("organization_id")
+  scenarioNameSnapshot String   @map("scenario_name_snapshot")
+  description          String?
+  fingerprint          String
+  validationStatus     String   @map("validation_status")
+  validationMethod     String   @map("validation_method")
+  validationPhase      String   @map("validation_phase")
+  validationUpMs       Int?     @map("validation_up_ms")
+  validationDownMs     Int?     @map("validation_down_ms")
+  /// [ScenarioRecipeJson]
+  fixtureJson          Json     @map("fixture_json")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  scenario        Scenario               @relation("ScenarioRecipeVersionHistory", fields: [scenarioId], references: [id], onDelete: Cascade)
+  activeForScenario Scenario?            @relation("ActiveScenarioRecipeVersion")
+  snapshot        BranchSnapshot         @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  schemaSnapshot  ScenarioSchemaSnapshot @relation(fields: [schemaSnapshotId], references: [id])
+  application     Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  organization    Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioId, snapshotId])
+  @@index([scenarioId])
+  @@index([snapshotId])
+  @@index([schemaSnapshotId])
+  @@index([applicationId])
+  @@index([organizationId])
+  @@map("scenario_recipe_version")
 }
 
 model ScenarioInstance {
@@ -1101,6 +1188,8 @@ model ScenarioInstance {
   metadata  Json?
   /// [ScenarioLastError]
   lastError Json?   @map("last_error")
+  /// [ScenarioResolvedVariables]
+  resolvedVariables Json? @map("resolved_variables")
 
   deploymentId String?           @map("deployment_id")
   deployment   BranchDeployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)

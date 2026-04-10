@@ -10,7 +10,6 @@ export interface ScenarioApplicationData {
 }
 
 export interface ScenarioSubject {
-    getScenarioId(): Promise<string>;
     getApplicationData(): Promise<ScenarioApplicationData>;
     linkInstance(instanceId: string): Promise<void>;
 }
@@ -20,19 +19,6 @@ export class GenerationSubject implements ScenarioSubject {
         private readonly db: PrismaClient,
         private readonly generationId: string,
     ) {}
-
-    async getScenarioId(): Promise<string> {
-        const generation = await this.db.testGeneration.findUniqueOrThrow({
-            where: { id: this.generationId },
-            select: { testPlan: { select: { scenarioId: true } } },
-        });
-
-        if (generation.testPlan.scenarioId == null) {
-            throw new Error(`Test generation ${this.generationId} does not have a scenario configured`);
-        }
-
-        return generation.testPlan.scenarioId;
-    }
 
     async getApplicationData(): Promise<ScenarioApplicationData> {
         const generation = await this.db.testGeneration.findUniqueOrThrow({
@@ -92,24 +78,6 @@ export class RunSubject implements ScenarioSubject {
         private readonly db: PrismaClient,
         private readonly runId: string,
     ) {}
-
-    async getScenarioId(): Promise<string> {
-        const run = await this.db.run.findUniqueOrThrow({
-            where: { id: this.runId },
-            select: {
-                assignment: {
-                    select: { plan: { select: { scenarioId: true } } },
-                },
-            },
-        });
-
-        const scenarioId = run.assignment.plan?.scenarioId;
-        if (scenarioId == null) {
-            throw new Error(`Run ${this.runId} does not have a scenario configured`);
-        }
-
-        return scenarioId;
-    }
 
     async getApplicationData(): Promise<ScenarioApplicationData> {
         const run = await this.db.run.findUniqueOrThrow({

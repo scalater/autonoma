@@ -5,6 +5,10 @@ import { ScenarioTestHarness } from "./scenario-harness";
 
 const SIGNING_SECRET = "test-secret";
 
+const DISCOVER_BODY = {
+    schema: { models: [], edges: [], relations: [], scopeField: "organizationId" },
+};
+
 integrationTestSuite({
     name: "WebhookClient",
     createHarness: () => ScenarioTestHarness.create(),
@@ -21,19 +25,26 @@ integrationTestSuite({
         test("discover: returns parsed response", async ({ harness, seedResult: { client } }) => {
             harness.webhookServer.onRequest(() => ({
                 status: 200,
-                body: { environments: [{ name: "checkout", description: "Checkout flow" }] },
+                body: {
+                    schema: {
+                        models: [{ name: "User", fields: [] }],
+                        edges: [],
+                        relations: [],
+                        scopeField: "organizationId",
+                    },
+                },
             }));
 
             const result = await client.discover();
 
-            expect(result.environments).toHaveLength(1);
-            expect(result.environments[0]?.name).toBe("checkout");
+            expect(result.schema.models).toHaveLength(1);
+            expect(result.schema.models[0]?.name).toBe("User");
         });
 
         test("discover: sends signature header", async ({ harness, seedResult: { client } }) => {
             harness.webhookServer.onRequest(() => ({
                 status: 200,
-                body: { environments: [] },
+                body: DISCOVER_BODY,
             }));
 
             await client.discover();
@@ -46,7 +57,7 @@ integrationTestSuite({
         test("discover: logs webhook call to database", async ({ harness, seedResult: { appId, client } }) => {
             harness.webhookServer.onRequest(() => ({
                 status: 200,
-                body: { environments: [] },
+                body: DISCOVER_BODY,
             }));
 
             await client.discover();
@@ -75,7 +86,7 @@ integrationTestSuite({
 
             const result = await client.up({
                 instanceId,
-                scenarioName: "checkout",
+                create: { Organization: [{ _alias: "org1", name: "Acme Corp" }] },
             });
 
             expect(result.auth).toEqual({ token: "abc" });
@@ -92,11 +103,11 @@ integrationTestSuite({
 
             const instanceId = await harness.createScenarioInstance(orgId, appId, "checkout-body", "REQUESTED");
 
-            await client.up({ instanceId, scenarioName: "checkout-body" });
+            await client.up({ instanceId, create: { Organization: [{ _alias: "org1", name: "Acme Corp" }] } });
 
             expect(harness.webhookServer.requests[0]?.body).toMatchObject({
                 action: "up",
-                environment: "checkout-body",
+                create: { Organization: [{ _alias: "org1", name: "Acme Corp" }] },
             });
         });
 
@@ -145,12 +156,12 @@ integrationTestSuite({
                 if (callCount === 1) {
                     return { status: 500, body: { error: "internal" } };
                 }
-                return { status: 200, body: { environments: [] } };
+                return { status: 200, body: DISCOVER_BODY };
             });
 
             const result = await client.discover();
 
-            expect(result.environments).toEqual([]);
+            expect(result.schema.models).toEqual([]);
             expect(callCount).toBe(2);
         });
 
@@ -179,7 +190,7 @@ integrationTestSuite({
                 if (callCount <= 1) {
                     return { status: 500, body: { error: "boom" } };
                 }
-                return { status: 200, body: { environments: [] } };
+                return { status: 200, body: DISCOVER_BODY };
             });
 
             await client.discover();

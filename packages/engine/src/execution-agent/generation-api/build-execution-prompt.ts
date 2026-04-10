@@ -2,6 +2,7 @@ export function buildExecutionPrompt(
     basePrompt: string,
     customInstructions?: string | null,
     credentials?: Record<string, string>,
+    recipeVariables?: Record<string, string>,
 ): string {
     const parts: string[] = [];
 
@@ -11,7 +12,17 @@ export function buildExecutionPrompt(
             .join("\n");
 
         parts.push(
-            `Before starting the test, log in using the following credentials. When typing each value, use the variable reference shown — do not type the variable name literally, the system resolves it to the actual value at runtime:\n${credentialLines}`,
+            `Before starting the test, log in using the following credentials. When typing each value, use the variable reference shown - do not type the variable name literally, the system resolves it to the actual value at runtime:\n${credentialLines}`,
+        );
+    }
+
+    if (recipeVariables != null && Object.keys(recipeVariables).length > 0) {
+        const variableLines = Object.entries(recipeVariables)
+            .map(([key, value]) => `- ${key}: "${value}" (reference as {{${key}}})`)
+            .join("\n");
+
+        parts.push(
+            `The test environment was set up with the following dynamic data. These values change between runs. When you encounter them in the UI or need to type/assert them, always use the variable reference (e.g. {{variableName}}) instead of the literal value:\n${variableLines}`,
         );
     }
 

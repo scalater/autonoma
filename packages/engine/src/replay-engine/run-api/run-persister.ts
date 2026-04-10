@@ -38,7 +38,8 @@ export interface RunData {
         } | null;
     };
     scenarioInstance: {
-        auth: unknown;
+        auth: Record<string, unknown> | null;
+        resolvedVariables: Record<string, string> | null;
     } | null;
     steps: Array<{
         order: number;
@@ -80,7 +81,7 @@ export class RunPersister<TSpec extends CommandSpec> {
             where: { id: this.id },
             include: {
                 scenarioInstance: {
-                    select: { auth: true },
+                    select: { auth: true, resolvedVariables: true },
                 },
                 assignment: {
                     include: {

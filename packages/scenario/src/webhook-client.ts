@@ -22,12 +22,12 @@ interface WebhookCallParams<T> {
 
 interface UpParams {
     instanceId: string;
-    scenarioName: string;
+    create: Record<string, unknown[]>;
 }
 
 interface DownParams {
     instanceId: string;
-    refs: unknown;
+    refs: Record<string, unknown> | null;
     refsToken?: string;
 }
 
@@ -64,11 +64,11 @@ export class WebhookClient {
         });
     }
 
-    async up({ instanceId, scenarioName }: UpParams, options?: WebhookCallOptions): Promise<UpResponse> {
+    async up({ instanceId, create }: UpParams, options?: WebhookCallOptions): Promise<UpResponse> {
         return this.call({
             instanceId,
             action: "UP",
-            body: { action: "up", environment: scenarioName, testRunId: instanceId },
+            body: { action: "up", create, testRunId: instanceId },
             responseSchema: UpResponseSchema,
             maxRetries: options?.maxRetries ?? 2,
             timeoutMs: options?.timeoutMs ?? 30_000,
@@ -107,7 +107,13 @@ export class WebhookClient {
                     ? `Webhook timed out after ${timeoutMs / 1000}s - ensure your endpoint is reachable and responds quickly`
                     : error.message;
                 lastError = new Error(message);
-                await this.logWebhookCall({ instanceId, action, requestBody: body, durationMs, error: message });
+                await this.logWebhookCall({
+                    instanceId,
+                    action,
+                    requestBody: body,
+                    durationMs,
+                    error: message,
+                });
                 this.logger.warn(`Webhook ${action} attempt ${attempt + 1} failed`, {
                     error: message,
                     applicationId: this.applicationId,
@@ -166,7 +172,9 @@ export class WebhookClient {
             signal: AbortSignal.timeout(timeoutMs),
         });
 
-        const responseBody = await response.json();
+        const responseBody = await response.json().catch(async () => ({
+            error: `Non-JSON response: ${(await response.text()).slice(0, 500)}`,
+        }));
         return { status: response.status, responseBody };
     }
 
@@ -206,7 +214,9 @@ export class WebhookClient {
             }),
         );
         if (logError != null) {
-            this.logger.error("Failed to log webhook call", { error: logError.message });
+            this.logger.error("Failed to log webhook call", {
+                error: logError.message,
+            });
         }
     }
 }
