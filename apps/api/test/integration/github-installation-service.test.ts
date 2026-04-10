@@ -3,10 +3,6 @@ import { NotFoundError } from "@autonoma/errors";
 import { expect, vi } from "vitest";
 import { apiTestSuite } from "../api-test";
 
-vi.mock("@autonoma/workflow", () => ({
-    triggerTestCaseGenerationJob: vi.fn().mockResolvedValue(undefined),
-}));
-
 const mockInstallationClient = {
     listInstallationRepos: vi.fn(),
     compareCommits: vi.fn(),

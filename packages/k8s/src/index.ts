@@ -25,8 +25,7 @@ export type ImageKey =
     | "execution-agent-web"
     | "execution-agent-mobile"
     | "reviewer"
-    | "eval-job-finalizer"
-    | "test-case-generator";
+    | "eval-job-finalizer";
 
 export function makeKubeConfig(): KubeConfig {
     const kc = new KubeConfig();

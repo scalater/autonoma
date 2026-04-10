@@ -1,7 +1,6 @@
 import type { GitHubDeploymentTrigger, GitHubInstallation, GitHubRepository, PrismaClient } from "@autonoma/db";
 import { NotFoundError } from "@autonoma/errors";
 import type { GitHubApp } from "@autonoma/github";
-import { triggerTestCaseGenerationJob } from "@autonoma/workflow";
 import { Service } from "../routes/service";
 
 export class GitHubInstallationService extends Service {
@@ -158,18 +157,6 @@ export class GitHubInstallationService extends Service {
         });
 
         this.logger.info("Updated repo config", { repoId, watchBranch, deploymentTrigger, applicationId });
-
-        const isNewAppLink = applicationId != null && existingRepo.applicationId !== applicationId;
-        if (isNewAppLink) {
-            this.logger.info("Application newly linked, triggering indexing", { repoId, applicationId });
-            void this.indexRepository({
-                ...existingRepo,
-                applicationId,
-                installation: { organizationId: orgId },
-            }).catch((error: unknown) => {
-                this.logger.fatal("Repository indexing failed", error, { repoId, applicationId });
-            });
-        }
     }
 
     async handleDeploymentNotification(
@@ -448,60 +435,5 @@ export class GitHubInstallationService extends Service {
         await this.db.gitHubInstallation.delete({
             where: { organizationId: orgId },
         });
-    }
-
-    async indexAllRepositories(installationId: string): Promise<void> {
-        const installation = await this.db.gitHubInstallation.findUnique({
-            where: { id: installationId },
-            include: { repositories: true },
-        });
-
-        if (installation == null) return;
-
-        this.logger.info("Starting repository indexing", {
-            installationId,
-            repoCount: installation.repositories.length,
-        });
-
-        for (const repo of installation.repositories) {
-            try {
-                await this.indexRepository({ ...repo, installation });
-            } catch (error) {
-                this.logger.fatal("Failed to index repository", error, { repoId: repo.id, fullName: repo.fullName });
-            }
-        }
-
-        this.logger.info("Repository indexing complete", { installationId });
-    }
-
-    async indexRepository(repo: GitHubRepository & { installation: { organizationId: string } }): Promise<void> {
-        this.logger.info("Triggering test case generation job", { repoId: repo.id, fullName: repo.fullName });
-
-        if (repo.applicationId == null) {
-            this.logger.warn("Skipping indexing - no application linked to repo", { repoId: repo.id });
-            return;
-        }
-
-        await this.db.gitHubRepository.update({
-            where: { id: repo.id },
-            data: { indexingStatus: "running" },
-        });
-
-        try {
-            await triggerTestCaseGenerationJob(repo.id);
-
-            await this.db.gitHubRepository.update({
-                where: { id: repo.id },
-                data: { indexingStatus: "completed", indexedAt: new Date() },
-            });
-
-            this.logger.info("Test case generation job triggered", { repoId: repo.id, fullName: repo.fullName });
-        } catch (err) {
-            await this.db.gitHubRepository.update({
-                where: { id: repo.id },
-                data: { indexingStatus: "failed" },
-            });
-            throw err;
-        }
     }
 }

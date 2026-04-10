@@ -4,7 +4,6 @@ export const imageVersionConfigSchema = z.object({
     "execution-agent-web": z.string(),
     "execution-agent-mobile": z.string(),
     "workflow-scenario": z.string(),
-    "test-case-generator": z.string(),
     "generation-assigner": z.string(),
     diffs: z.string(),
     "generation-reviewer": z.string(),
@@ -22,7 +21,6 @@ export type ImageKey = keyof ImageVersionConfig;
  */
 export type SecretFileName =
     | "execution-agent-file"
-    | "test-case-generator-env-file"
     | "scenario-manager-file"
     | "generation-assigner-file"
     | "diffs-env-file"

@@ -10,7 +10,6 @@ Background jobs that run as standalone processes, typically orchestrated as Kube
 | **generation-assigner** | `@autonoma/generation-assigner` | Assigns completed generation results back to a test suite snapshot. Optionally finalizes (activates) the snapshot. |
 | **generation-reviewer** | `@autonoma/generation-reviewer` | Reviews a single test generation using AI video analysis. Produces a verdict (pass/fail category, severity, confidence) and persists an issue record. |
 | **replay-reviewer** | `@autonoma/replay-reviewer` | Reviews a failed test run using AI video analysis. Same review pattern as generation-reviewer but operates on run recordings. |
-| **test-case-generator** | `@autonoma/test-case-generator` | Clones a GitHub repo, runs a multi-phase AI pipeline (knowledge base, scenarios, E2E tests) to generate test cases from source code. |
 | **scenario** | `@autonoma/job-scenario` | Manages test scenario lifecycle - "up" provisions a scenario instance before a run/generation, "down" tears it down afterward. |
 | **reviewer** | (legacy) | Build artifact only - no source files. Superseded by generation-reviewer and replay-reviewer. |
 | **notifier** | (legacy) | Build artifact only - no source files. Previously handled SNS/SQS notifications. |
@@ -115,15 +114,6 @@ All jobs use `createEnv` from `@t3-oss/env-core` for validated environment confi
 |----------|----------|-------------|
 | `AUTO_ACTIVATE` | No | Set to `"true"` to finalize the snapshot after assigning |
 
-### test-case-generator
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `REPOSITORY_ID` | Yes | GitHub repository ID to generate tests for |
-| `GITHUB_APP_ID` | Yes | GitHub App ID |
-| `GITHUB_APP_PRIVATE_KEY` | Yes | GitHub App private key |
-| `GITHUB_APP_WEBHOOK_SECRET` | Yes | GitHub App webhook secret |
-
 ### scenario
 
 | Variable | Required | Description |
@@ -140,4 +130,3 @@ All jobs use `createEnv` from `@t3-oss/env-core` for validated environment confi
 - **Error handling follows the `fx` pattern** from `@autonoma/try` - Go-style error tuples with `fx.runAsync` / `fx.run`.
 - **Reviewer jobs share a common pattern:** load data from DB + S3, process video through Gemini, produce a verdict, persist results in a transaction with cost records.
 - **Scenario job has two entry points:** `up.ts` (provision before test) and `down.ts` (teardown after test), each with their own env validation.
-- **Test case generator runs a 3-phase AI pipeline:** (1) generate knowledge base from repo code, (2) generate test scenarios, (3) generate E2E test cases as markdown.

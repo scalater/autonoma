@@ -25,7 +25,6 @@ src/
 └── workflows/                        # Workflow definitions (trigger functions + templates)
     ├── test-plan-generation.ts       # triggerTestPlanWorkflow
     ├── batch-generation.ts           # triggerBatchGeneration
-    ├── test-case-generation-k8s.ts   # triggerTestCaseGenerationJob
     ├── run-replay.ts                 # triggerRunWorkflow
     ├── diffs/                        # triggerDiffsJob
     ├── generation-reviewer/          # triggerGenerationReviewWorkflow
@@ -38,7 +37,6 @@ src/
 // Trigger functions - submit Argo workflows to K8s
 triggerTestPlanWorkflow(params: TriggerTestPlanWorkflowParams): Promise<void>
 triggerBatchGeneration(params: TriggerBatchGenerationParams): Promise<void>
-triggerTestCaseGenerationJob(/* ... */): Promise<void>
 triggerRunWorkflow(params: TriggerRunWorkflowParams): Promise<void>
 triggerDiffsJob(params: TriggerDiffsJobParams): Promise<void>
 triggerGenerationReviewWorkflow(/* ... */): Promise<void>
