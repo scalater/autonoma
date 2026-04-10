@@ -34,11 +34,11 @@ export class BillingCustomerService extends Service {
             return { cancelPath: fallbackPath, successPath: fallbackPath };
         }
 
-        const appBranchMatch = normalizedPath.match(/^\/app\/([^/]+)\/branch\/([^/?#]+)/);
+        const appBranchMatch = normalizedPath.match(/^\/app\/([^/]+)\//);
         if (appBranchMatch != null) {
             return {
                 cancelPath: normalizedPath,
-                successPath: `/app/${appBranchMatch[1]}/branch/${appBranchMatch[2]}/billing`,
+                successPath: `/app/${appBranchMatch[1]}/billing`,
             };
         }
 
