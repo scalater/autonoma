@@ -151,7 +151,7 @@ async function handleDown(
 
     try {
         await scenario.down(refs)
-        return res.json({ success: true })
+        return res.json({ ok: true })
     } catch (error) {
         console.error("[Autonoma] down failed", { error })
         return errorResponse(res, "Teardown failed", "DOWN_FAILED", 500)
@@ -200,8 +200,8 @@ Since your React SPA stores tokens in memory or localStorage (not httpOnly cooki
 import { sign } from "jsonwebtoken"
 
 export function createBypassToken(email: string, organizationId: string): string {
-    const secret = process.env.AUTONOMA_INTERNAL_SECRET
-    if (secret == null) throw new Error("AUTONOMA_INTERNAL_SECRET is not configured")
+    const secret = process.env.AUTONOMA_JWT_SECRET
+    if (secret == null) throw new Error("AUTONOMA_JWT_SECRET is not configured")
 
     return sign(
         { email, organizationId, bypass: true },

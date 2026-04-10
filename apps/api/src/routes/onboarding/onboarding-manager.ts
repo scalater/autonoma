@@ -148,11 +148,11 @@ export class OnboardingManager {
         return state.runScenarioDryRun(scenarioId);
     }
 
-    /** Move from `scenario_dry_run` to `url`. Works from scenario_dry_run or any later step. */
-    async complete(applicationId: string) {
-        this.logger.info("Completing scenario dry run", { applicationId });
-        const state = await this.loadStateOrEarlier(applicationId, "scenario_dry_run");
-        await state.complete();
+    /** Advance from `scenario_dry_run` to `github`, optionally storing a production URL. */
+    async complete(applicationId: string, productionUrl?: string) {
+        this.logger.info("Advancing to github step", { applicationId, hasProductionUrl: productionUrl != null });
+        const state = await this.loadState(applicationId);
+        await state.complete(productionUrl);
         return this.getState(applicationId);
     }
 
@@ -264,7 +264,12 @@ export class OnboardingManager {
             if (err instanceof SnapshotNotPendingError) {
                 this.logger.info("No pending snapshot to enqueue - skipping", { applicationId, branchId });
             } else {
-                throw err;
+                // Log but don't block onboarding completion - generation queueing can be retried later
+                this.logger.error("Failed to enqueue generations after onboarding", {
+                    applicationId,
+                    branchId,
+                    error: err instanceof Error ? err.message : String(err),
+                });
             }
         }
     }

@@ -1,11 +1,16 @@
 import type { NavigateFn } from "@tanstack/react-router";
+import type { OnboardingStep } from "./onboarding-steps";
 
-const STEP_ROUTES: Record<string, string> = {
-    install: "/onboarding/install",
-    configure: "/onboarding/configure",
-    working: "/onboarding/working",
-    scenario_dry_run: "/onboarding/scenario-dry-run",
-    url: "/onboarding/url",
+const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
+
+const STEP_ROUTES: Record<string, OnboardingStep> = {
+    install: "install",
+    configure: "install",
+    working: "working",
+    scenario_dry_run: "scenario-dry-run",
+    url: "scenario-dry-run",
+    github: "github",
+    completed: "complete",
 };
 
 /**
@@ -13,7 +18,7 @@ const STEP_ROUTES: Record<string, string> = {
  * The applicationId is passed via search params so each page can read it.
  */
 export function navigateToOnboarding(applicationId: string, step: string | undefined, navigate: NavigateFn) {
-    const route = STEP_ROUTES[step ?? "install"] ?? "/onboarding/install";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic route requires any cast for search params
-    void navigate({ to: route, search: { appId: applicationId } } as any);
+    localStorage.setItem(ONBOARDING_APP_KEY, applicationId);
+    const resolvedStep: OnboardingStep = STEP_ROUTES[step ?? "install"] ?? "intro-welcome";
+    void navigate({ to: "/onboarding", search: { step: resolvedStep } });
 }

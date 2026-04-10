@@ -45,6 +45,9 @@ import { Route as BlacklightOnboardingCompleteRouteImport } from "./routes/_blac
 import { Route as BlacklightOnboardingConfigureRouteImport } from "./routes/_blacklight/onboarding/configure";
 import { Route as BlacklightOnboardingGithubRouteImport } from "./routes/_blacklight/onboarding/github";
 import { Route as BlacklightOnboardingInstallRouteImport } from "./routes/_blacklight/onboarding/install";
+import { Route as BlacklightOnboardingIntroKeyConceptsRouteImport } from "./routes/_blacklight/onboarding/intro-key-concepts";
+import { Route as BlacklightOnboardingIntroPlatformTourRouteImport } from "./routes/_blacklight/onboarding/intro-platform-tour";
+import { Route as BlacklightOnboardingIntroWelcomeRouteImport } from "./routes/_blacklight/onboarding/intro-welcome";
 import { Route as BlacklightOnboardingRouteRouteImport } from "./routes/_blacklight/onboarding/route";
 import { Route as BlacklightOnboardingScenarioDryRunRouteImport } from "./routes/_blacklight/onboarding/scenario-dry-run";
 import { Route as BlacklightOnboardingUrlRouteImport } from "./routes/_blacklight/onboarding/url";
@@ -81,6 +84,21 @@ const BlacklightOnboardingUrlRoute = BlacklightOnboardingUrlRouteImport.update({
 const BlacklightOnboardingScenarioDryRunRoute = BlacklightOnboardingScenarioDryRunRouteImport.update({
     id: "/scenario-dry-run",
     path: "/scenario-dry-run",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingIntroWelcomeRoute = BlacklightOnboardingIntroWelcomeRouteImport.update({
+    id: "/intro-welcome",
+    path: "/intro-welcome",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingIntroPlatformTourRoute = BlacklightOnboardingIntroPlatformTourRouteImport.update({
+    id: "/intro-platform-tour",
+    path: "/intro-platform-tour",
+    getParentRoute: () => BlacklightOnboardingRouteRoute,
+} as any);
+const BlacklightOnboardingIntroKeyConceptsRoute = BlacklightOnboardingIntroKeyConceptsRouteImport.update({
+    id: "/intro-key-concepts",
+    path: "/intro-key-concepts",
     getParentRoute: () => BlacklightOnboardingRouteRoute,
 } as any);
 const BlacklightOnboardingInstallRoute = BlacklightOnboardingInstallRouteImport.update({
@@ -264,6 +282,9 @@ export interface FileRoutesByFullPath {
     "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/onboarding/github": typeof BlacklightOnboardingGithubRoute;
     "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/onboarding/intro-key-concepts": typeof BlacklightOnboardingIntroKeyConceptsRoute;
+    "/onboarding/intro-platform-tour": typeof BlacklightOnboardingIntroPlatformTourRoute;
+    "/onboarding/intro-welcome": typeof BlacklightOnboardingIntroWelcomeRoute;
     "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
@@ -303,6 +324,9 @@ export interface FileRoutesByTo {
     "/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/onboarding/github": typeof BlacklightOnboardingGithubRoute;
     "/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/onboarding/intro-key-concepts": typeof BlacklightOnboardingIntroKeyConceptsRoute;
+    "/onboarding/intro-platform-tour": typeof BlacklightOnboardingIntroPlatformTourRoute;
+    "/onboarding/intro-welcome": typeof BlacklightOnboardingIntroWelcomeRoute;
     "/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
@@ -343,6 +367,9 @@ export interface FileRoutesById {
     "/_blacklight/onboarding/configure": typeof BlacklightOnboardingConfigureRoute;
     "/_blacklight/onboarding/github": typeof BlacklightOnboardingGithubRoute;
     "/_blacklight/onboarding/install": typeof BlacklightOnboardingInstallRoute;
+    "/_blacklight/onboarding/intro-key-concepts": typeof BlacklightOnboardingIntroKeyConceptsRoute;
+    "/_blacklight/onboarding/intro-platform-tour": typeof BlacklightOnboardingIntroPlatformTourRoute;
+    "/_blacklight/onboarding/intro-welcome": typeof BlacklightOnboardingIntroWelcomeRoute;
     "/_blacklight/onboarding/scenario-dry-run": typeof BlacklightOnboardingScenarioDryRunRoute;
     "/_blacklight/onboarding/url": typeof BlacklightOnboardingUrlRoute;
     "/_blacklight/onboarding/working": typeof BlacklightOnboardingWorkingRoute;
@@ -386,6 +413,9 @@ export interface FileRouteTypes {
         | "/onboarding/configure"
         | "/onboarding/github"
         | "/onboarding/install"
+        | "/onboarding/intro-key-concepts"
+        | "/onboarding/intro-platform-tour"
+        | "/onboarding/intro-welcome"
         | "/onboarding/scenario-dry-run"
         | "/onboarding/url"
         | "/onboarding/working"
@@ -425,6 +455,9 @@ export interface FileRouteTypes {
         | "/onboarding/configure"
         | "/onboarding/github"
         | "/onboarding/install"
+        | "/onboarding/intro-key-concepts"
+        | "/onboarding/intro-platform-tour"
+        | "/onboarding/intro-welcome"
         | "/onboarding/scenario-dry-run"
         | "/onboarding/url"
         | "/onboarding/working"
@@ -464,6 +497,9 @@ export interface FileRouteTypes {
         | "/_blacklight/onboarding/configure"
         | "/_blacklight/onboarding/github"
         | "/_blacklight/onboarding/install"
+        | "/_blacklight/onboarding/intro-key-concepts"
+        | "/_blacklight/onboarding/intro-platform-tour"
+        | "/_blacklight/onboarding/intro-welcome"
         | "/_blacklight/onboarding/scenario-dry-run"
         | "/_blacklight/onboarding/url"
         | "/_blacklight/onboarding/working"
@@ -549,6 +585,27 @@ declare module "@tanstack/react-router" {
             path: "/scenario-dry-run";
             fullPath: "/onboarding/scenario-dry-run";
             preLoaderRoute: typeof BlacklightOnboardingScenarioDryRunRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/intro-welcome": {
+            id: "/_blacklight/onboarding/intro-welcome";
+            path: "/intro-welcome";
+            fullPath: "/onboarding/intro-welcome";
+            preLoaderRoute: typeof BlacklightOnboardingIntroWelcomeRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/intro-platform-tour": {
+            id: "/_blacklight/onboarding/intro-platform-tour";
+            path: "/intro-platform-tour";
+            fullPath: "/onboarding/intro-platform-tour";
+            preLoaderRoute: typeof BlacklightOnboardingIntroPlatformTourRouteImport;
+            parentRoute: typeof BlacklightOnboardingRouteRoute;
+        };
+        "/_blacklight/onboarding/intro-key-concepts": {
+            id: "/_blacklight/onboarding/intro-key-concepts";
+            path: "/intro-key-concepts";
+            fullPath: "/onboarding/intro-key-concepts";
+            preLoaderRoute: typeof BlacklightOnboardingIntroKeyConceptsRouteImport;
             parentRoute: typeof BlacklightOnboardingRouteRoute;
         };
         "/_blacklight/onboarding/install": {
@@ -872,6 +929,9 @@ interface BlacklightOnboardingRouteRouteChildren {
     BlacklightOnboardingConfigureRoute: typeof BlacklightOnboardingConfigureRoute;
     BlacklightOnboardingGithubRoute: typeof BlacklightOnboardingGithubRoute;
     BlacklightOnboardingInstallRoute: typeof BlacklightOnboardingInstallRoute;
+    BlacklightOnboardingIntroKeyConceptsRoute: typeof BlacklightOnboardingIntroKeyConceptsRoute;
+    BlacklightOnboardingIntroPlatformTourRoute: typeof BlacklightOnboardingIntroPlatformTourRoute;
+    BlacklightOnboardingIntroWelcomeRoute: typeof BlacklightOnboardingIntroWelcomeRoute;
     BlacklightOnboardingScenarioDryRunRoute: typeof BlacklightOnboardingScenarioDryRunRoute;
     BlacklightOnboardingUrlRoute: typeof BlacklightOnboardingUrlRoute;
     BlacklightOnboardingWorkingRoute: typeof BlacklightOnboardingWorkingRoute;
@@ -882,6 +942,9 @@ const BlacklightOnboardingRouteRouteChildren: BlacklightOnboardingRouteRouteChil
     BlacklightOnboardingConfigureRoute: BlacklightOnboardingConfigureRoute,
     BlacklightOnboardingGithubRoute: BlacklightOnboardingGithubRoute,
     BlacklightOnboardingInstallRoute: BlacklightOnboardingInstallRoute,
+    BlacklightOnboardingIntroKeyConceptsRoute: BlacklightOnboardingIntroKeyConceptsRoute,
+    BlacklightOnboardingIntroPlatformTourRoute: BlacklightOnboardingIntroPlatformTourRoute,
+    BlacklightOnboardingIntroWelcomeRoute: BlacklightOnboardingIntroWelcomeRoute,
     BlacklightOnboardingScenarioDryRunRoute: BlacklightOnboardingScenarioDryRunRoute,
     BlacklightOnboardingUrlRoute: BlacklightOnboardingUrlRoute,
     BlacklightOnboardingWorkingRoute: BlacklightOnboardingWorkingRoute,

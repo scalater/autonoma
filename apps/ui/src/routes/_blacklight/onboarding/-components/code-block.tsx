@@ -29,8 +29,8 @@ export function CodeBlock({ children, copyValue }: CodeBlockProps) {
 
   return (
     <div className="group overflow-hidden border border-border-dim bg-surface-base transition-colors hover:border-primary/30">
-      <div className="flex items-center justify-between p-4">
-        <pre className="flex-1 overflow-x-auto font-mono text-sm tracking-tight whitespace-pre text-text-secondary">
+      <div className="flex min-w-0 items-start justify-between gap-4 p-4">
+        <pre className="min-w-0 flex-1 overflow-x-hidden font-mono text-sm tracking-tight whitespace-pre-wrap break-all text-text-secondary">
           {children}
         </pre>
         <Button

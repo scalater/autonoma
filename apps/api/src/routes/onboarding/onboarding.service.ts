@@ -54,8 +54,8 @@ export class OnboardingService extends Service {
         return this.manager.runScenarioDryRun(applicationId, scenarioId);
     }
 
-    async complete(applicationId: string) {
-        return this.manager.complete(applicationId);
+    async complete(applicationId: string, productionUrl?: string) {
+        return this.manager.complete(applicationId, productionUrl);
     }
 
     async reset(applicationId: string) {

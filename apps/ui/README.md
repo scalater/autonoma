@@ -93,6 +93,7 @@ src/
 - **File-based routing** - TanStack Router plugin scans `src/routes/` and auto-generates `routeTree.gen.ts`. Add a new file to add a route.
 - **Type-safe API layer** - tRPC types flow from `@autonoma/api` to the frontend. Never manually define API response types. Use `trpc.<router>.<procedure>.queryOptions()` with `useSuspenseQuery` for reads.
 - **Route context** - The router context provides `auth`, `queryClient`, and `trpc` to all routes, set up in `main.tsx`.
+- **Onboarding URL model** - onboarding uses a single canonical route at `/onboarding` with `step` search state (for example `/onboarding?step=working`). Legacy onboarding subpaths redirect to the canonical URL.
 - **Proxy in dev** - Vite proxies `/v1` to the API server, so the frontend and API share the same origin during development.
 - **Static SPA** - No SSR. Builds to static files in `dist/`, served by nginx in production.
 - **tRPC batching** - Queries are batched via `httpBatchLink`, except `FormData` uploads which use `httpLink`.

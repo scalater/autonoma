@@ -1,32 +1,182 @@
-import { Button, cn } from "@autonoma/blacklight";
+import { Alert, AlertDescription, AlertTitle, Button, Input, Label, cn } from "@autonoma/blacklight";
 import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
 import { CheckCircleIcon } from "@phosphor-icons/react/CheckCircle";
+import { CircleIcon } from "@phosphor-icons/react/Circle";
 import { FlaskIcon } from "@phosphor-icons/react/Flask";
+import { GitBranchIcon } from "@phosphor-icons/react/GitBranch";
+import { GlobeIcon } from "@phosphor-icons/react/Globe";
+import { KeyIcon } from "@phosphor-icons/react/Key";
 import { PencilSimpleIcon } from "@phosphor-icons/react/PencilSimple";
 import { PlayIcon } from "@phosphor-icons/react/Play";
 import { PlusIcon } from "@phosphor-icons/react/Plus";
+import { RocketLaunchIcon } from "@phosphor-icons/react/RocketLaunch";
+import { SpinnerGapIcon } from "@phosphor-icons/react/SpinnerGap";
 import { TrashIcon } from "@phosphor-icons/react/Trash";
 import { WarningCircleIcon } from "@phosphor-icons/react/WarningCircle";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   useCompleteOnboarding,
   useConfigureAndDiscoverScenarios,
   useOnboardingScenarios,
   useRunScenarioDryRun,
 } from "lib/onboarding/onboarding-api";
-import { useEffect, useRef, useState } from "react";
-import { onboardingSearchSchema } from "./-onboarding-search";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DocLink } from "./-components/doc-link";
+import { OnboardingPageHeader } from "./-components/onboarding-page-header";
+import { getOnboardingApplicationId } from "./install";
 
 export const Route = createFileRoute("/_blacklight/onboarding/scenario-dry-run")({
-  component: ScenarioDryRunPage,
-  validateSearch: onboardingSearchSchema,
+  component: () => <Navigate to="/onboarding" search={{ step: "scenario-dry-run" }} />,
 });
 
-interface DryRunResult {
-  success: boolean;
-  phase: "up" | "down";
-  error: unknown;
+function StepNumber({ step, done }: { step: number; done: boolean }) {
+  return (
+    <div
+      className={cn(
+        "flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-xs font-bold transition-all",
+        done
+          ? "border-primary-ink bg-primary-ink text-surface-void"
+          : "border-border-mid bg-surface-base text-text-tertiary",
+      )}
+    >
+      {done ? <CheckCircleIcon size={16} weight="fill" /> : step}
+    </div>
+  );
+}
+
+function isValidUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+interface WebhookErrorDetails {
+  title: string;
+  hints: string[];
+  field?: "url" | "secret" | "both";
+}
+
+function getWebhookErrorDetails(errorMessage: string): WebhookErrorDetails {
+  const statusMatch = errorMessage.match(/Webhook returned status (\d+)/);
+  if (statusMatch != null) {
+    const status = Number(statusMatch[1]);
+    switch (status) {
+      case 401:
+        return {
+          title: "Authentication failed (401)",
+          field: "secret",
+          hints: [
+            "The signing secret doesn't match. Verify that AUTONOMA_SIGNING_SECRET on your deployment matches the value you entered above.",
+          ],
+        };
+      case 403:
+        return {
+          title: "Forbidden (403)",
+          field: "both",
+          hints: [
+            "The request was rejected by your endpoint.",
+            "Check that AUTONOMA_SIGNING_SECRET matches exactly - no extra spaces or line breaks.",
+            'Verify AUTONOMA_ENABLED is set to "true" on your deployment.',
+          ],
+        };
+      case 404:
+        return {
+          title: "Endpoint not found (404)",
+          field: "url",
+          hints: [
+            "The webhook URL path doesn't exist. Verify the URL includes the correct route (e.g. /api/autonoma).",
+            "Make sure the latest code changes have been deployed.",
+          ],
+        };
+      case 500:
+        return {
+          title: "Server error (500)",
+          hints: [
+            "Your endpoint returned an internal error. Check your deployment logs for details.",
+            "Verify that AUTONOMA_SIGNING_SECRET is set.",
+          ],
+        };
+      case 502:
+      case 503:
+      case 504:
+        return {
+          title: `Service unavailable (${status})`,
+          field: "url",
+          hints: [
+            "Your deployment appears to be down or not ready yet.",
+            "Wait for the deployment to finish, then try again.",
+            "Make sure your app is running and accessible from the internet.",
+          ],
+        };
+      default:
+        return {
+          title: `Unexpected response (${status})`,
+          hints: ["Your endpoint returned an unexpected status code. Check your deployment logs for details."],
+        };
+    }
+  }
+
+  if (errorMessage.includes("timeout") || errorMessage.includes("abort")) {
+    return {
+      title: "Request timed out",
+      field: "url",
+      hints: [
+        "The webhook didn't respond within 30 seconds.",
+        "Make sure your deployment is running and accessible from the internet.",
+      ],
+    };
+  }
+
+  if (errorMessage.includes("fetch failed") || errorMessage.includes("ECONNREFUSED")) {
+    return {
+      title: "Connection failed",
+      field: "url",
+      hints: [
+        "Could not connect to the webhook URL.",
+        "Verify the URL is correct and your deployment is publicly accessible.",
+        "If running locally, make sure the dev server is running.",
+      ],
+    };
+  }
+
+  if (errorMessage.includes("response validation failed")) {
+    return {
+      title: "Invalid response format",
+      hints: [
+        "The endpoint responded but the body doesn't match the expected schema.",
+        "Make sure you're using the latest version of the Autonoma SDK.",
+      ],
+    };
+  }
+
+  return {
+    title: "Discovery failed",
+    hints: [errorMessage],
+  };
+}
+
+function DiscoverErrorAlert({ error }: { error: { message: string } }) {
+  const details = getWebhookErrorDetails(error.message);
+
+  return (
+    <Alert variant="critical">
+      <AlertTitle>{details.title}</AlertTitle>
+      <AlertDescription>
+        <ul className="mt-1 space-y-1">
+          {details.hints.map((hint) => (
+            <li key={hint} className="flex items-start gap-2 leading-relaxed">
+              <span className="mt-1 shrink-0 text-text-tertiary">-</span>
+              <span>{hint}</span>
+            </li>
+          ))}
+        </ul>
+      </AlertDescription>
+    </Alert>
+  );
 }
 
 interface LogEntry {
@@ -115,31 +265,49 @@ function WebhookLog({ entries }: { entries: LogEntry[] }) {
   );
 }
 
-function ScenarioDryRunPage() {
-  const { appId: applicationId } = Route.useSearch();
+export function DeployPage() {
+  const applicationId = getOnboardingApplicationId();
 
-  const [webhookUrl, setWebhookUrl] = useState("");
+  const [webhookUrlDraft, setWebhookUrlDraft] = useState<string>();
+  const [webhookUrlTouched, setWebhookUrlTouched] = useState(false);
   const [signingSecret, setSigningSecret] = useState("");
+  const [signingSecretTouched, setSigningSecretTouched] = useState(false);
+  const [deployConfirmed, setDeployConfirmed] = useState(false);
+  const [appUrl, setAppUrl] = useState("");
+  const [appUrlTouched, setAppUrlTouched] = useState(false);
   const [customHeaders, setCustomHeaders] = useState<Array<{ key: string; value: string }>>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string>();
-  const [dryRunResult, setDryRunResult] = useState<DryRunResult>();
-  const [isEditing, setIsEditing] = useState(false);
+  const [webhookConfirmed, setWebhookConfirmed] = useState(false);
+
+  // Per-scenario dry run results, keyed by scenario id
+  const [scenarioResults, setScenarioResults] = useState<
+    Record<string, { success: boolean; phase?: string; error?: unknown }>
+  >({});
+  const [isDryRunning, setIsDryRunning] = useState(false);
 
   const navigate = useNavigate();
   const discoverScenarios = useConfigureAndDiscoverScenarios();
-  const scenariosQuery = useOnboardingScenarios(applicationId);
+  const scenariosQuery = useOnboardingScenarios(applicationId ?? "");
   const runDryRun = useRunScenarioDryRun();
   const completeOnboarding = useCompleteOnboarding();
   const log = useLogEntries();
 
+  const webhookUrl = webhookUrlDraft ?? "";
   const scenarios = scenariosQuery.data ?? [];
-  const isWebhookConfigured = scenarios.length > 0 && !isEditing;
-  const effectiveScenarioId = selectedScenarioId ?? scenarios[0]?.id;
-  const dryRunPassed = dryRunResult?.success === true;
+  const isWebhookConfigured = webhookConfirmed && scenarios.length > 0;
+  const isAppUrlValid = appUrl.length > 0 && isValidUrl(appUrl);
+
+  const allDryRunsPassed = scenarios.length > 0 && scenarios.every((s) => scenarioResults[s.id]?.success === true);
+  const anyDryRunFailed = scenarios.some((s) => scenarioResults[s.id]?.success === false);
+
+  const discoverError = discoverScenarios.error;
+  const discoverErrorDetails = discoverError != null ? getWebhookErrorDetails(discoverError.message) : undefined;
+  const isUrlErrorField = discoverErrorDetails?.field === "url" || discoverErrorDetails?.field === "both";
+  const isSecretErrorField = discoverErrorDetails?.field === "secret" || discoverErrorDetails?.field === "both";
 
   function handleDiscoverScenarios() {
-    if (webhookUrl.length === 0 || signingSecret.length === 0) return;
+    if (webhookUrl.length === 0 || !isValidUrl(webhookUrl) || signingSecret.length === 0 || applicationId == null)
+      return;
 
     log.clear();
     log.addEntry("info", `Discovering scenarios at ${webhookUrl}...`);
@@ -151,13 +319,17 @@ function ScenarioDryRunPage() {
     const webhookHeaders = Object.keys(headersRecord).length > 0 ? headersRecord : undefined;
 
     discoverScenarios.mutate(
-      { applicationId, webhookUrl, signingSecret, webhookHeaders },
+      {
+        applicationId,
+        webhookUrl,
+        signingSecret,
+        webhookHeaders,
+      },
       {
         onSuccess: () => {
           log.addEntry("success", "Scenarios discovered successfully");
-          setSelectedScenarioId(undefined);
-          setDryRunResult(undefined);
-          setIsEditing(false);
+          setScenarioResults({});
+          setWebhookConfirmed(true);
         },
         onError: (error) => {
           log.addEntry("error", formatError(error));
@@ -167,292 +339,445 @@ function ScenarioDryRunPage() {
   }
 
   function handleReconfigure() {
-    setIsEditing(true);
-    setDryRunResult(undefined);
+    setWebhookConfirmed(false);
+    setScenarioResults({});
     log.clear();
   }
 
-  function handleRunDryRun() {
-    if (effectiveScenarioId == null) return;
+  const handleRunAllDryRuns = useCallback(async () => {
+    if (applicationId == null || scenarios.length === 0) return;
 
-    const scenarioName = scenarios.find((s) => s.id === effectiveScenarioId)?.name ?? effectiveScenarioId;
+    setIsDryRunning(true);
+    setScenarioResults({});
+    log.clear();
+    log.addEntry("info", `Running dry run for all ${scenarios.length} scenarios...`);
 
-    setDryRunResult(undefined);
-    log.addEntry("info", `Running dry run for scenario "${scenarioName}"...`);
-    log.addEntry("info", "Calling UP webhook...");
+    for (const scenario of scenarios) {
+      log.addEntry("info", `[${scenario.name}] Running up/down cycle...`);
 
-    runDryRun.mutate(
-      { applicationId, scenarioId: effectiveScenarioId },
-      {
-        onSuccess: (data) => {
-          setDryRunResult(data);
-          if (data.success) {
-            log.addEntry("success", "UP succeeded");
-            log.addEntry("success", "DOWN succeeded");
-            log.addEntry("success", "Dry run completed successfully");
-          } else {
-            const phase = data.phase.toUpperCase();
-            log.addEntry("error", `${phase} failed: ${formatError(data.error)}`);
-          }
-        },
-        onError: (error) => {
-          log.addEntry("error", formatError(error));
-        },
-      },
-    );
-  }
+      try {
+        const result = await new Promise<{ success: boolean; phase?: string; error?: unknown }>((resolve, reject) => {
+          runDryRun.mutate(
+            { applicationId, scenarioId: scenario.id },
+            {
+              onSuccess: (data) => resolve(data),
+              onError: (err) => reject(err),
+            },
+          );
+        });
+
+        setScenarioResults((prev) => ({ ...prev, [scenario.id]: result }));
+
+        if (result.success) {
+          log.addEntry("success", `[${scenario.name}] Passed`);
+        } else {
+          log.addEntry("error", `[${scenario.name}] Failed during ${result.phase} phase`);
+        }
+      } catch (err) {
+        const errorResult = { success: false, error: err };
+        setScenarioResults((prev) => ({ ...prev, [scenario.id]: errorResult }));
+        log.addEntry("error", `[${scenario.name}] ${formatError(err)}`);
+      }
+    }
+
+    setIsDryRunning(false);
+  }, [applicationId, scenarios, runDryRun, log]);
 
   function handleComplete() {
+    if (applicationId == null || !isAppUrlValid) return;
+
     completeOnboarding.mutate(
-      { applicationId },
+      { applicationId, productionUrl: appUrl },
       {
         onSuccess: () => {
-          void navigate({ to: "/onboarding/url", search: { appId: applicationId } });
+          void navigate({ to: "/onboarding", search: { step: "github" }, replace: true });
         },
       },
     );
   }
 
+  const isCompleting = completeOnboarding.isPending;
+
   return (
-    <div className="py-16">
-      <header className="mb-10 border-b border-border-dim pb-8">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-primary-ink/20 bg-surface-base">
-          <FlaskIcon size={22} weight="duotone" className="text-primary-ink" />
-        </div>
-        <h1 className="text-4xl font-medium tracking-tight text-text-primary">Scenario Dry Run</h1>
-        <p className="mt-3 font-mono text-sm text-text-secondary">
-          Verify that your scenario webhook is working by running a test up/down cycle.
-        </p>
-      </header>
-
-      {/* Step 1: Webhook configuration */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">Webhook Configuration</h2>
-          {isWebhookConfigured && (
-            <button
-              type="button"
-              onClick={handleReconfigure}
-              className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-primary-ink"
-            >
-              <PencilSimpleIcon size={12} />
-              Change
-            </button>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="webhook-url" className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">
-              Webhook URL
-            </label>
-            <input
-              id="webhook-url"
-              type="url"
-              value={webhookUrl}
-              onChange={(e) => setWebhookUrl(e.target.value)}
-              placeholder="https://your-app.com/api/autonoma/webhook"
-              disabled={isWebhookConfigured}
-              className={cn(
-                "w-full max-w-lg border border-border-dim bg-surface-base px-4 py-2.5 font-mono text-sm text-text-primary placeholder-text-tertiary/50 outline-none focus:border-primary-ink/50",
-                isWebhookConfigured && "opacity-50",
-              )}
-            />
+    <>
+      <OnboardingPageHeader
+        leading={
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-primary-ink/20 bg-surface-base">
+            <FlaskIcon size={22} weight="duotone" className="text-primary-ink" />
           </div>
+        }
+        title="Deploy Autonoma SDK"
+        description={
+          <p className="max-w-2xl">
+            The agent created an environment factory endpoint in your project. Now you need to deploy it and verify it
+            works. Follow the steps below.
+          </p>
+        }
+        descriptionClassName="text-sm"
+      />
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="signing-secret" className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">
-              Signing Secret
-            </label>
-            <input
-              id="signing-secret"
-              type="password"
-              value={signingSecret}
-              onChange={(e) => setSigningSecret(e.target.value)}
-              placeholder="your-signing-secret"
-              disabled={isWebhookConfigured}
-              className={cn(
-                "w-full max-w-lg border border-border-dim bg-surface-base px-4 py-2.5 font-mono text-sm text-text-primary placeholder-text-tertiary/50 outline-none focus:border-primary-ink/50",
-                isWebhookConfigured && "opacity-50",
-              )}
-            />
-          </div>
+      {/* Step 1: Deploy changes */}
+      <section className="space-y-4">
+        <div className="flex items-start gap-4">
+          <StepNumber step={1} done={deployConfirmed} />
+          <div className="flex-1 space-y-3">
+            <h2 className="text-lg font-medium text-text-primary">Deploy the changes the agent made</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">
+              The agent created an environment factory endpoint in your codebase (typically at{" "}
+              <code className="rounded bg-surface-raised px-1.5 py-0.5 font-mono text-2xs text-primary-ink">
+                /api/autonoma
+              </code>
+              ). You need to commit, push, and deploy these changes so the endpoint is reachable.{" "}
+              <DocLink href="https://docs.agent.autonoma.app/guides/environment-factory/">
+                See the Environment Factory guide
+              </DocLink>
+            </p>
 
-          {/* Advanced: Custom Headers */}
-          {!isWebhookConfigured && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowAdvanced((prev) => !prev)}
-                className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-text-secondary"
-              >
-                <CaretDownIcon
-                  size={12}
-                  className={cn("transition-transform", showAdvanced ? "rotate-0" : "-rotate-90")}
-                />
-                Advanced
-              </button>
-
-              {showAdvanced && (
-                <div className="mt-3 space-y-3">
-                  <label className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">
-                    Custom Headers
-                  </label>
-                  {customHeaders.map((header, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={header.key}
-                        onChange={(e) => {
-                          const next = [...customHeaders];
-                          next[index] = { ...header, key: e.target.value };
-                          setCustomHeaders(next);
-                        }}
-                        placeholder="Header name"
-                        className="w-48 border border-border-dim bg-surface-base px-3 py-2 font-mono text-sm text-text-primary placeholder-text-tertiary/50 outline-none focus:border-primary-ink/50"
-                      />
-                      <input
-                        type="text"
-                        value={header.value}
-                        onChange={(e) => {
-                          const next = [...customHeaders];
-                          next[index] = { ...header, value: e.target.value };
-                          setCustomHeaders(next);
-                        }}
-                        placeholder="Value"
-                        className="flex-1 border border-border-dim bg-surface-base px-3 py-2 font-mono text-sm text-text-primary placeholder-text-tertiary/50 outline-none focus:border-primary-ink/50"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setCustomHeaders(customHeaders.filter((_, i) => i !== index))}
-                        className="flex size-9 shrink-0 items-center justify-center text-text-tertiary transition-colors hover:text-status-critical"
-                      >
-                        <TrashIcon size={14} />
-                      </button>
+            <div className="flex flex-col gap-3 border border-border-dim bg-surface-base p-4">
+              <div className="flex items-center gap-2.5 text-sm text-text-secondary">
+                <GitBranchIcon size={16} weight="bold" className="shrink-0 text-text-tertiary" />
+                <span>Commit and push the agent's changes to your repository</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-sm text-text-secondary">
+                <RocketLaunchIcon size={16} weight="bold" className="shrink-0 text-text-tertiary" />
+                <span>
+                  Deploy to your hosting provider, or run{" "}
+                  <code className="rounded bg-surface-raised px-1.5 py-0.5 font-mono text-2xs text-primary-ink">
+                    npm run dev
+                  </code>{" "}
+                  locally
+                </span>
+              </div>
+              <div className="flex items-start gap-2.5 text-sm text-text-secondary">
+                <KeyIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-text-tertiary" />
+                <div className="flex flex-col gap-1.5">
+                  <span>Set these environment variables on your deployed environment:</span>
+                  <div className="flex flex-col gap-1 pl-1">
+                    <div className="flex items-center gap-2 font-mono text-2xs">
+                      <CircleIcon size={6} weight="fill" className="shrink-0 text-text-tertiary" />
+                      <code className="rounded bg-surface-raised px-1.5 py-0.5 text-primary-ink">
+                        AUTONOMA_SIGNING_SECRET
+                      </code>
+                      <span className="font-sans text-text-tertiary">- shared secret for webhook verification</span>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setCustomHeaders([...customHeaders, { key: "", value: "" }])}
-                    className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-primary-ink"
-                  >
-                    <PlusIcon size={12} />
-                    Add Header
-                  </button>
+                    <div className="flex items-center gap-2 font-mono text-2xs">
+                      <CircleIcon size={6} weight="fill" className="shrink-0 text-text-tertiary" />
+                      <code className="rounded bg-surface-raised px-1.5 py-0.5 text-primary-ink">
+                        AUTONOMA_ENABLED=true
+                      </code>
+                      <span className="font-sans text-text-tertiary">- enables the endpoint in production</span>
+                    </div>
+                  </div>
+                  <p className="mt-1 text-2xs text-text-tertiary">
+                    Generate secrets with:{" "}
+                    <code className="rounded bg-surface-raised px-1.5 py-0.5 font-mono text-primary-ink">
+                      openssl rand -hex 32
+                    </code>
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
-          )}
 
-          {!isWebhookConfigured && (
-            <Button
-              variant="accent"
-              className="w-fit gap-2 px-6 py-3 font-mono text-sm font-bold uppercase"
-              onClick={handleDiscoverScenarios}
-              disabled={webhookUrl.length === 0 || signingSecret.length === 0 || discoverScenarios.isPending}
-            >
-              {discoverScenarios.isPending ? "Discovering..." : "Discover Scenarios"}
-            </Button>
-          )}
+            {!deployConfirmed && (
+              <Button
+                variant="accent"
+                className="w-fit gap-2 px-6 py-3 font-mono text-sm font-bold uppercase"
+                onClick={() => setDeployConfirmed(true)}
+              >
+                <CheckCircleIcon size={16} weight="bold" />
+                I've deployed my changes
+              </Button>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Step 2: Scenario selection + dry run */}
-      {isWebhookConfigured && (
-        <section className="mt-10 space-y-6 border-t border-border-dim pt-10">
-          <h2 className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">Test Scenario</h2>
+      {/* Step 2: Webhook URL + Secret */}
+      {deployConfirmed && (
+        <section className="mt-10 space-y-4 border-t border-border-dim pt-10">
+          <div className="flex items-start gap-4">
+            <StepNumber step={2} done={isWebhookConfigured} />
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-medium text-text-primary">Connect your webhook</h2>
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-text-secondary">
+                    Provide the URL where the environment factory is running. Autonoma will call this endpoint to set up
+                    and tear down test data before each run.
+                  </p>
+                </div>
+                {isWebhookConfigured && (
+                  <button
+                    type="button"
+                    onClick={handleReconfigure}
+                    className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-primary-ink"
+                  >
+                    <PencilSimpleIcon size={12} />
+                    Change
+                  </button>
+                )}
+              </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="scenario-select"
-                className="font-mono text-2xs uppercase tracking-widest text-text-tertiary"
-              >
-                Scenario
-              </label>
-              <select
-                id="scenario-select"
-                value={effectiveScenarioId ?? ""}
-                onChange={(e) => {
-                  setSelectedScenarioId(e.target.value);
-                  setDryRunResult(undefined);
-                }}
-                className="w-full max-w-lg border border-border-dim bg-surface-base px-4 py-2.5 font-mono text-sm text-text-primary outline-none focus:border-primary-ink/50"
-              >
-                {scenarios.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="webhook-url">Webhook URL</Label>
+                  <p className="text-2xs text-text-tertiary">
+                    The full URL of the environment factory endpoint. This is typically your app's base URL plus the
+                    path the agent created (e.g. /api/autonoma).
+                  </p>
+                  <Input
+                    id="webhook-url"
+                    type="url"
+                    value={webhookUrl}
+                    onChange={(e) => {
+                      setWebhookUrlDraft(e.target.value);
+                      discoverScenarios.reset();
+                    }}
+                    onBlur={() => setWebhookUrlTouched(true)}
+                    aria-invalid={
+                      (webhookUrlTouched && webhookUrl.length > 0 && !isValidUrl(webhookUrl)) || isUrlErrorField
+                    }
+                    placeholder="https://staging.your-app.com/api/autonoma"
+                    disabled={isWebhookConfigured}
+                    className="max-w-lg"
+                  />
+                  {webhookUrlTouched && webhookUrl.length > 0 && !isValidUrl(webhookUrl) && (
+                    <p className="text-2xs text-status-critical">Enter a valid URL starting with http:// or https://</p>
+                  )}
+                </div>
 
-            <Button
-              variant="accent"
-              className="w-fit gap-2 px-6 py-3 font-mono text-sm font-bold uppercase"
-              onClick={handleRunDryRun}
-              disabled={effectiveScenarioId == null || runDryRun.isPending}
-            >
-              <PlayIcon size={16} weight="bold" />
-              {runDryRun.isPending ? "Running..." : "Run Dry Run"}
-            </Button>
-          </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="signing-secret">Signing Secret</Label>
+                  <p className="text-2xs text-text-tertiary">
+                    Copy the{" "}
+                    <code className="rounded bg-surface-raised px-1 py-0.5 font-mono text-2xs">
+                      AUTONOMA_SIGNING_SECRET
+                    </code>{" "}
+                    value from your project's{" "}
+                    <code className="rounded bg-surface-raised px-1 py-0.5 font-mono text-2xs">.env.local</code> or{" "}
+                    <code className="rounded bg-surface-raised px-1 py-0.5 font-mono text-2xs">.env</code> file. This is
+                    the same secret your deployed endpoint uses to verify requests.
+                  </p>
+                  <Input
+                    id="signing-secret"
+                    type="password"
+                    value={signingSecret}
+                    onChange={(e) => {
+                      setSigningSecret(e.target.value);
+                      discoverScenarios.reset();
+                    }}
+                    onBlur={() => setSigningSecretTouched(true)}
+                    aria-invalid={(signingSecretTouched && signingSecret.length === 0) || isSecretErrorField}
+                    placeholder="your-signing-secret"
+                    disabled={isWebhookConfigured}
+                    className="max-w-lg"
+                  />
+                  {signingSecretTouched && signingSecret.length === 0 && (
+                    <p className="text-2xs text-status-critical">Signing secret is required</p>
+                  )}
+                </div>
 
-          {/* Result display */}
-          {dryRunResult != null && (
-            <div
-              className={cn(
-                "flex items-start gap-3 border px-5 py-4",
-                dryRunResult.success
-                  ? "border-status-success/30 bg-status-success/5"
-                  : "border-status-critical/30 bg-status-critical/5",
-              )}
-            >
-              {dryRunResult.success ? (
-                <>
-                  <CheckCircleIcon size={20} weight="fill" className="mt-0.5 shrink-0 text-status-success" />
+                {/* Advanced: Custom Headers */}
+                {!isWebhookConfigured && (
                   <div>
-                    <p className="font-mono text-sm font-medium text-status-success">Setup successful!</p>
-                    <p className="mt-1 font-mono text-2xs text-text-secondary">
-                      Scenario up and down completed without errors. Your webhook is working correctly.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <WarningCircleIcon size={20} weight="fill" className="mt-0.5 shrink-0 text-status-critical" />
-                  <div>
-                    <p className="font-mono text-sm font-medium text-status-critical">
-                      Dry run failed during {dryRunResult.phase} phase
-                    </p>
-                    {dryRunResult.error != null && (
-                      <p className="mt-1 font-mono text-2xs text-text-secondary">{formatError(dryRunResult.error)}</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced((prev) => !prev)}
+                      className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-text-secondary"
+                    >
+                      <CaretDownIcon
+                        size={12}
+                        className={cn("transition-transform", showAdvanced ? "rotate-0" : "-rotate-90")}
+                      />
+                      Advanced
+                    </button>
+
+                    {showAdvanced && (
+                      <div className="mt-3 space-y-3">
+                        <Label>Custom Headers</Label>
+                        {customHeaders.map((header, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input
+                              type="text"
+                              value={header.key}
+                              onChange={(e) => {
+                                const next = [...customHeaders];
+                                next[index] = { ...header, key: e.target.value };
+                                setCustomHeaders(next);
+                              }}
+                              placeholder="Header name"
+                              className="w-48"
+                            />
+                            <Input
+                              type="text"
+                              value={header.value}
+                              onChange={(e) => {
+                                const next = [...customHeaders];
+                                next[index] = { ...header, value: e.target.value };
+                                setCustomHeaders(next);
+                              }}
+                              placeholder="Value"
+                              className="flex-1"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setCustomHeaders(customHeaders.filter((_, i) => i !== index))}
+                              className="flex size-9 shrink-0 items-center justify-center text-text-tertiary transition-colors hover:text-status-critical"
+                            >
+                              <TrashIcon size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setCustomHeaders([...customHeaders, { key: "", value: "" }])}
+                          className="flex items-center gap-1.5 font-mono text-2xs text-text-tertiary transition-colors hover:text-primary-ink"
+                        >
+                          <PlusIcon size={12} />
+                          Add Header
+                        </button>
+                      </div>
                     )}
                   </div>
-                </>
-              )}
+                )}
+
+                {!isWebhookConfigured && (
+                  <>
+                    <Button
+                      variant="accent"
+                      className="w-fit gap-2 px-6 py-3 font-mono text-sm font-bold uppercase"
+                      onClick={handleDiscoverScenarios}
+                      disabled={
+                        webhookUrl.length === 0 ||
+                        !isValidUrl(webhookUrl) ||
+                        signingSecret.length === 0 ||
+                        discoverScenarios.isPending ||
+                        applicationId == null
+                      }
+                    >
+                      <GlobeIcon size={16} weight="bold" />
+                      {discoverScenarios.isPending ? "Discovering..." : "Discover Scenarios"}
+                    </Button>
+
+                    {discoverError != null && <DiscoverErrorAlert error={discoverError} />}
+                  </>
+                )}
+              </div>
             </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* Step 3: Dry run all scenarios */}
+      {isWebhookConfigured && (
+        <section className="mt-10 space-y-4 border-t border-border-dim pt-10">
+          <div className="flex items-start gap-4">
+            <StepNumber step={3} done={allDryRunsPassed} />
+            <div className="flex-1 space-y-4">
+              <div>
+                <h2 className="text-lg font-medium text-text-primary">Verify with a dry run</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-text-secondary">
+                  Run a dry run for all {scenarios.length} scenario{scenarios.length !== 1 ? "s" : ""}. This calls your
+                  webhook to create test data (up), then immediately tear it down (down) - verifying the full cycle
+                  works.{" "}
+                  <DocLink href="https://docs.agent.autonoma.app/test-planner/step-2-scenarios/">
+                    Learn more about scenarios
+                  </DocLink>
+                </p>
+              </div>
+
+              {/* Scenario results list */}
+              {scenarios.length > 0 && Object.keys(scenarioResults).length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {scenarios.map((s) => {
+                    const result = scenarioResults[s.id];
+                    return (
+                      <div key={s.id} className="flex items-center gap-3 font-mono text-sm">
+                        {result == null ? (
+                          <SpinnerGapIcon size={16} className="shrink-0 animate-spin text-text-tertiary" />
+                        ) : result.success ? (
+                          <CheckCircleIcon size={16} weight="fill" className="shrink-0 text-status-success" />
+                        ) : (
+                          <WarningCircleIcon size={16} weight="fill" className="shrink-0 text-status-critical" />
+                        )}
+                        <span className={cn("text-2xs", result?.success === false && "text-status-critical")}>
+                          {s.name}
+                          {result?.success === false &&
+                            result.phase != null &&
+                            ` - failed during ${result.phase} phase`}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="accent"
+                  className="w-fit gap-2 px-6 py-3 font-mono text-sm font-bold uppercase"
+                  onClick={() => void handleRunAllDryRuns()}
+                  disabled={isDryRunning}
+                >
+                  <PlayIcon size={16} weight="bold" />
+                  {isDryRunning ? "Running..." : anyDryRunFailed ? "Retry Dry Run" : "Run Dry Run"}
+                </Button>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
       {/* Webhook log console */}
       <WebhookLog entries={log.entries} />
 
-      {/* Complete button */}
-      {dryRunPassed && (
-        <section className="mt-10 border-t border-border-dim pt-10">
-          <Button
-            variant="accent"
-            className="gap-3 px-8 py-4 font-mono text-sm font-bold uppercase"
-            onClick={handleComplete}
-            disabled={completeOnboarding.isPending}
-          >
-            {completeOnboarding.isPending ? "Continuing..." : "Continue"}
-            <ArrowRightIcon size={18} weight="bold" />
-          </Button>
+      {/* Step 4: App URL + Continue */}
+      {allDryRunsPassed && (
+        <section className="mt-10 space-y-4 border-t border-border-dim pt-10">
+          <div className="flex items-start gap-4">
+            <StepNumber step={4} done={isAppUrlValid} />
+            <div className="flex-1 space-y-4">
+              <div>
+                <h2 className="text-lg font-medium text-text-primary">Set your application URL</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-text-secondary">
+                  Where should Autonoma run tests? Use your staging or preview environment - somewhere that closely
+                  mirrors production but where test data won't affect real users. You can change this later in settings.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="app-url">Application URL</Label>
+                <Input
+                  id="app-url"
+                  type="url"
+                  value={appUrl}
+                  onChange={(e) => setAppUrl(e.target.value)}
+                  onBlur={() => setAppUrlTouched(true)}
+                  aria-invalid={appUrlTouched && appUrl.length > 0 && !isValidUrl(appUrl)}
+                  placeholder="https://staging.your-app.com"
+                  className="max-w-lg"
+                />
+                {appUrlTouched && appUrl.length > 0 && !isValidUrl(appUrl) && (
+                  <p className="text-2xs text-status-critical">Enter a valid URL starting with http:// or https://</p>
+                )}
+              </div>
+
+              {isAppUrlValid && (
+                <Button
+                  variant="accent"
+                  className="gap-3 px-8 py-4 font-mono text-sm font-bold uppercase"
+                  onClick={handleComplete}
+                  disabled={isCompleting}
+                  aria-label="onboarding-complete"
+                >
+                  {isCompleting ? "Completing..." : "Continue"}
+                  <ArrowRightIcon size={18} weight="bold" />
+                </Button>
+              )}
+            </div>
+          </div>
         </section>
       )}
-    </div>
+    </>
   );
 }

@@ -1,54 +1,21 @@
 import { Button } from "@autonoma/blacklight";
 import { BugIcon } from "@phosphor-icons/react/Bug";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { trpcClient } from "lib/trpc";
-import { useEffect, useRef, useState } from "react";
-import { onboardingSearchSchema } from "./-onboarding-search";
+import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_blacklight/onboarding/complete")({
-  component: CompletePage,
-  validateSearch: onboardingSearchSchema,
+  component: () => <Navigate to="/onboarding" search={{ step: "complete" }} />,
 });
 
-async function resolveAppSlug(applicationId: string): Promise<string | undefined> {
-  const apps = await trpcClient.applications.list.query();
-  return apps.find((a) => a.id === applicationId)?.slug;
-}
-
-function CompletePage() {
-  const { appId } = Route.useSearch();
+export function CompletePage() {
   const navigate = useNavigate();
-  const resolved = useRef(false);
-  const [appSlug, setAppSlug] = useState<string>();
 
   useEffect(() => {
-    if (!resolved.current) {
-      resolved.current = true;
-      void resolveAppSlug(appId).then(setAppSlug);
-    }
-  }, [appId]);
-
-  function navigateToApp() {
-    if (appSlug != null) {
-      void navigate({ to: "/app/$appSlug", params: { appSlug } });
-    } else {
-      void navigate({ to: "/" });
-    }
-  }
-
-  useEffect(() => {
-    // Auto-navigate once we have resolved the app slug (or after a timeout fallback)
-    if (appSlug != null) {
-      const timer = setTimeout(navigateToApp, 2000);
-      return () => clearTimeout(timer);
-    }
-
-    // Fallback: if slug resolution takes too long, navigate home
-    const fallback = setTimeout(() => {
-      void navigate({ to: "/" });
-    }, 4000);
-    return () => clearTimeout(fallback);
-  }, [appSlug, navigate]);
+    const timer = setTimeout(() => {
+      void navigate({ to: "/", replace: true });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <>
@@ -65,7 +32,7 @@ function CompletePage() {
         }
       `}</style>
 
-      <div className="flex flex-col items-center py-16 text-center">
+      <div className="flex flex-col items-center py-10 text-center sm:py-12">
         <div
           className="mb-10 flex size-28 items-center justify-center rounded-full border border-primary-ink/20 bg-surface-base"
           style={{ animation: "bugGlow 3s ease-in-out infinite" }}
@@ -87,7 +54,7 @@ function CompletePage() {
         <Button
           variant="accent"
           className="mt-14 gap-3 px-10 py-4 font-mono text-sm font-bold uppercase"
-          onClick={navigateToApp}
+          onClick={() => void navigate({ to: "/", replace: true })}
           aria-label="onboarding-complete-start-now"
         >
           <BugIcon size={18} weight="bold" />

@@ -1,9 +1,19 @@
-import { Button, Skeleton } from "@autonoma/blacklight";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Skeleton,
+} from "@autonoma/blacklight";
 import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CheckCircleIcon } from "@phosphor-icons/react/CheckCircle";
 import { GithubLogoIcon } from "@phosphor-icons/react/GithubLogo";
 import { WarningCircleIcon } from "@phosphor-icons/react/WarningCircle";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   useGithubConfig,
   useGithubInstallation,
@@ -13,14 +23,16 @@ import {
 import { useCompleteGithub } from "lib/query/onboarding.queries";
 import { Suspense, useState } from "react";
 import { z } from "zod";
+import { OnboardingPageHeader } from "./-components/onboarding-page-header";
+import { getOnboardingApplicationId } from "./install";
 
 const githubSearchParams = z.object({
-  appId: z.string(),
+  appId: z.string().optional(),
   error: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_blacklight/onboarding/github")({
-  component: GitHubPage,
+  component: () => <Navigate to="/onboarding" search={{ step: "github" }} />,
   validateSearch: githubSearchParams,
 });
 
@@ -35,20 +47,36 @@ function getErrorMessage(error: string): string {
   }
 }
 
-function GitHubPage() {
-  const { error, appId } = Route.useSearch();
+export function GitHubPage() {
+  const applicationId = getOnboardingApplicationId();
+  // Check if we arrived here from a GitHub OAuth callback with an error
+  const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get("error") ?? undefined;
+
+  if (applicationId == null) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="font-mono text-sm text-text-tertiary">No application found. Please start from the beginning.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="py-16">
-      <header className="mb-10 border-b border-border-dim pb-8">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-primary-ink/20 bg-surface-base">
-          <GithubLogoIcon size={22} weight="duotone" className="text-primary-ink" />
-        </div>
-        <h1 className="text-4xl font-medium tracking-tight text-text-primary">Connect GitHub</h1>
-        <p className="mt-3 font-mono text-sm text-text-secondary">
-          Link a repository so Autonoma can analyze code changes and keep your tests up to date.
-        </p>
-      </header>
+    <>
+      <OnboardingPageHeader
+        leading={
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-primary-ink/20 bg-surface-base">
+            <GithubLogoIcon size={22} weight="duotone" className="text-primary-ink" />
+          </div>
+        }
+        title="Connect GitHub"
+        description={
+          <p className="max-w-2xl">
+            Link a repository so Autonoma can analyze code changes and keep your tests up to date.
+          </p>
+        }
+        descriptionClassName="text-sm"
+      />
 
       {error != null && (
         <div className="mb-8 flex items-start gap-3 border border-status-critical/30 bg-status-critical/5 px-5 py-4">
@@ -58,9 +86,9 @@ function GitHubPage() {
       )}
 
       <Suspense fallback={<GitHubContentSkeleton />}>
-        <GitHubContent appId={appId} />
+        <GitHubContent appId={applicationId} />
       </Suspense>
-    </div>
+    </>
   );
 }
 
@@ -145,7 +173,7 @@ function RepoSelectionStep({ appId }: { appId: string }) {
       { applicationId: appId },
       {
         onSuccess: () => {
-          void navigate({ to: "/onboarding/complete", search: { appId } });
+          void navigate({ to: "/onboarding", search: { step: "complete" } });
         },
       },
     );
@@ -181,28 +209,29 @@ function RepoSelectionStep({ appId }: { appId: string }) {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="repo-select" className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">
-          Repository
-        </label>
-        <select
-          id="repo-select"
+        <Label>Repository</Label>
+        <Select
           value={selectedRepoId ?? ""}
-          onChange={(e) => {
-            setSelectedRepoId(e.target.value || undefined);
-            const repo = repos.find((r) => r.id === e.target.value);
+          onValueChange={(value) => {
+            const id = value as string;
+            setSelectedRepoId(id || undefined);
+            const repo = repos.find((r) => r.id === id);
             if (repo?.defaultBranch != null) {
               setWatchBranch(repo.defaultBranch);
             }
           }}
-          className="w-full max-w-lg border border-border-dim bg-surface-base px-4 py-2.5 font-mono text-sm text-text-primary outline-none focus:border-primary-ink/50"
         >
-          <option value="">Select a repository</option>
-          {repos.map((repo) => (
-            <option key={repo.id} value={repo.id}>
-              {repo.fullName}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="max-w-lg">
+            <SelectValue placeholder="Select a repository" />
+          </SelectTrigger>
+          <SelectContent>
+            {repos.map((repo) => (
+              <SelectItem key={repo.id} value={repo.id}>
+                {repo.fullName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {settingsUrl != null && (
           <p className="font-mono text-2xs text-text-tertiary">
             Can't find your repository?{" "}
@@ -220,15 +249,13 @@ function RepoSelectionStep({ appId }: { appId: string }) {
 
       {selectedRepoId != null && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="branch-input" className="font-mono text-2xs uppercase tracking-widest text-text-tertiary">
-            Branch to watch
-          </label>
-          <input
+          <Label htmlFor="branch-input">Branch to watch</Label>
+          <Input
             id="branch-input"
             type="text"
             value={watchBranch}
             onChange={(e) => setWatchBranch(e.target.value)}
-            className="w-full max-w-lg border border-border-dim bg-surface-base px-4 py-2.5 font-mono text-sm text-text-primary placeholder-text-tertiary/50 outline-none focus:border-primary-ink/50"
+            className="max-w-lg"
           />
           <p className="font-mono text-2xs text-text-tertiary">Autonoma will analyze changes pushed to this branch.</p>
         </div>

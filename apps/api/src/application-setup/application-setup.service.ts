@@ -127,12 +127,17 @@ export class ApplicationSetupService {
     }
 
     async addEvent(setupId: string, organizationId: string, event: SetupEventBody) {
-        const setup = await this.db.$transaction(async (tx) => {
+        let setupCompleted = false;
+        let applicationId: string | undefined;
+
+        await this.db.$transaction(async (tx) => {
             const found = await tx.applicationSetup.findUnique({
                 where: { id: setupId, organizationId },
                 select: { id: true, applicationId: true },
             });
             if (found == null) throw new NotFoundError("Application setup not found");
+
+            applicationId = found.applicationId;
 
             await tx.applicationSetupEvent.create({
                 data: {
@@ -154,6 +159,7 @@ export class ApplicationSetupService {
                     where: { id: setupId },
                     data: { status: "completed", completedAt: new Date() },
                 });
+                setupCompleted = true;
             }
 
             if (event.type === "error") {
@@ -166,23 +172,24 @@ export class ApplicationSetupService {
             return found;
         });
 
-        log.info("Added setup event", { setupId, type: event.type });
-
-        if (event.type === "step.completed" && event.data.step === TOTAL_SETUP_STEPS - 1) {
+        // Advance onboarding after the transaction commits so there's no deadlock
+        if (setupCompleted && applicationId != null) {
             try {
-                await this.onboardingManager.startScenarioDryRun(setup.applicationId);
-                log.info("Advanced onboarding to scenario_dry_run after final step completed", {
+                await this.onboardingManager.startScenarioDryRun(applicationId);
+                log.info("Advanced onboarding to scenario_dry_run after setup completion", {
                     setupId,
-                    applicationId: setup.applicationId,
+                    applicationId,
                 });
             } catch (err) {
-                log.warn("Could not advance onboarding to scenario_dry_run - recipes may be missing", {
-                    setupId,
-                    applicationId: setup.applicationId,
-                    error: err instanceof Error ? err.message : String(err),
-                });
+                if (err instanceof InvalidOnboardingStepError) {
+                    log.info("Onboarding already past working step", { applicationId });
+                } else {
+                    throw err;
+                }
             }
         }
+
+        log.info("Added setup event", { setupId, type: event.type });
     }
 
     async updateSetup(setupId: string, organizationId: string, body: UpdateSetupBody) {

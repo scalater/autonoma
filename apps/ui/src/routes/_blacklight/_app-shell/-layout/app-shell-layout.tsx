@@ -41,11 +41,7 @@ function MinimalLayout({ children }: { children: ReactNode }) {
 
       <div className="relative z-10 flex h-14 shrink-0 items-center justify-between border-b border-border-dim bg-surface-void/80 px-6 backdrop-blur">
         <Link to="/">
-          <img
-            src="/logo.svg"
-            alt="Autonoma"
-            className="h-5 [.blacklight-dark_&]:brightness-0 [.blacklight-dark_&]:invert"
-          />
+          <img src="/logo.svg" alt="Autonoma" className="h-5 w-auto" />
         </Link>
         <div className="flex items-center gap-2">
           <span className="font-mono text-2xs text-text-tertiary">{user?.name ?? user?.email ?? "User"}</span>

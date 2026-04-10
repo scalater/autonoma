@@ -10,4 +10,12 @@ export class InstallState extends OnboardingState {
             data: { step: "configure" },
         });
     }
+
+    override async markAgentConnected(): Promise<void> {
+        this.logger.info("Agent connected directly from install - skipping configure step");
+        await this.db.onboardingState.update({
+            where: { applicationId: this.applicationId },
+            data: { step: "working", agentConnectedAt: new Date() },
+        });
+    }
 }

@@ -94,7 +94,7 @@ defmodule MyApp.Autonoma.RefsToken do
   @expiry_seconds 86_400  # 24 hours
 
   defp secret do
-    Application.fetch_env!(:my_app, :autonoma_internal_secret)
+    Application.fetch_env!(:my_app, :autonoma_jwt_secret)
   end
 
   @doc "Sign refs into a JWT token."
@@ -143,7 +143,7 @@ end
 defmodule MyApp.Autonoma.Signature do
   @doc "Verify the x-signature header against the raw request body."
   def verify(raw_body, signature) do
-    secret = Application.fetch_env!(:my_app, :autonoma_shared_secret)
+    secret = Application.fetch_env!(:my_app, :autonoma_signing_secret)
     expected = :crypto.mac(:hmac, :sha256, secret, raw_body) |> Base.encode16(case: :lower)
 
     Plug.Crypto.secure_compare(expected, signature)
@@ -282,7 +282,7 @@ defmodule MyAppWeb.AutonomaController do
 
         module ->
           case module.down(refs) do
-            :ok -> json(conn, %{success: true})
+            :ok -> json(conn, %{ok: true})
             {:error, reason} -> error_response(conn, "Down failed: #{inspect(reason)}", "DOWN_FAILED", 500)
           end
       end
@@ -420,8 +420,8 @@ end
 
 ```elixir
 config :my_app,
-  autonoma_shared_secret: System.get_env("AUTONOMA_SHARED_SECRET"),
-  autonoma_internal_secret: System.get_env("AUTONOMA_INTERNAL_SECRET"),
+  autonoma_signing_secret: System.get_env("AUTONOMA_SIGNING_SECRET"),
+  autonoma_jwt_secret: System.get_env("AUTONOMA_JWT_SECRET"),
   autonoma_factory_enabled: true
 ```
 

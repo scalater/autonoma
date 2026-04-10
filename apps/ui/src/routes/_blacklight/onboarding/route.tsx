@@ -1,30 +1,70 @@
 import { Button } from "@autonoma/blacklight";
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/ArrowCounterClockwise";
 import { SignOutIcon } from "@phosphor-icons/react/SignOut";
-import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TalkToSupport } from "components/talk-to-support";
 import { useAuth, useAuthClient } from "lib/auth";
+import { isOnboardingStep, type OnboardingStep } from "lib/onboarding/onboarding-steps";
 import { ensureSessionData } from "lib/query/auth.queries";
+import { trpc } from "lib/trpc";
 import { useState } from "react";
 import { StepProgress } from "./-components/step-progress";
+import { CompletePage } from "./complete";
+import { GitHubPage } from "./github";
+import { InstallPage } from "./install";
+import { IntroKeyConceptsPage } from "./intro-key-concepts";
+import { IntroPlatformTourPage } from "./intro-platform-tour";
+import { IntroWelcomePage } from "./intro-welcome";
+import { DeployPage } from "./scenario-dry-run";
+import { WorkingPage } from "./working";
+
+const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
+const ONBOARDING_API_KEY_STORAGE = "autonoma.onboarding.apiKey";
+
+function mapBackendStepToViewStep(step: string | undefined): OnboardingStep {
+  if (step === "working") return "working";
+  if (step === "scenario_dry_run" || step === "url") return "scenario-dry-run";
+  if (step === "github") return "github";
+  if (step === "completed") return "complete";
+  // New users with no backend state should see the intro
+  if (step == null || step === "install") return "intro-welcome";
+  return "intro-welcome";
+}
 
 export const Route = createFileRoute("/_blacklight/onboarding")({
   component: OnboardingLayout,
-  beforeLoad: async ({ context: { queryClient } }) => {
+  validateSearch: (search: Record<string, unknown>) => {
+    const step = typeof search.step === "string" && isOnboardingStep(search.step) ? search.step : undefined;
+    return { step };
+  },
+  loader: async ({ context: { queryClient } }) => {
     const session = await ensureSessionData(queryClient);
     if (session == null) throw Route.redirect({ to: "/login", search: { error: undefined } });
+    const applicationId = localStorage.getItem(ONBOARDING_APP_KEY);
+    if (applicationId == null) {
+      return { backendStep: "install" };
+    }
+    try {
+      const state = await queryClient.ensureQueryData(trpc.onboarding.getState.queryOptions({ applicationId }));
+      return { backendStep: state.step };
+    } catch {
+      localStorage.removeItem(ONBOARDING_API_KEY_STORAGE);
+      localStorage.removeItem(ONBOARDING_APP_KEY);
+      return { backendStep: "install" };
+    }
   },
 });
 
-function getCurrentStep(pathname: string) {
-  if (pathname.includes("/install")) return 0;
-  if (pathname.includes("/configure")) return 1;
-  if (pathname.includes("/working")) return 2;
-  if (pathname.includes("/scenario-dry-run")) return 3;
-  if (pathname.includes("/url")) return 4;
-  if (pathname.includes("/github")) return 5;
-  if (pathname.includes("/complete")) return 6;
-  return 0;
+function resolveViewStep(requestedStep: OnboardingStep | undefined, backendStep: string): OnboardingStep {
+  if (requestedStep != null && requestedStep.startsWith("intro-")) {
+    return requestedStep;
+  }
+  const backendViewStep = mapBackendStepToViewStep(backendStep);
+  if (requestedStep == null) return backendViewStep;
+  // Always trust the requested step - the UI navigates forward when the backend
+  // operation succeeds, but the route loader may re-fetch before the backend
+  // state has fully transitioned (e.g. working -> scenario_dry_run).
+  return requestedStep;
 }
 
 function GridBackground() {
@@ -41,19 +81,33 @@ function GridBackground() {
 }
 
 function OnboardingLayout() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const authClient = useAuthClient();
-  const currentStep = getCurrentStep(location.pathname);
+  const { backendStep } = Route.useLoaderData();
+  const { step } = Route.useSearch();
+  const currentStepId = resolveViewStep(step, backendStep);
   const [confirmReset, setConfirmReset] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   function handleReset() {
     setIsResetting(true);
-    void navigate({ to: "/onboarding/install" });
+    localStorage.removeItem(ONBOARDING_API_KEY_STORAGE);
+    localStorage.removeItem(ONBOARDING_APP_KEY);
+    void navigate({ to: "/onboarding", search: { step: "intro-welcome" } });
     setConfirmReset(false);
     setIsResetting(false);
+  }
+
+  function renderStep() {
+    if (currentStepId === "intro-welcome") return <IntroWelcomePage />;
+    if (currentStepId === "intro-key-concepts") return <IntroKeyConceptsPage />;
+    if (currentStepId === "intro-platform-tour") return <IntroPlatformTourPage />;
+    if (currentStepId === "install") return <InstallPage />;
+    if (currentStepId === "working") return <WorkingPage />;
+    if (currentStepId === "scenario-dry-run") return <DeployPage />;
+    if (currentStepId === "github") return <GitHubPage />;
+    return <CompletePage />;
   }
 
   return (
@@ -62,11 +116,7 @@ function OnboardingLayout() {
 
       {/* Top nav */}
       <div className="fixed left-0 right-0 top-0 z-50 flex h-14 shrink-0 items-center justify-between border-b border-border-dim bg-surface-void/80 px-6 backdrop-blur">
-        <img
-          src="/logo.svg"
-          alt="Autonoma"
-          className="h-5 [.blacklight-dark_&]:brightness-0 [.blacklight-dark_&]:invert"
-        />
+        <img src="/logo.svg" alt="Autonoma" className="h-5 w-auto" />
         <div className="flex items-center gap-2">
           <span className="font-mono text-2xs text-text-tertiary">{user?.name ?? user?.email ?? ""}</span>
           <Button
@@ -89,7 +139,7 @@ function OnboardingLayout() {
       <aside className="relative z-10 mt-14 flex w-64 shrink-0 flex-col border-r border-border-dim bg-surface-base/30 backdrop-blur-sm">
         <div className="flex-1 p-8 pt-10">
           <h3 className="mb-8 font-mono text-3xs uppercase tracking-widest text-text-tertiary">New Application</h3>
-          <StepProgress currentStep={currentStep} />
+          <StepProgress currentStepId={currentStepId} />
         </div>
 
         <div className="border-t border-border-dim px-8 py-6">
@@ -132,8 +182,8 @@ function OnboardingLayout() {
           backgroundImage: "radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
         }}
       >
-        <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col justify-center">
-          <Outlet />
+        <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col justify-center px-6 py-10 pb-16 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+          {renderStep()}
         </div>
       </main>
     </div>

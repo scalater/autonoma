@@ -33,6 +33,11 @@ export const sounds = {
         setTimeout(() => playTone(784, 0.22, 0.28), 200); // G5
     },
 
+    attention: () => {
+        playTone(880, 0.1, 0.22); // A5
+        setTimeout(() => playTone(1100, 0.15, 0.25), 120); // ~C#6
+    },
+
     error: () => {
         playTone(330, 0.14, 0.28, "square");
         setTimeout(() => playTone(220, 0.2, 0.22, "square"), 140);

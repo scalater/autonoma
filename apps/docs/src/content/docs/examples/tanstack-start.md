@@ -150,7 +150,7 @@ async function handleDown(refs: Record<string, unknown>, refsToken: string) {
 
     try {
         await scenario.down(refs)
-        return json({ success: true })
+        return json({ ok: true })
     } catch (error) {
         console.error("[Autonoma] down failed", { error })
         return errorResponse("Teardown failed", "DOWN_FAILED", 500)

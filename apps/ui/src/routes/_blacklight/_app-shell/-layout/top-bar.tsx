@@ -94,7 +94,7 @@ function AppSelector({ currentApp }: { currentApp: { slug: string; name: string 
           <DropdownMenuItem
             className="gap-1.5 border border-dashed border-border-mid text-primary"
             onClick={() => {
-              void navigate({ to: "/onboarding/install" });
+              void navigate({ to: "/onboarding", search: { step: "install" } });
             }}
           >
             <PlusIcon size={14} weight="bold" />

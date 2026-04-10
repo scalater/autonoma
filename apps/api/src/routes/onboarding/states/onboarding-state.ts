@@ -94,8 +94,8 @@ export abstract class OnboardingState {
         throw new InvalidOnboardingStepError(this.step, "run scenario dry run");
     }
 
-    /** Transition from `scenario_dry_run` to `url`. */
-    complete(): Promise<void> {
+    /** Transition from `scenario_dry_run` to `completed`. */
+    complete(_productionUrl?: string): Promise<void> {
         throw new InvalidOnboardingStepError(this.step, "complete onboarding");
     }
 

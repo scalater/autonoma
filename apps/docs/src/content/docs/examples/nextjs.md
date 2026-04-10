@@ -97,7 +97,7 @@ export type UpResponse = {
 }
 
 export type DownResponse = {
-    success: boolean
+    ok: boolean
 }
 
 export type DiscoverEnvironment = {
@@ -169,8 +169,8 @@ const JWT_ALGORITHM = "HS256" as const
 const REFS_TOKEN_EXPIRY = "24h"
 
 function getSecret(): string {
-    const secret = process.env.AUTONOMA_INTERNAL_SECRET
-    if (secret == null) throw new Error("AUTONOMA_INTERNAL_SECRET is not configured")
+    const secret = process.env.AUTONOMA_JWT_SECRET
+    if (secret == null) throw new Error("AUTONOMA_JWT_SECRET is not configured")
     return secret
 }
 
@@ -568,7 +568,7 @@ export async function POST(request: NextRequest) {
         return new NextResponse(null, { status: 404 })
     }
 
-    // Layer 2: HMAC signature verification (uses AUTONOMA_SHARED_SECRET)
+    // Layer 2: HMAC signature verification (uses AUTONOMA_SIGNING_SECRET)
     const rawBody = await request.text()
     const signature = request.headers.get("x-signature")
 
@@ -664,7 +664,7 @@ async function handleDown(
 
     try {
         await scenario.down(refs)
-        return NextResponse.json({ success: true })
+        return NextResponse.json({ ok: true })
     } catch (error) {
         console.error("[Autonoma] down failed", { error })
         return errorResponse("Teardown failed", "DOWN_FAILED", 500)
@@ -672,7 +672,7 @@ async function handleDown(
 }
 
 function verifySignature(rawBody: string, signature: string): boolean {
-    const secret = process.env.AUTONOMA_SHARED_SECRET
+    const secret = process.env.AUTONOMA_SIGNING_SECRET
     if (secret == null) return false
     const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex")
     return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
@@ -683,8 +683,8 @@ function errorResponse(message: string, code: ErrorCode, status: number) {
 }
 
 function createBypassCookies(email: string, organizationId: string) {
-    const secret = process.env.AUTONOMA_INTERNAL_SECRET
-    if (secret == null) throw new Error("AUTONOMA_INTERNAL_SECRET is not configured")
+    const secret = process.env.AUTONOMA_JWT_SECRET
+    if (secret == null) throw new Error("AUTONOMA_JWT_SECRET is not configured")
 
     const accessToken = sign(
         { email, externalOrganizationId: organizationId },
@@ -782,8 +782,8 @@ function createRequest(body: object): NextRequest {
 }
 
 beforeAll(() => {
-    process.env.AUTONOMA_SHARED_SECRET = SHARED_SECRET
-    process.env.AUTONOMA_INTERNAL_SECRET = INTERNAL_SECRET
+    process.env.AUTONOMA_SIGNING_SECRET = SHARED_SECRET
+    process.env.AUTONOMA_JWT_SECRET = INTERNAL_SECRET
 })
 
 describe("POST /api/autonoma", () => {
@@ -861,7 +861,7 @@ describe("POST /api/autonoma", () => {
                 }),
             )
             expect(downResponse.status).toBe(200)
-            expect((await downResponse.json()).success).toBe(true)
+            expect((await downResponse.json()).ok).toBe(true)
 
             // Verify cleanup
             const orgAfter = await db.organization.findUnique({

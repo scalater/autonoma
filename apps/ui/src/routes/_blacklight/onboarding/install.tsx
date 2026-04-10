@@ -1,17 +1,24 @@
-import { Badge, Button, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger } from "@autonoma/blacklight";
-import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useStartConfigure } from "lib/onboarding/onboarding-api";
-import { trpcClient } from "lib/trpc";
-import { useEffect, useRef, useState } from "react";
-import { z } from "zod";
+import { Badge, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger } from "@autonoma/blacklight";
+import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Claude } from "components/icons";
+import { sounds } from "lib/onboarding/sounds";
+import { usePollApplicationSetup } from "lib/query/app-generations.queries";
+import { toastManager } from "lib/toast-manager";
+import { queryClient, trpc, trpcClient } from "lib/trpc";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { CodeBlock } from "./-components/code-block";
+import { DocLink } from "./-components/doc-link";
+import { InfoCallout } from "./-components/info-callout";
+import { OnboardingPageHeader } from "./-components/onboarding-page-header";
 
-const installSearchSchema = z.object({ appId: z.string().optional() });
+const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
+
+export function getOnboardingApplicationId(): string | undefined {
+  return localStorage.getItem(ONBOARDING_APP_KEY) ?? undefined;
+}
 
 export const Route = createFileRoute("/_blacklight/onboarding/install")({
-  component: InstallPage,
-  validateSearch: installSearchSchema,
+  component: () => <Navigate to="/onboarding" search={{ step: "install" }} />,
 });
 
 function obfuscateKey(key: string) {
@@ -93,7 +100,7 @@ function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicatio
 
 function ClaudeCodeTab({ result }: { result?: SetupResult }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {result != null ? (
         <EnvSetupSection apiKey={result.apiKey} applicationId={result.applicationId} />
       ) : (
@@ -125,8 +132,6 @@ interface SetupResult {
 }
 
 function useAutoSetup() {
-  const { appId } = Route.useSearch();
-  const navigate = useNavigate();
   const [result, setResult] = useState<SetupResult>();
   const [error, setError] = useState<string>();
   const started = useRef(false);
@@ -136,117 +141,201 @@ function useAutoSetup() {
     started.current = true;
 
     async function setup() {
-      // If we already have an appId from search params, create a fresh API key for it
-      if (appId != null) {
+      const existingAppId = getOnboardingApplicationId();
+
+      // If we already have an appId from localStorage, create a fresh API key for it
+      if (existingAppId != null) {
         const apiKey = await trpcClient.apiKeys.create.mutate({ name: "Generation Agent" });
-        setResult({ apiKey: apiKey.key, applicationId: appId });
+        setResult({ apiKey: apiKey.key, applicationId: existingAppId });
         return;
       }
 
-      // No appId - create a new app + API key, then redirect to self with appId in URL
+      // No appId - create a new app + API key, then store in localStorage
       const app = await trpcClient.applications.createMinimal.mutate({
         name: `app-${crypto.randomUUID().slice(0, 8)}`,
       });
 
+      localStorage.setItem(ONBOARDING_APP_KEY, app.id);
+
       const apiKey = await trpcClient.apiKeys.create.mutate({ name: "Generation Agent" });
       setResult({ apiKey: apiKey.key, applicationId: app.id });
-
-      // Put appId in the URL so it survives refresh
-      void navigate({ to: "/onboarding/install", search: { appId: app.id }, replace: true });
     }
 
     setup().catch((err: Error) => {
       setError(err.message);
     });
-  }, [appId, navigate]);
+  }, []);
 
   return { result, error };
 }
 
-function InstallPage() {
+/** Polls for agent connection and auto-navigates to the working page. */
+function WaitingForAgent({ applicationId }: { applicationId: string }) {
   const navigate = useNavigate();
-  const { result, error } = useAutoSetup();
-  const startConfigure = useStartConfigure(result?.applicationId ?? "");
+  const { data: setup } = usePollApplicationSetup(applicationId);
+  const navigatedRef = useRef(false);
 
-  function handleContinue() {
-    if (result == null) return;
-    startConfigure.mutate(undefined, {
-      onSuccess: () => {
-        void navigate({ to: "/onboarding/configure", search: { appId: result.applicationId } });
-      },
-    });
-  }
+  useEffect(() => {
+    if (setup != null && !navigatedRef.current) {
+      navigatedRef.current = true;
+      sounds.agentConnected();
+      toastManager.add({ title: "Agent connected", type: "success", timeout: 3000 });
+      // Fetch fresh onboarding state (bypassing 30s staleTime) so the route loader
+      // picks up step="working" instead of the cached "install" value.
+      void queryClient
+        .fetchQuery({ ...trpc.onboarding.getState.queryOptions({ applicationId }), staleTime: 0 })
+        .then(() => {
+          void navigate({ to: "/onboarding", search: { step: "working" } });
+        });
+    }
+  }, [setup, navigate, applicationId]);
+
+  return null;
+}
+
+function AgentConnectionStatus() {
+  return (
+    <div className="flex shrink-0 items-center gap-3 rounded-lg border border-primary-ink/30 bg-primary-ink/5 px-4 py-3 shadow-[0_0_12px_rgba(var(--color-primary-ink-rgb,200,255,0),0.1)]">
+      <div className="relative flex size-3 shrink-0">
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary-ink opacity-75" />
+        <span className="relative inline-flex size-3 rounded-full bg-primary-ink" />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-sm font-medium text-text-primary">Waiting for agent to connect...</span>
+        <span className="text-xs text-text-secondary">Keep this tab open - it will advance automatically</span>
+      </div>
+    </div>
+  );
+}
+
+function RunPluginSection() {
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-6 border border-border-dim bg-surface-base p-8 sm:p-10">
+      <h2 className="text-base font-medium text-text-primary">
+        <span className="mr-2 font-mono text-text-tertiary">2.</span>
+        Run the plugin
+      </h2>
+      <p className="text-sm leading-relaxed text-text-secondary">
+        Now run these commands inside Claude Code. Make sure you're in your project's root directory.
+      </p>
+
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <p className="text-sm text-text-secondary">Reload plugins to make sure the latest version is loaded:</p>
+          <CodeBlock>/reload-plugins</CodeBlock>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm text-text-secondary">Run the test planner:</p>
+          <CodeBlock>/autonoma-test-planner:generate-tests</CodeBlock>
+          <p className="mt-2 flex items-center gap-2.5 font-mono text-2xs text-text-secondary">
+            <Claude /> Works best with Opus 4.6
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InitializeLocalSkillCard({ result, error }: { result: SetupResult | undefined; error: string | undefined }) {
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-6 border border-border-dim bg-surface-base p-8 sm:p-10">
+      <div className="flex items-center gap-2">
+        <h2 className="text-base font-medium text-text-primary">
+          <span className="mr-2 font-mono text-text-tertiary">1.</span>
+          Initialize local skill
+        </h2>
+      </div>
+
+      {error != null ? (
+        <div className="border border-status-critical/30 bg-status-critical/10 p-4 font-mono text-sm text-status-critical">
+          Failed to create API key: {error}
+        </div>
+      ) : (
+        <Tabs defaultValue="claude-code">
+          <TabsList variant="line">
+            <TabsTrigger value="claude-code" className="gap-2">
+              <ClaudeIcon />
+              Claude Code
+            </TabsTrigger>
+            <TabsTrigger value="openai-codex" className="gap-2" disabled>
+              <OpenAIIcon />
+              OpenAI Codex
+              <Badge
+                variant="outline"
+                className="ml-1 border-primary-ink/30 bg-primary-ink/10 font-mono text-3xs uppercase tracking-widest text-primary-ink"
+              >
+                Soon
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="opencode" className="gap-2" disabled>
+              <OpenCodeIcon />
+              OpenCode
+              <Badge
+                variant="outline"
+                className="ml-1 border-primary-ink/30 bg-primary-ink/10 font-mono text-3xs uppercase tracking-widest text-primary-ink"
+              >
+                Soon
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="claude-code" className="pt-6">
+            <ClaudeCodeTab result={result} />
+          </TabsContent>
+          <TabsContent value="openai-codex" className="pt-6">
+            <ComingSoonTab name="OpenAI Codex" />
+          </TabsContent>
+          <TabsContent value="opencode" className="pt-6">
+            <ComingSoonTab name="OpenCode" />
+          </TabsContent>
+        </Tabs>
+      )}
+    </div>
+  );
+}
+
+export function InstallPage() {
+  const { result, error } = useAutoSetup();
 
   return (
     <>
-      <header className="mb-14 border-b border-border-dim pb-8">
-        <h1 className="text-4xl font-medium tracking-tight text-text-primary">Welcome to Autonoma</h1>
-        <p className="mt-3 font-mono text-sm text-text-secondary">
-          Install the plugin in your coding agent, then configure your project.
-        </p>
-      </header>
+      <OnboardingPageHeader
+        variant="split"
+        title="Install the Plugin"
+        description={
+          <>
+            The Autonoma plugin connects Claude Code to our platform. Once installed, the agent will analyze your
+            codebase and generate tests automatically.
+          </>
+        }
+        trailing={
+          result != null ? (
+            <>
+              <AgentConnectionStatus />
+              <Suspense fallback={null}>
+                <WaitingForAgent applicationId={result.applicationId} />
+              </Suspense>
+            </>
+          ) : undefined
+        }
+      />
 
-      <div className="flex flex-col gap-6 border border-border-dim bg-surface-base p-8">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-medium text-text-primary">Initialize local skill</h2>
+      <InfoCallout title="What to expect">
+        Copy the commands below into your terminal. Once the plugin runs, the agent will connect to Autonoma and start
+        analyzing your project. This page will automatically advance when the connection is established.{" "}
+        <DocLink href="https://docs.agent.autonoma.app/test-planner/">Read the full guide</DocLink>
+      </InfoCallout>
+
+      <div className="mt-8" />
+
+      {result != null ? (
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10 lg:items-stretch">
+          <InitializeLocalSkillCard result={result} error={error} />
+          <RunPluginSection />
         </div>
-
-        {error != null ? (
-          <div className="border border-status-critical/30 bg-status-critical/10 p-4 font-mono text-sm text-status-critical">
-            Failed to create API key: {error}
-          </div>
-        ) : (
-          <Tabs defaultValue="claude-code">
-            <TabsList variant="line">
-              <TabsTrigger value="claude-code" className="gap-2">
-                <ClaudeIcon />
-                Claude Code
-              </TabsTrigger>
-              <TabsTrigger value="openai-codex" className="gap-2" disabled>
-                <OpenAIIcon />
-                OpenAI Codex
-                <Badge
-                  variant="outline"
-                  className="ml-1 border-primary-ink/30 bg-primary-ink/10 font-mono text-3xs uppercase tracking-widest text-primary-ink"
-                >
-                  Soon
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="opencode" className="gap-2" disabled>
-                <OpenCodeIcon />
-                OpenCode
-                <Badge
-                  variant="outline"
-                  className="ml-1 border-primary-ink/30 bg-primary-ink/10 font-mono text-3xs uppercase tracking-widest text-primary-ink"
-                >
-                  Soon
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="claude-code" className="pt-6">
-              <ClaudeCodeTab result={result} />
-            </TabsContent>
-            <TabsContent value="openai-codex" className="pt-6">
-              <ComingSoonTab name="OpenAI Codex" />
-            </TabsContent>
-            <TabsContent value="opencode" className="pt-6">
-              <ComingSoonTab name="OpenCode" />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        <Button
-          variant="accent"
-          className="w-full gap-2 font-mono text-sm font-bold uppercase"
-          onClick={handleContinue}
-          disabled={result == null || startConfigure.isPending}
-          aria-label="onboarding-install-continue"
-        >
-          {startConfigure.isPending ? "Starting..." : "Continue"}
-          <ArrowRightIcon size={16} weight="bold" />
-        </Button>
-      </div>
+      ) : (
+        <InitializeLocalSkillCard result={result} error={error} />
+      )}
     </>
   );
 }

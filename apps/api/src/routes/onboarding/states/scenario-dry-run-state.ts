@@ -74,11 +74,31 @@ export class ScenarioDryRunState extends OnboardingState {
         return { success: true as const, phase: "down" as const, error: undefined };
     }
 
-    override async complete(): Promise<void> {
-        this.logger.info("Completing scenario dry run, moving to url step");
-        await this.db.onboardingState.update({
-            where: { applicationId: this.applicationId },
-            data: { step: "url" },
+    override async complete(productionUrl?: string): Promise<void> {
+        this.logger.info("Advancing to github step from scenario dry run", { hasProductionUrl: productionUrl != null });
+
+        await this.db.$transaction(async (tx) => {
+            await tx.onboardingState.update({
+                where: { applicationId: this.applicationId },
+                data: {
+                    step: "github",
+                    ...(productionUrl != null ? { productionUrl } : {}),
+                },
+            });
+
+            if (productionUrl != null) {
+                const app = await tx.application.findUnique({
+                    where: { id: this.applicationId },
+                    select: { mainBranch: { select: { deploymentId: true } } },
+                });
+
+                if (app?.mainBranch?.deploymentId != null) {
+                    await tx.webDeployment.update({
+                        where: { deploymentId: app.mainBranch.deploymentId },
+                        data: { url: productionUrl },
+                    });
+                }
+            }
         });
     }
 }

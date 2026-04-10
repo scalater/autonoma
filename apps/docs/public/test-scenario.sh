@@ -50,7 +50,7 @@ ${COLOR_BOLD}Usage:${COLOR_RESET}
 
 ${COLOR_BOLD}Required:${COLOR_RESET}
   --url URL              Your Environment Factory endpoint URL
-  --secret SECRET        Your AUTONOMA_SHARED_SECRET (the HMAC secret shared with Autonoma)
+  --secret SECRET        Your AUTONOMA_SIGNING_SECRET (the HMAC secret shared with Autonoma)
   --scenario NAME        Scenario name to test (e.g., standard, empty, large)
 
 ${COLOR_BOLD}Options:${COLOR_RESET}
@@ -64,20 +64,20 @@ ${COLOR_BOLD}Examples:${COLOR_RESET}
   # Test the standard scenario
   curl -fsSL https://docs.agent.autonoma.app/test-scenario.sh | bash -s -- \\
     --url https://your-app.com/api/autonoma \\
-    --secret your-shared-secret \\
+    --secret your-signing-secret \\
     --scenario standard
 
   # Test without teardown (inspect created data manually)
   curl -fsSL https://docs.agent.autonoma.app/test-scenario.sh | bash -s -- \\
     --url https://your-app.com/api/autonoma \\
-    --secret your-shared-secret \\
+    --secret your-signing-secret \\
     --scenario standard \\
     --keep-up
 
   # Skip discover and test up/down directly
   curl -fsSL https://docs.agent.autonoma.app/test-scenario.sh | bash -s -- \\
     --url https://your-app.com/api/autonoma \\
-    --secret your-shared-secret \\
+    --secret your-signing-secret \\
     --scenario empty \\
     --skip-discover
 

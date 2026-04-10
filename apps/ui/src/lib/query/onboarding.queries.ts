@@ -1,6 +1,18 @@
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useAPIMutation } from "lib/query/api-queries";
 import { trpc, trpcClient } from "lib/trpc";
+import { getOnboardingApplicationId } from "routes/_blacklight/onboarding/install";
+
+/**
+ * Reloads the page when a backend step-mismatch error is detected
+ * ("Cannot X during Y step"). The route guard in the onboarding layout
+ * then redirects the user to the correct step.
+ */
+function reloadOnStepMismatch(error: { message: string }) {
+    if (error.message.startsWith("Cannot ") && error.message.includes(" during ")) {
+        setTimeout(() => window.location.reload(), 2000);
+    }
+}
 
 export function useOnboardingState(applicationId: string) {
     return useSuspenseQuery(trpc.onboarding.getState.queryOptions({ applicationId }));
@@ -22,24 +34,29 @@ export function useResetOnboarding(applicationId: string) {
     });
 }
 
-export function useStartConfigure(applicationId: string) {
+export function useStartConfigure(_applicationId: string) {
     const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: () => trpcClient.onboarding.startConfigure.mutate({ applicationId }),
+    return useAPIMutation({
+        mutationFn: () =>
+            trpcClient.onboarding.startConfigure.mutate({ applicationId: getOnboardingApplicationId() ?? "" }),
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
         },
+        onError: reloadOnStepMismatch,
+        errorToast: { title: "Failed to start configuration" },
     });
 }
 
 export function useSetUrl(applicationId: string) {
     const queryClient = useQueryClient();
-    return useMutation({
+    return useAPIMutation({
         mutationFn: (input: { productionUrl: string }) =>
             trpcClient.onboarding.setUrl.mutate({ ...input, applicationId }),
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
         },
+        onError: reloadOnStepMismatch,
+        errorToast: { title: "Failed to set application URL" },
     });
 }
 
@@ -62,6 +79,7 @@ export function useConfigureAndDiscoverScenarios() {
                 void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
                 void queryClient.invalidateQueries({ queryKey: trpc.applications.list.queryKey() });
             },
+            onError: (error) => reloadOnStepMismatch(error),
         }),
         errorToast: { title: "Failed to save endpoint configuration" },
     });
@@ -73,7 +91,9 @@ export function useOnboardingScenarios(applicationId: string) {
 
 export function useRunScenarioDryRun() {
     return useAPIMutation({
-        ...trpc.onboarding.runScenarioDryRun.mutationOptions(),
+        ...trpc.onboarding.runScenarioDryRun.mutationOptions({
+            onError: (error) => reloadOnStepMismatch(error),
+        }),
         errorToast: { title: "Scenario dry run failed" },
     });
 }
@@ -82,7 +102,10 @@ export function useCompleteOnboarding() {
     const queryClient = useQueryClient();
     return useAPIMutation({
         ...trpc.onboarding.complete.mutationOptions({
-            onSettled: () => void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() }),
+            onSettled: () => {
+                void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
+            },
+            onError: (error) => reloadOnStepMismatch(error),
         }),
         errorToast: { title: "Failed to complete onboarding" },
     });
