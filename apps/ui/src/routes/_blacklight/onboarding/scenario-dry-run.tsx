@@ -3,6 +3,7 @@ import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
 import { CheckCircleIcon } from "@phosphor-icons/react/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/Circle";
+import { CopyIcon } from "@phosphor-icons/react/Copy";
 import { FlaskIcon } from "@phosphor-icons/react/Flask";
 import { GitBranchIcon } from "@phosphor-icons/react/GitBranch";
 import { GlobeIcon } from "@phosphor-icons/react/Globe";
@@ -21,13 +22,12 @@ import {
   useOnboardingScenarios,
   useRunScenarioDryRun,
 } from "lib/onboarding/onboarding-api";
+import { toastManager } from "lib/toast-manager";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DocLink } from "./-components/doc-link";
 import { OnboardingPageHeader } from "./-components/onboarding-page-header";
-import { getOnboardingApplicationId } from "./install";
-
 export const Route = createFileRoute("/_blacklight/onboarding/scenario-dry-run")({
-  component: () => <Navigate to="/onboarding" search={{ step: "scenario-dry-run" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "scenario-dry-run", appId: undefined }} />,
 });
 
 function StepNumber({ step, done }: { step: number; done: boolean }) {
@@ -265,9 +265,18 @@ function WebhookLog({ entries }: { entries: LogEntry[] }) {
   );
 }
 
-export function DeployPage() {
-  const applicationId = getOnboardingApplicationId();
+function generateHexSecret(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
+export function DeployPage({ appId }: { appId?: string }) {
+  const applicationId = appId;
+
+  const [generatedSecret] = useState(generateHexSecret);
   const [webhookUrlDraft, setWebhookUrlDraft] = useState<string>();
   const [webhookUrlTouched, setWebhookUrlTouched] = useState(false);
   const [signingSecret, setSigningSecret] = useState("");
@@ -390,7 +399,7 @@ export function DeployPage() {
       { applicationId, productionUrl: appUrl },
       {
         onSuccess: () => {
-          void navigate({ to: "/onboarding", search: { step: "github" }, replace: true });
+          void navigate({ to: "/onboarding", search: { step: "github", appId: applicationId }, replace: true });
         },
       },
     );
@@ -453,27 +462,61 @@ export function DeployPage() {
                 <div className="flex flex-col gap-1.5">
                   <span>Set these environment variables on your deployed environment:</span>
                   <div className="flex flex-col gap-1 pl-1">
-                    <div className="flex items-center gap-2 font-mono text-2xs">
-                      <CircleIcon size={6} weight="fill" className="shrink-0 text-text-tertiary" />
-                      <code className="rounded bg-surface-raised px-1.5 py-0.5 text-primary-ink">
-                        AUTONOMA_SIGNING_SECRET
-                      </code>
-                      <span className="font-sans text-text-tertiary">- shared secret for webhook verification</span>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 font-mono text-2xs">
+                        <CircleIcon size={6} weight="fill" className="shrink-0 text-text-tertiary" />
+                        <code className="rounded bg-surface-raised px-1.5 py-0.5 text-primary-ink">
+                          AUTONOMA_SIGNING_SECRET
+                        </code>
+                        <span className="font-sans text-text-tertiary">- shared secret for webhook verification</span>
+                      </div>
+                      <div className="ml-3.5 flex items-center gap-2">
+                        <code className="truncate rounded bg-surface-raised px-1.5 py-0.5 font-mono text-2xs text-text-secondary">
+                          {`${generatedSecret.slice(0, 8)}${"*".repeat(8)}${generatedSecret.slice(-4)}`}
+                        </code>
+                        <button
+                          type="button"
+                          title="Copy secret and auto-fill below"
+                          className="flex shrink-0 items-center justify-center text-text-tertiary transition-colors hover:text-primary-ink"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(generatedSecret).then(() => {
+                              setSigningSecret(generatedSecret);
+                              toastManager.add({
+                                type: "success",
+                                title: "Secret copied",
+                                description: "Signing secret copied and auto-filled below.",
+                              });
+                            });
+                          }}
+                        >
+                          <CopyIcon size={14} />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 font-mono text-2xs">
                       <CircleIcon size={6} weight="fill" className="shrink-0 text-text-tertiary" />
                       <code className="rounded bg-surface-raised px-1.5 py-0.5 text-primary-ink">
                         AUTONOMA_ENABLED=true
                       </code>
+                      <button
+                        type="button"
+                        title="Copy environment variable"
+                        className="flex shrink-0 items-center justify-center text-text-tertiary transition-colors hover:text-primary-ink"
+                        onClick={() => {
+                          void navigator.clipboard.writeText("AUTONOMA_ENABLED=true").then(() => {
+                            toastManager.add({
+                              type: "success",
+                              title: "Copied",
+                              description: "AUTONOMA_ENABLED=true",
+                            });
+                          });
+                        }}
+                      >
+                        <CopyIcon size={14} />
+                      </button>
                       <span className="font-sans text-text-tertiary">- enables the endpoint in production</span>
                     </div>
                   </div>
-                  <p className="mt-1 text-2xs text-text-tertiary">
-                    Generate secrets with:{" "}
-                    <code className="rounded bg-surface-raised px-1.5 py-0.5 font-mono text-primary-ink">
-                      openssl rand -hex 32
-                    </code>
-                  </p>
                 </div>
               </div>
             </div>

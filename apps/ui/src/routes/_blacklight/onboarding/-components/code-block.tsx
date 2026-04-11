@@ -1,4 +1,5 @@
-import { Button } from "@autonoma/blacklight";
+import { Button, cn } from "@autonoma/blacklight";
+import "./code-block.css";
 import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
 import { CaretRightIcon } from "@phosphor-icons/react/CaretRight";
 import { CheckIcon } from "@phosphor-icons/react/Check";
@@ -13,9 +14,13 @@ interface CodeBlockProps {
   collapsible?: boolean;
   /** Label shown next to the toggle when collapsed. Defaults to the first line of children. */
   collapsedLabel?: string;
+  /** Whether this code block is the current active step to copy. */
+  isActive?: boolean;
+  /** Callback fired after a successful copy. */
+  onCopied?: () => void;
 }
 
-export function CodeBlock({ children, copyValue, collapsible, collapsedLabel }: CodeBlockProps) {
+export function CodeBlock({ children, copyValue, collapsible, collapsedLabel, isActive, onCopied }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -25,6 +30,7 @@ export function CodeBlock({ children, copyValue, collapsible, collapsedLabel }: 
       toastManager.add({ type: "success", title: "Copied", description: "Command copied to clipboard." });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      onCopied?.();
     } catch {
       toastManager.add({
         type: "critical",
@@ -38,7 +44,15 @@ export function CodeBlock({ children, copyValue, collapsible, collapsedLabel }: 
   const firstLine = collapsedLabel ?? children.split("\n")[0] ?? "";
 
   return (
-    <div className="group overflow-hidden border border-border-dim bg-surface-base transition-colors hover:border-primary/30">
+    <div
+      className={cn(
+        "group border bg-surface-base",
+        isActive === true
+          ? "border-primary-ink"
+          : "overflow-hidden border-border-dim transition-colors hover:border-primary/30",
+      )}
+      style={isActive === true ? { animation: "heartbeat-border 2s ease-in-out infinite" } : undefined}
+    >
       <div className="flex min-w-0 items-start justify-between gap-4 p-4">
         {isCollapsed ? (
           <button

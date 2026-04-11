@@ -18,9 +18,6 @@ import { IntroWelcomePage } from "./intro-welcome";
 import { DeployPage } from "./scenario-dry-run";
 import { WorkingPage } from "./working";
 
-const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
-const ONBOARDING_API_KEY_STORAGE = "autonoma.onboarding.apiKey";
-
 function mapBackendStepToViewStep(step: string | undefined): OnboardingStep {
   if (step === "working") return "working";
   if (step === "scenario_dry_run" || step === "url") return "scenario-dry-run";
@@ -35,12 +32,13 @@ export const Route = createFileRoute("/_blacklight/onboarding")({
   component: OnboardingLayout,
   validateSearch: (search: Record<string, unknown>) => {
     const step = typeof search.step === "string" && isOnboardingStep(search.step) ? search.step : undefined;
-    return { step };
+    const appId = typeof search.appId === "string" ? search.appId : undefined;
+    return { step, appId };
   },
-  loader: async ({ context: { queryClient } }) => {
+  loader: async ({ context: { queryClient }, location }) => {
     const session = await ensureSessionData(queryClient);
     if (session == null) throw Route.redirect({ to: "/login", search: { error: undefined } });
-    const applicationId = localStorage.getItem(ONBOARDING_APP_KEY);
+    const applicationId = (location.search as { appId?: string }).appId;
     if (applicationId == null) {
       return { backendStep: "install" };
     }
@@ -48,8 +46,6 @@ export const Route = createFileRoute("/_blacklight/onboarding")({
       const state = await queryClient.ensureQueryData(trpc.onboarding.getState.queryOptions({ applicationId }));
       return { backendStep: state.step };
     } catch {
-      localStorage.removeItem(ONBOARDING_API_KEY_STORAGE);
-      localStorage.removeItem(ONBOARDING_APP_KEY);
       return { backendStep: "install" };
     }
   },
@@ -85,16 +81,14 @@ function OnboardingLayout() {
   const { user } = useAuth();
   const authClient = useAuthClient();
   const { backendStep } = Route.useLoaderData();
-  const { step } = Route.useSearch();
+  const { step, appId } = Route.useSearch();
   const currentStepId = resolveViewStep(step, backendStep);
   const [confirmReset, setConfirmReset] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   function handleReset() {
     setIsResetting(true);
-    localStorage.removeItem(ONBOARDING_API_KEY_STORAGE);
-    localStorage.removeItem(ONBOARDING_APP_KEY);
-    void navigate({ to: "/onboarding", search: { step: "intro-welcome" } });
+    void navigate({ to: "/onboarding", search: { step: "intro-welcome", appId: undefined } });
     setConfirmReset(false);
     setIsResetting(false);
   }
@@ -103,10 +97,10 @@ function OnboardingLayout() {
     if (currentStepId === "intro-welcome") return <IntroWelcomePage />;
     if (currentStepId === "intro-key-concepts") return <IntroKeyConceptsPage />;
     if (currentStepId === "intro-platform-tour") return <IntroPlatformTourPage />;
-    if (currentStepId === "install") return <InstallPage />;
-    if (currentStepId === "working") return <WorkingPage />;
-    if (currentStepId === "scenario-dry-run") return <DeployPage />;
-    if (currentStepId === "github") return <GitHubPage />;
+    if (currentStepId === "install") return <InstallPage appId={appId} />;
+    if (currentStepId === "working") return <WorkingPage appId={appId} />;
+    if (currentStepId === "scenario-dry-run") return <DeployPage appId={appId} />;
+    if (currentStepId === "github") return <GitHubPage appId={appId} />;
     return <CompletePage />;
   }
 

@@ -10,7 +10,7 @@ import { OnboardingPageHeader } from "./-components/onboarding-page-header";
 import { AnimatedProcessRow, StageCard } from "./-components/stage-card";
 
 export const Route = createFileRoute("/_blacklight/onboarding/intro-welcome")({
-  component: () => <Navigate to="/onboarding" search={{ step: "intro-welcome" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "intro-welcome", appId: undefined }} />,
 });
 
 export function IntroWelcomePage() {

@@ -110,7 +110,7 @@ export function StepProgress({ currentStepId }: StepProgressProps) {
                 <Link
                   key={step.id}
                   to="/onboarding"
-                  search={{ step: step.id }}
+                  search={{ step: step.id, appId: undefined }}
                   className="group flex cursor-pointer gap-5"
                 >
                   {content}

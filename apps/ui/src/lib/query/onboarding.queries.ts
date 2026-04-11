@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useAPIMutation } from "lib/query/api-queries";
 import { trpc, trpcClient } from "lib/trpc";
-import { getOnboardingApplicationId } from "routes/_blacklight/onboarding/install";
 
 /**
  * Reloads the page when a backend step-mismatch error is detected
@@ -34,11 +33,10 @@ export function useResetOnboarding(applicationId: string) {
     });
 }
 
-export function useStartConfigure(_applicationId: string) {
+export function useStartConfigure(applicationId: string) {
     const queryClient = useQueryClient();
     return useAPIMutation({
-        mutationFn: () =>
-            trpcClient.onboarding.startConfigure.mutate({ applicationId: getOnboardingApplicationId() ?? "" }),
+        mutationFn: () => trpcClient.onboarding.startConfigure.mutate({ applicationId }),
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: trpc.onboarding.getState.queryKey() });
         },

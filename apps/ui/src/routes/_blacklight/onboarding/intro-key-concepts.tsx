@@ -7,7 +7,7 @@ import { OnboardingPageHeader } from "./-components/onboarding-page-header";
 import { StageCard } from "./-components/stage-card";
 
 export const Route = createFileRoute("/_blacklight/onboarding/intro-key-concepts")({
-  component: () => <Navigate to="/onboarding" search={{ step: "intro-key-concepts" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "intro-key-concepts", appId: undefined }} />,
 });
 
 export function IntroKeyConceptsPage() {

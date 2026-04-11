@@ -1,8 +1,6 @@
 import type { NavigateFn } from "@tanstack/react-router";
 import type { OnboardingStep } from "./onboarding-steps";
 
-const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
-
 const STEP_ROUTES: Record<string, OnboardingStep> = {
     install: "install",
     configure: "install",
@@ -18,7 +16,6 @@ const STEP_ROUTES: Record<string, OnboardingStep> = {
  * The applicationId is passed via search params so each page can read it.
  */
 export function navigateToOnboarding(applicationId: string, step: string | undefined, navigate: NavigateFn) {
-    localStorage.setItem(ONBOARDING_APP_KEY, applicationId);
     const resolvedStep: OnboardingStep = STEP_ROUTES[step ?? "install"] ?? "intro-welcome";
-    void navigate({ to: "/onboarding", search: { step: resolvedStep } });
+    void navigate({ to: "/onboarding", search: { step: resolvedStep, appId: applicationId } });
 }

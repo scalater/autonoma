@@ -24,7 +24,6 @@ import { useCompleteGithub } from "lib/query/onboarding.queries";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 import { OnboardingPageHeader } from "./-components/onboarding-page-header";
-import { getOnboardingApplicationId } from "./install";
 
 const githubSearchParams = z.object({
   appId: z.string().optional(),
@@ -32,7 +31,7 @@ const githubSearchParams = z.object({
 });
 
 export const Route = createFileRoute("/_blacklight/onboarding/github")({
-  component: () => <Navigate to="/onboarding" search={{ step: "github" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "github", appId: undefined }} />,
   validateSearch: githubSearchParams,
 });
 
@@ -47,8 +46,8 @@ function getErrorMessage(error: string): string {
   }
 }
 
-export function GitHubPage() {
-  const applicationId = getOnboardingApplicationId();
+export function GitHubPage({ appId }: { appId?: string }) {
+  const applicationId = appId;
   // Check if we arrived here from a GitHub OAuth callback with an error
   const urlParams = new URLSearchParams(window.location.search);
   const error = urlParams.get("error") ?? undefined;
@@ -173,7 +172,7 @@ function RepoSelectionStep({ appId }: { appId: string }) {
       { applicationId: appId },
       {
         onSuccess: () => {
-          void navigate({ to: "/onboarding", search: { step: "complete" } });
+          void navigate({ to: "/onboarding", search: { step: "complete", appId: appId } });
         },
       },
     );

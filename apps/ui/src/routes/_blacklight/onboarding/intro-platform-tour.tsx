@@ -4,7 +4,7 @@ import { MockDashboard } from "./-components/mock-dashboard";
 import { OnboardingPageHeader } from "./-components/onboarding-page-header";
 
 export const Route = createFileRoute("/_blacklight/onboarding/intro-platform-tour")({
-  component: () => <Navigate to="/onboarding" search={{ step: "intro-platform-tour" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "intro-platform-tour", appId: undefined }} />,
 });
 
 export function IntroPlatformTourPage() {

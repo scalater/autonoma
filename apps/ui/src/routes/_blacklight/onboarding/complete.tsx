@@ -1,10 +1,10 @@
-import { Button } from "@autonoma/blacklight";
+import { buttonVariants } from "@autonoma/blacklight";
 import { BugIcon } from "@phosphor-icons/react/Bug";
-import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_blacklight/onboarding/complete")({
-  component: () => <Navigate to="/onboarding" search={{ step: "complete" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "complete", appId: undefined }} />,
 });
 
 export function CompletePage() {
@@ -51,15 +51,17 @@ export function CompletePage() {
           Your scenarios are live. Autonoma will run them automatically and alert you when something breaks.
         </p>
 
-        <Button
-          variant="accent"
-          className="mt-14 gap-3 px-10 py-4 font-mono text-sm font-bold uppercase"
-          onClick={() => void navigate({ to: "/", replace: true })}
+        <Link
+          to="/"
+          className={buttonVariants({
+            variant: "accent",
+            className: "mt-14 gap-3 px-10 py-4 font-mono text-sm font-bold uppercase",
+          })}
           aria-label="onboarding-complete-start-now"
         >
           <BugIcon size={18} weight="bold" />
           Start now
-        </Button>
+        </Link>
 
         <p className="mt-4 font-mono text-2xs text-text-tertiary opacity-60">Let the bug hunting season begin</p>
       </div>

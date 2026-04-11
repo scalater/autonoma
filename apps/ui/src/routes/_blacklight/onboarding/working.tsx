@@ -12,12 +12,11 @@ import { toastManager } from "lib/toast-manager";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { DocLink } from "./-components/doc-link";
 import { OnboardingPageHeader } from "./-components/onboarding-page-header";
-import { getOnboardingApplicationId } from "./install";
 
 const SETUP_STEP_NAMES = ["Knowledge Base", "Scenarios", "E2E Tests", "Environment Factory"] as const;
 
 export const Route = createFileRoute("/_blacklight/onboarding/working")({
-  component: () => <Navigate to="/onboarding" search={{ step: "working" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "working", appId: undefined }} />,
 });
 
 interface SetupEvent {
@@ -180,7 +179,7 @@ function SetupProgress({ applicationId }: { applicationId: string }) {
         type: "success",
       });
       setTimeout(() => {
-        void navigate({ to: "/onboarding", search: { step: "scenario-dry-run" }, replace: true });
+        void navigate({ to: "/onboarding", search: { step: "scenario-dry-run", appId: applicationId }, replace: true });
       }, 1500);
     }
   }, [isCompleted, navigate]);
@@ -310,8 +309,8 @@ function WorkingPageSkeleton() {
   );
 }
 
-export function WorkingPage() {
-  const applicationId = getOnboardingApplicationId();
+export function WorkingPage({ appId }: { appId?: string }) {
+  const applicationId = appId;
 
   if (applicationId == null) {
     return (

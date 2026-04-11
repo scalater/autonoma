@@ -11,14 +11,8 @@ import { DocLink } from "./-components/doc-link";
 import { InfoCallout } from "./-components/info-callout";
 import { OnboardingPageHeader } from "./-components/onboarding-page-header";
 
-const ONBOARDING_APP_KEY = "autonoma.onboarding.applicationId";
-
-export function getOnboardingApplicationId(): string | undefined {
-  return localStorage.getItem(ONBOARDING_APP_KEY) ?? undefined;
-}
-
 export const Route = createFileRoute("/_blacklight/onboarding/install")({
-  component: () => <Navigate to="/onboarding" search={{ step: "install" }} />,
+  component: () => <Navigate to="/onboarding" search={{ step: "install", appId: undefined }} />,
 });
 
 function obfuscateKey(key: string) {
@@ -67,16 +61,32 @@ function OpenCodeIcon({ className }: { className?: string }) {
   );
 }
 
-function CommandStep({ label, command }: { label: string; command: string }) {
+interface CommandStepProps {
+  label: string;
+  command: string;
+  isActive?: boolean;
+  onCopied?: () => void;
+}
+
+function CommandStep({ label, command, isActive, onCopied }: CommandStepProps) {
   return (
     <div className="space-y-2">
       <p className="text-sm text-text-secondary">{label}</p>
-      <CodeBlock>{command}</CodeBlock>
+      <CodeBlock isActive={isActive} onCopied={onCopied}>
+        {command}
+      </CodeBlock>
     </div>
   );
 }
 
-function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicationId: string }) {
+interface EnvSetupSectionProps {
+  apiKey: string;
+  applicationId: string;
+  isActive?: boolean;
+  onCopied?: () => void;
+}
+
+function EnvSetupSection({ apiKey, applicationId, isActive, onCopied }: EnvSetupSectionProps) {
   const apiUrl = window.location.origin;
   const displayCommand = `export AUTONOMA_API_KEY=${obfuscateKey(apiKey)}\nexport AUTONOMA_PROJECT_ID=${applicationId}\nexport AUTONOMA_API_URL=${apiUrl}\nexport AUTONOMA_SDK_ENDPOINT=https://your-app.com/api/autonoma\nexport AUTONOMA_SHARED_SECRET=your-shared-secret\nclaude --dangerously-skip-permissions`;
   const rawCommand = `export AUTONOMA_API_KEY=${apiKey} && export AUTONOMA_PROJECT_ID=${applicationId} && export AUTONOMA_API_URL=${apiUrl} && export AUTONOMA_SDK_ENDPOINT=https://your-app.com/api/autonoma && export AUTONOMA_SHARED_SECRET=your-shared-secret && claude --dangerously-skip-permissions`;
@@ -93,6 +103,8 @@ function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicatio
         copyValue={rawCommand}
         collapsible
         collapsedLabel="export AUTONOMA_API_KEY=... && claude --dangerously-skip-permissions"
+        isActive={isActive}
+        onCopied={onCopied}
       >
         {displayCommand}
       </CodeBlock>
@@ -104,21 +116,36 @@ function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicatio
   );
 }
 
-function ClaudeCodeTab({ result }: { result?: SetupResult }) {
+interface ClaudeCodeTabProps {
+  result?: SetupResult;
+  activeStep: number;
+  onStepCopied: () => void;
+}
+
+function ClaudeCodeTab({ result, activeStep, onStepCopied }: ClaudeCodeTabProps) {
   return (
     <div className="space-y-8">
       {result != null ? (
-        <EnvSetupSection apiKey={result.apiKey} applicationId={result.applicationId} />
+        <EnvSetupSection
+          apiKey={result.apiKey}
+          applicationId={result.applicationId}
+          isActive={activeStep === 0}
+          onCopied={onStepCopied}
+        />
       ) : (
         <Skeleton className="h-16 w-full" />
       )}
       <CommandStep
         label="Install the plugin from the marketplace:"
         command="/plugin marketplace add Autonoma-AI/test-planner-plugin"
+        isActive={activeStep === 1}
+        onCopied={onStepCopied}
       />
       <CommandStep
         label="Then register it with Claude Code:"
         command="/plugin install autonoma-test-planner@autonoma"
+        isActive={activeStep === 2}
+        onCopied={onStepCopied}
       />
     </div>
   );
@@ -137,7 +164,8 @@ interface SetupResult {
   applicationId: string;
 }
 
-function useAutoSetup() {
+function useAutoSetup(appId: string | undefined) {
+  const navigate = useNavigate();
   const [result, setResult] = useState<SetupResult>();
   const [error, setError] = useState<string>();
   const started = useRef(false);
@@ -147,24 +175,21 @@ function useAutoSetup() {
     started.current = true;
 
     async function setup() {
-      const existingAppId = getOnboardingApplicationId();
-
-      // If we already have an appId from localStorage, create a fresh API key for it
-      if (existingAppId != null) {
+      // If we already have an appId from the URL, create a fresh API key for it
+      if (appId != null) {
         const apiKey = await trpcClient.apiKeys.create.mutate({ name: "Generation Agent" });
-        setResult({ apiKey: apiKey.key, applicationId: existingAppId });
+        setResult({ apiKey: apiKey.key, applicationId: appId });
         return;
       }
 
-      // No appId - create a new app + API key, then store in localStorage
+      // No appId - create a new app + API key, then redirect to self with appId in URL
       const app = await trpcClient.applications.createMinimal.mutate({
         name: `app-${crypto.randomUUID().slice(0, 8)}`,
       });
 
-      localStorage.setItem(ONBOARDING_APP_KEY, app.id);
-
       const apiKey = await trpcClient.apiKeys.create.mutate({ name: "Generation Agent" });
       setResult({ apiKey: apiKey.key, applicationId: app.id });
+      void navigate({ to: "/onboarding", search: { step: "install", appId: app.id }, replace: true });
     }
 
     setup().catch((err: Error) => {
@@ -191,7 +216,7 @@ function WaitingForAgent({ applicationId }: { applicationId: string }) {
       void queryClient
         .fetchQuery({ ...trpc.onboarding.getState.queryOptions({ applicationId }), staleTime: 0 })
         .then(() => {
-          void navigate({ to: "/onboarding", search: { step: "working" } });
+          void navigate({ to: "/onboarding", search: { step: "working", appId: applicationId } });
         });
     }
   }, [setup, navigate, applicationId]);
@@ -214,7 +239,12 @@ function AgentConnectionStatus() {
   );
 }
 
-function RunPluginSection() {
+interface RunPluginSectionProps {
+  activeStep: number;
+  onStepCopied: () => void;
+}
+
+function RunPluginSection({ activeStep, onStepCopied }: RunPluginSectionProps) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 border border-border-dim bg-surface-base p-8 sm:p-10">
       <h2 className="text-base font-medium text-text-primary">
@@ -226,13 +256,17 @@ function RunPluginSection() {
       </p>
 
       <div className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-sm text-text-secondary">Reload plugins to make sure the latest version is loaded:</p>
-          <CodeBlock>/reload-plugins</CodeBlock>
-        </div>
+        <CommandStep
+          label="Reload plugins to make sure the latest version is loaded:"
+          command="/reload-plugins"
+          isActive={activeStep === 3}
+          onCopied={onStepCopied}
+        />
         <div className="space-y-2">
           <p className="text-sm text-text-secondary">Run the test planner:</p>
-          <CodeBlock>/autonoma-test-planner:generate-tests</CodeBlock>
+          <CodeBlock isActive={activeStep === 4} onCopied={onStepCopied}>
+            /autonoma-test-planner:generate-tests
+          </CodeBlock>
           <p className="mt-2 flex items-center gap-2.5 font-mono text-2xs text-text-secondary">
             <Claude /> Works best with Opus 4.6
           </p>
@@ -242,7 +276,14 @@ function RunPluginSection() {
   );
 }
 
-function InitializeLocalSkillCard({ result, error }: { result: SetupResult | undefined; error: string | undefined }) {
+interface InitializeLocalSkillCardProps {
+  result: SetupResult | undefined;
+  error: string | undefined;
+  activeStep: number;
+  onStepCopied: () => void;
+}
+
+function InitializeLocalSkillCard({ result, error, activeStep, onStepCopied }: InitializeLocalSkillCardProps) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 border border-border-dim bg-surface-base p-8 sm:p-10">
       <div className="flex items-center gap-2">
@@ -286,7 +327,7 @@ function InitializeLocalSkillCard({ result, error }: { result: SetupResult | und
           </TabsList>
 
           <TabsContent value="claude-code" className="pt-6">
-            <ClaudeCodeTab result={result} />
+            <ClaudeCodeTab result={result} activeStep={activeStep} onStepCopied={onStepCopied} />
           </TabsContent>
           <TabsContent value="openai-codex" className="pt-6">
             <ComingSoonTab name="OpenAI Codex" />
@@ -300,8 +341,15 @@ function InitializeLocalSkillCard({ result, error }: { result: SetupResult | und
   );
 }
 
-export function InstallPage() {
-  const { result, error } = useAutoSetup();
+const TOTAL_COPY_STEPS = 5;
+
+export function InstallPage({ appId }: { appId?: string }) {
+  const { result, error } = useAutoSetup(appId);
+  const [activeStep, setActiveStep] = useState(0);
+
+  function handleStepCopied() {
+    setActiveStep((prev) => Math.min(prev + 1, TOTAL_COPY_STEPS - 1));
+  }
 
   return (
     <>
@@ -336,11 +384,21 @@ export function InstallPage() {
 
       {result != null ? (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10 lg:items-stretch">
-          <InitializeLocalSkillCard result={result} error={error} />
-          <RunPluginSection />
+          <InitializeLocalSkillCard
+            result={result}
+            error={error}
+            activeStep={activeStep}
+            onStepCopied={handleStepCopied}
+          />
+          <RunPluginSection activeStep={activeStep} onStepCopied={handleStepCopied} />
         </div>
       ) : (
-        <InitializeLocalSkillCard result={result} error={error} />
+        <InitializeLocalSkillCard
+          result={result}
+          error={error}
+          activeStep={activeStep}
+          onStepCopied={handleStepCopied}
+        />
       )}
     </>
   );
