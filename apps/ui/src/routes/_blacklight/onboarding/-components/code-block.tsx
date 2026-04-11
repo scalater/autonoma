@@ -1,4 +1,6 @@
 import { Button } from "@autonoma/blacklight";
+import { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
+import { CaretRightIcon } from "@phosphor-icons/react/CaretRight";
 import { CheckIcon } from "@phosphor-icons/react/Check";
 import { CopyIcon } from "@phosphor-icons/react/Copy";
 import { toastManager } from "lib/toast-manager";
@@ -7,10 +9,15 @@ import { useState } from "react";
 interface CodeBlockProps {
   children: string;
   copyValue?: string;
+  /** When true, only the first line is shown with a toggle to expand. */
+  collapsible?: boolean;
+  /** Label shown next to the toggle when collapsed. Defaults to the first line of children. */
+  collapsedLabel?: string;
 }
 
-export function CodeBlock({ children, copyValue }: CodeBlockProps) {
+export function CodeBlock({ children, copyValue, collapsible, collapsedLabel }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   async function handleCopy() {
     try {
@@ -27,12 +34,40 @@ export function CodeBlock({ children, copyValue }: CodeBlockProps) {
     }
   }
 
+  const isCollapsed = collapsible === true && !expanded;
+  const firstLine = collapsedLabel ?? children.split("\n")[0] ?? "";
+
   return (
     <div className="group overflow-hidden border border-border-dim bg-surface-base transition-colors hover:border-primary/30">
       <div className="flex min-w-0 items-start justify-between gap-4 p-4">
-        <pre className="min-w-0 flex-1 overflow-x-hidden font-mono text-sm tracking-tight whitespace-pre-wrap break-all text-text-secondary">
-          {children}
-        </pre>
+        {isCollapsed ? (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+          >
+            <CaretRightIcon size={14} className="shrink-0 text-text-tertiary" />
+            <span className="min-w-0 flex-1 truncate font-mono text-sm tracking-tight text-text-secondary">
+              {firstLine}
+            </span>
+          </button>
+        ) : (
+          <div className="min-w-0 flex-1">
+            {collapsible === true && (
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="mb-2 flex cursor-pointer items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary"
+              >
+                <CaretDownIcon size={14} />
+                <span>Collapse</span>
+              </button>
+            )}
+            <pre className="min-w-0 flex-1 overflow-x-hidden font-mono text-sm tracking-tight whitespace-pre-wrap break-all text-text-secondary">
+              {children}
+            </pre>
+          </div>
+        )}
         <Button
           variant="ghost"
           size="icon-xs"

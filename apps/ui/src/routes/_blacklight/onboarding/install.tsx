@@ -89,7 +89,13 @@ function EnvSetupSection({ apiKey, applicationId }: { apiKey: string; applicatio
         If your project does not already have the Autonoma SDK integrated, integrate the Autonoma SDK in your project
         first. The plugin needs that SDK endpoint.
       </p>
-      <CodeBlock copyValue={rawCommand}>{displayCommand}</CodeBlock>
+      <CodeBlock
+        copyValue={rawCommand}
+        collapsible
+        collapsedLabel="export AUTONOMA_API_KEY=... && claude --dangerously-skip-permissions"
+      >
+        {displayCommand}
+      </CodeBlock>
       <p className="font-mono text-2xs text-text-tertiary">
         Use the endpoint URL and shared secret from your project&apos;s SDK integration, not from the Autonoma
         dashboard.
