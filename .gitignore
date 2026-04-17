@@ -12,6 +12,7 @@ packages/db/src/generated/
 .env
 .env.*
 !.env.example
+pruned/
 
 .DS_Store
 
