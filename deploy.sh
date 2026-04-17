@@ -3,18 +3,14 @@ set -e
 
 echo "=== Autonoma Self-Hosted Deploy ==="
 
-# ─── 1. Install Node.js 24 if not present ───────────────────────────────────
-if ! command -v node &>/dev/null || [[ "$(node -v)" != v24* ]]; then
-  echo "Installing Node.js 24..."
-  curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-fi
+# ─── 1. Ensure pnpm is available (no sudo required) ────────────────────────
+export PNPM_HOME="${HOME}/.local/share/pnpm"
+export PATH="${PNPM_HOME}:${PATH}"
 
-# ─── 2. Install pnpm if not present ─────────────────────────────────────────
 if ! command -v pnpm &>/dev/null; then
   echo "Installing pnpm..."
-  corepack enable
-  corepack prepare pnpm@10.33.0 --activate
+  curl -fsSL https://get.pnpm.io/install.sh | env PNPM_HOME="${PNPM_HOME}" sh -
+  export PATH="${PNPM_HOME}:${PATH}"
 fi
 
 echo "Node: $(node -v) | pnpm: $(pnpm -v)"
