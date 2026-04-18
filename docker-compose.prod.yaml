@@ -1,6 +1,8 @@
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
     ports:
       - "80:80"
       - "443:443"
@@ -23,7 +25,6 @@ services:
       - acme:/etc/acme.sh
     environment:
       DEFAULT_EMAIL: guillermo@scalater.com
-      NGINX_PROXY_CONTAINER: autonoma-nginx-proxy-1
     restart: unless-stopped
 
   postgresql:
