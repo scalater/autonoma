@@ -23,6 +23,7 @@ services:
       - acme:/etc/acme.sh
     environment:
       DEFAULT_EMAIL: guillermo@scalater.com
+      NGINX_PROXY_CONTAINER: autonoma-nginx-proxy-1
     restart: unless-stopped
 
   postgresql:
