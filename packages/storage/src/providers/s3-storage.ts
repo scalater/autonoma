@@ -49,6 +49,11 @@ export class S3Storage implements StorageProvider {
     }
 
     public static createFromEnv(): S3Storage {
+        if (!env.S3_BUCKET || !env.S3_REGION || !env.S3_ACCESS_KEY_ID || !env.S3_SECRET_ACCESS_KEY) {
+            throw new Error(
+                "S3 environment variables are not configured. Set S3_BUCKET, S3_REGION, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY to enable file storage.",
+            );
+        }
         return new S3Storage({
             bucket: env.S3_BUCKET,
             region: env.S3_REGION,

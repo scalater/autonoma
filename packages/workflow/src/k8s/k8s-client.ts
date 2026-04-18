@@ -62,7 +62,7 @@ export class K8sClient {
     static fromEnv() {
         const kc = new KubeConfig();
         kc.loadFromDefault();
-        return new K8sClient(kc, env.NAMESPACE);
+        return new K8sClient(kc, env.NAMESPACE ?? "default");
     }
 
     private async readImageVersionConfig() {

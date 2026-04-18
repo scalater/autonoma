@@ -36,13 +36,14 @@ export function makeKubeConfig(): KubeConfig {
 export async function getImage(architecture: ImageKey): Promise<string> {
     const kc = makeKubeConfig();
     const api = kc.makeApiClient(CoreV1Api);
-    const config = await api.readNamespacedConfigMap({ name: "image-version", namespace: env.NAMESPACE });
+    const namespace = env.NAMESPACE ?? "default";
+    const config = await api.readNamespacedConfigMap({ name: "image-version", namespace });
     if (!config.data) {
         throw new Error("ConfigMap data is undefined");
     }
     const image = config.data[architecture];
     if (!image) {
-        throw new Error(`No image configuration found for namespace ${env.NAMESPACE}`);
+        throw new Error(`No image configuration found for namespace ${namespace}`);
     }
     return image;
 }

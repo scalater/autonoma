@@ -25,11 +25,11 @@ export const env = createEnv({
         LOCAL_GENERATION: z.stringbool().default(false),
         LOCAL_GENERATION_CONCURRENCY: z.coerce.number().int().positive().default(2),
 
-        // Secrets for GitHub HTTP app authentication.
-        GITHUB_APP_ID: z.string().min(1),
-        GITHUB_APP_PRIVATE_KEY: z.string().min(1),
-        GITHUB_APP_WEBHOOK_SECRET: z.string().min(1),
-        GITHUB_APP_SLUG: z.string().min(1),
+        // Secrets for GitHub HTTP app authentication (optional for self-hosting).
+        GITHUB_APP_ID: z.string().min(1).optional(),
+        GITHUB_APP_PRIVATE_KEY: z.string().min(1).optional(),
+        GITHUB_APP_WEBHOOK_SECRET: z.string().min(1).optional(),
+        GITHUB_APP_SLUG: z.string().min(1).optional(),
 
         // Used to indicate that we're running in a test environment.
         // This is only intended to avoid importing certain modules, do not use it for any other purpose.

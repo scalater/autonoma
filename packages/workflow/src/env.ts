@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
     server: {
-        NAMESPACE: z.string().min(1),
+        NAMESPACE: z.string().min(1).optional(),
         DATABASE_URL: z.string().min(1),
         SENTRY_ENV: z.string().min(1).optional(),
     },
