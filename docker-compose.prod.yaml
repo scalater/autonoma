@@ -1,4 +1,30 @@
 services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    restart: unless-stopped
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    environment:
+      DEFAULT_EMAIL: guillermo@scalater.com
+    restart: unless-stopped
+
   postgresql:
     image: postgres:18-alpine
     environment:
@@ -50,8 +76,9 @@ services:
     image: ghcr.io/scalater/autonoma-ui:latest
     environment:
       API_UPSTREAM: api:4000
-    ports:
-      - "3000:3000"
+      VIRTUAL_HOST: autonoma.scalater.com
+      VIRTUAL_PORT: "3000"
+      LETSENCRYPT_HOST: autonoma.scalater.com
     depends_on:
       - api
     restart: unless-stopped
@@ -59,3 +86,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  certs:
+  vhost:
+  html:
+  acme:

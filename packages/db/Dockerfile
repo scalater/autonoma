@@ -1,5 +1,13 @@
 FROM node:24-alpine
 WORKDIR /app
-RUN npm install -g prisma@7
+
+# Install packages needed for prisma.config.ts (Prisma v7)
+RUN npm init -y && \
+    npm install prisma@7 tsx @t3-oss/env-core zod
+
+# Copy prisma config (needs tsx + env validation)
+COPY prisma.config.ts ./
+COPY src/env.ts ./src/env.ts
 COPY prisma/ ./prisma/
-CMD ["prisma", "migrate", "deploy", "--schema", "./prisma/schema.prisma"]
+
+CMD ["npx", "prisma", "migrate", "deploy"]
