@@ -25,20 +25,29 @@ services:
       timeout: 3s
       retries: 5
 
+  migrate:
+    image: ghcr.io/scalater/autonoma-migrate:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgresql:5432/autonoma
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    restart: on-failure
+
   api:
-    build:
-      context: ./pruned/api
+    image: ghcr.io/scalater/autonoma-api:latest
     env_file: .env
     depends_on:
       postgresql:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   ui:
-    build:
-      context: ./pruned/ui
+    image: ghcr.io/scalater/autonoma-ui:latest
     environment:
       API_UPSTREAM: api:4000
     ports:
