@@ -1,0 +1,96 @@
+name: Deploy Self-Hosted
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: scalater
+
+jobs:
+  deploy:
+    name: Build, Push & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build API and UI
+        run: pnpm turbo run build --filter=@autonoma/api... --filter=@autonoma/ui...
+
+      - name: Prepare Docker contexts
+        run: |
+          # API
+          mkdir -p pruned/api
+          cp apps/api/Dockerfile pruned/api/Dockerfile
+          cp -r apps/api/dist pruned/api/dist
+
+          # UI
+          mkdir -p pruned/ui
+          cp apps/ui/Dockerfile pruned/ui/Dockerfile
+          cp apps/ui/nginx.conf.template pruned/ui/nginx.conf.template
+          cp -r apps/ui/dist pruned/ui/dist
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.OWNER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push API
+        uses: docker/build-push-action@v6
+        with:
+          context: pruned/api
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/autonoma-api:latest
+          platforms: linux/amd64
+
+      - name: Build & Push UI
+        uses: docker/build-push-action@v6
+        with:
+          context: pruned/ui
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/autonoma-ui:latest
+          platforms: linux/amd64
+
+      - name: Build & Push Migrate
+        uses: docker/build-push-action@v6
+        with:
+          context: packages/db
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/autonoma-migrate:latest
+          platforms: linux/amd64
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /home/ploi/containers/autonoma
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
