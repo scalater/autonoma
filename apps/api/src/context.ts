@@ -51,10 +51,10 @@ function createGenerationProvider(): GenerationProvider {
 export const generationProvider = createGenerationProvider();
 
 const githubApp = new GitHubApp({
-    appSlug: env.GITHUB_APP_SLUG,
-    appId: env.GITHUB_APP_ID,
-    privateKey: env.GITHUB_APP_PRIVATE_KEY,
-    webhookSecret: env.GITHUB_APP_WEBHOOK_SECRET,
+    appSlug: env.GITHUB_APP_SLUG ?? "",
+    appId: env.GITHUB_APP_ID ?? "",
+    privateKey: env.GITHUB_APP_PRIVATE_KEY ?? "",
+    webhookSecret: env.GITHUB_APP_WEBHOOK_SECRET ?? "",
 });
 
 export async function createContext(c: HonoContext) {
