@@ -7,7 +7,9 @@
 - ✅ Dominio `autonoma.scalater.com` apuntando a `3.13.58.122`
 - ✅ `.env` configurado con Gemini, Google OAuth, secrets
 - ✅ `docker-compose.prod.yaml` y `deploy.sh` creados
-- ⏳ Pendiente: Push al servidor y ejecutar deploy
+- ✅ Deploy completo — app corriendo en producción
+- ✅ SSL con Let's Encrypt (auto-renovación)
+- ✅ Login con Google funcionando
 
 ## Variables de Entorno (.env)
 
